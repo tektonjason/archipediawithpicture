@@ -1,0 +1,11 @@
+
+[build]
+  environment = {
+    NODE_VERSION = "20.19.0"
+  }
+  command = "npm run build"
+  publish = "dist"
+
+[dev]
+  command = "ng serve"
+  targetPort = 4200
