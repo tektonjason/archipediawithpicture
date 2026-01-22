@@ -15,6 +15,28 @@ export class AppComponent {
   dataService = inject(DataService);
   // isSidebarOpen signal removed; using dataService.isSidebarOpen
 
+  // Footer visibility state
+  isFooterVisible = signal(true);
+
+  constructor() {
+    // Check local storage for footer visibility state and apply it
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const footerState = localStorage.getItem('arch_footer_visible');
+      if (footerState === 'false') {
+        this.isFooterVisible.set(false);
+      }
+    }
+  }
+
+  hideFooter() {
+    if (this.isFooterVisible()) {
+      this.isFooterVisible.set(false);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('arch_footer_visible', 'false');
+      }
+    }
+  }
+
   // Login Modal State
   showLoginModal = signal(false);
   loginEmail = signal('');

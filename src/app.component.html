@@ -84,8 +84,18 @@
         </a>
       </nav>
 
-      <!-- Footer Area -->
-      <div class="p-3 bg-gray-50 border-t-4 border-black space-y-3 shrink-0 min-w-[18rem]">
+      <!-- Footer Area Wrapper for Animation -->
+      <div 
+        class="shrink-0 min-w-[18rem] transition-all duration-500 ease-in-out overflow-hidden"
+        [class.max-h-96]="isFooterVisible()"
+        [class.max-h-0]="!isFooterVisible()"
+      >
+        <!-- Original Footer Area -->
+        <div 
+          class="p-3 bg-gray-50 border-t-4 border-black space-y-3"
+          [class.cursor-pointer]="isFooterVisible()"
+          (click)="hideFooter()"
+        >
         <div class="space-y-2">
             <div class="flex items-start gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-600 shrink-0 mt-px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
@@ -103,6 +113,7 @@
         <div class="border-t border-black/10 pt-2 text-center text-gray-500 text-[9px] font-medium tracking-wider">
            © 2026 曾若宽 版权所有
         </div>
+      </div>
       </div>
 
       <!-- Admin Status -->
