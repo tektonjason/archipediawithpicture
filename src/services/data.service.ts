@@ -978,18 +978,45 @@ export class DataService {
     ];
     
     // De-duplicate and transform data
+    const currentEntries = this.entries();
+    const currentMap = new Map(currentEntries.map(e => [e.id, e]));
     const uniqueEntries = new Map<string, Entry>();
-    rawData.forEach(row => {
+
+    // 1. Process seed data (merge with existing to preserve images)
+    rawData.forEach((row, index) => {
+      const id = row[2] + '_' + row[0];
+      const existing = currentMap.get(id);
+
+      // FORCE FIX: Use local static images for the first 24 items
+      // For others, preserve existing user uploads if any
+      let imageUrl = existing?.imageUrl;
+      if (index < 24) {
+        imageUrl = `/images/arch_${index + 1}.webp`;
+      }
+
       const entry: Entry = {
-        id: row[2] + '_' + row[0],
+        id: id,
         category: row[0],
         subcategory: row[1],
         term: row[2],
         termEn: row[3],
         definition: row[4],
         details: row[5],
+        imageUrl: imageUrl, 
+        isCustom: existing?.isCustom ?? false
       };
+
       if (!uniqueEntries.has(entry.id)) {
+        uniqueEntries.set(entry.id, entry);
+      }
+      
+      // Remove processed ID from currentMap
+      currentMap.delete(id);
+    });
+
+    // 2. Preserve custom entries created by user
+    currentMap.forEach(entry => {
+      if (entry.isCustom) {
         uniqueEntries.set(entry.id, entry);
       }
     });
