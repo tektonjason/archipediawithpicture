@@ -1,6 +1,6 @@
 
 
-import { Component, inject, signal, effect, computed } from '@angular/core';
+import { Component, inject, signal, effect, computed, HostListener, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { FormsModule } from '@angular/forms';
@@ -115,9 +115,17 @@ import { Location as NgLocation } from '@angular/common';
 
               <!-- Media Section -->
               <div class="mb-10 border-4 border-black shadow-[8px_8px_0px_0px_black] p-1 bg-white">
-                <div class="aspect-video bg-gray-100 overflow-hidden relative border-b-2 border-black">
+                <div 
+                  class="aspect-video bg-gray-100 overflow-hidden relative border-b-2 border-black group/image"
+                  [class.cursor-pointer]="e.imageUrl"
+                  (click)="openImageModal()">
                   @if(e.imageUrl) {
                     <img [src]="e.imageUrl" class="w-full h-full object-cover" alt="{{e.term}}">
+                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </div>
                   } @else {
                     <div class="w-full h-full flex items-center justify-center text-gray-400 font-bold text-lg">NO IMAGE</div>
                   }
@@ -150,14 +158,73 @@ import { Location as NgLocation } from '@angular/common';
             </div>
         </div>
       }
+
+      @if (showImageModal()) {
+        <div class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 md:p-8">
+          <!-- Backdrop -->
+          <div 
+            class="absolute inset-0 bg-black/90 backdrop-blur-md"
+            [class.animate-backdrop-in]="!isImageModalAnimatingOut()"
+            [class.animate-backdrop-out]="isImageModalAnimatingOut()"
+            (click)="closeImageModal()">
+          </div>
+          
+          <!-- Modal Content -->
+          <div 
+            class="relative z-10 w-full h-full flex flex-col gap-4"
+            [class.animate-modal-pop-in]="!isImageModalAnimatingOut()"
+            [class.animate-modal-pop-out]="isImageModalAnimatingOut()">
+            
+            <!-- Image Container -->
+            <div class="flex-1 flex items-center justify-center overflow-hidden" (click)="closeImageModal()">
+              <img 
+                [src]="entry()?.imageUrl" 
+                alt="{{entry()?.term}}" 
+                (load)="onImageLoad($event)"
+                class="modal-image object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] border-4 border-white transition-transform duration-300"
+                (click)="$event.stopPropagation()">
+            </div>
+
+            <!-- Controls -->
+            <div class="flex-shrink-0 flex justify-center items-center gap-6 pb-2">
+              <button (click)="downloadImage()" class="bauhaus-btn bg-white hover:bg-yellow-400 px-6 py-3 flex items-center gap-3 text-lg font-bold transition-all active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                下载原图
+              </button>
+              <button (click)="closeImageModal()" class="bauhaus-btn bg-white hover:bg-red-500 hover:text-white px-6 py-3 flex items-center gap-3 text-lg font-bold transition-all active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `
 })
-export class EntryDetailComponent {
+export class EntryDetailComponent implements OnDestroy {
   route: ActivatedRoute = inject(ActivatedRoute);
   router: Router = inject(Router);
   location: NgLocation = inject(NgLocation);
   dataService = inject(DataService);
+
+  private resizeObserver: ResizeObserver | null = null;
+  private activeImageElement: HTMLImageElement | null = null;
+
+  ngOnDestroy() {
+    this.disconnectResizeObserver();
+  }
+
+  private disconnectResizeObserver() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+  }
 
   entryId = signal<string>('');
   entry = computed(() => this.dataService.getEntry(this.entryId())());
@@ -168,6 +235,8 @@ export class EntryDetailComponent {
   editForm: any = {};
   
   showDeleteModal = signal(false);
+  showImageModal = signal(false);
+  isImageModalAnimatingOut = signal(false);
 
   constructor() {
     this.route.params.subscribe(p => {
@@ -222,5 +291,76 @@ export class EntryDetailComponent {
         console.error(e);
       }
     }
+  }
+
+  onImageLoad(event: Event) {
+    const img = event.target as HTMLImageElement;
+    this.updateImageSize(img);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    const img = document.querySelector('.modal-image') as HTMLImageElement;
+    if (img) {
+      this.updateImageSize(img);
+    }
+  }
+
+  private updateImageSize(img: HTMLImageElement) {
+    if (!img.naturalWidth) return;
+
+    // Use window dimensions directly for stability, accounting for padding (approx 32px-64px)
+    const availableWidth = window.innerWidth - 64; 
+    const availableHeight = window.innerHeight - 64;
+
+    const screenRatio = availableWidth / availableHeight;
+    const imageRatio = img.naturalWidth / img.naturalHeight;
+
+    // Reset styles first
+    img.style.width = '';
+    img.style.height = '';
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
+
+    if (imageRatio > screenRatio) {
+      // Image is wider than screen: fit to width
+      // To ensure small images are scaled UP, we set width to 100%
+      // But we must check if that causes height to overflow (which it shouldn't if ratio logic is correct)
+      img.style.width = '100%';
+      img.style.height = 'auto';
+    } else {
+      // Image is taller than screen: fit to height
+      img.style.width = 'auto';
+      img.style.height = '100%';
+    }
+  }
+
+  openImageModal() {
+    if (this.entry()?.imageUrl) {
+      this.showImageModal.set(true);
+    }
+  }
+
+  closeImageModal() {
+    this.isImageModalAnimatingOut.set(true);
+    setTimeout(() => {
+      this.showImageModal.set(false);
+      this.isImageModalAnimatingOut.set(false);
+    }, 250); // Matches the new 0.25s animation duration
+  }
+
+  downloadImage() {
+    const imageUrl = this.entry()?.imageUrl;
+    if (!imageUrl) return;
+
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    // Extract filename or generate one
+    const filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1) || `${this.entry()?.term?.replace(/\s+/g, '_') ?? 'image'}.jpg`;
+    link.download = filename;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }

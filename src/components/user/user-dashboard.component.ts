@@ -72,7 +72,12 @@ import pinyin from 'pinyin';
            </div>
            @if (historyEntries().length === 0) {
               <div class="text-center mt-10 text-gray-500">
-                <div class="text-6xl mb-2">🕒</div>
+                <div class="mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 inline-block stroke-black" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
                 <p class="font-bold text-lg text-gray-600 mt-2">暂无历史记录</p>
               </div>
            } @else {
