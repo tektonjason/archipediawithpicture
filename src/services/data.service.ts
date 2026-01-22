@@ -23,6 +23,18 @@ export interface Link {
   tags?: string[];
 }
 
+export interface Reading {
+  id?: string;
+  title: string;
+  author: string;
+  publisher: string;
+  year?: string;
+  description: string;
+  tags: string[];
+  journalLevel?: string; // e.g. "核心期刊"
+  url?: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
@@ -45,6 +57,7 @@ export class DataService {
   favorites = signal<string[]>([]);
   history = signal<string[]>([]);
   webLinks = signal<Link[]>([]);
+  readings = signal<Reading[]>([]);
   chatHistory = signal<ChatMessage[]>([]);
 
   // --- Encyclopedia View State ---
@@ -60,6 +73,7 @@ export class DataService {
     // }
     
     this.syncResources();
+    this.seedReadingsData();
 
     effect(() => localStorage.setItem('arch_favorites', JSON.stringify(this.favorites())));
     effect(() => localStorage.setItem('arch_history', JSON.stringify(this.history())));
@@ -351,6 +365,90 @@ export class DataService {
       { id: 'u5', category: '实用工具', title: 'BgSub', url: 'https://bgsub.cn', description: '基于AI的自动消除背景工具，无需上传图片。' },
       { id: 'u6', category: '实用工具', title: '扣扣图', url: 'https://www.koukoutu.com', description: '免费在线抠图工具。' }
     ];
+  }
+
+  private seedReadingsData() {
+    const rawData: Reading[] = [
+      { title: '建筑:形式、空间和秩序', author: '程大锦', publisher: '天津大学出版社', description: '建筑设计基础语汇的经典图解入门书。', tags: ['建筑设计'], journalLevel: null },
+      { title: '美国大城市的死与生', author: '[加]简·雅各布斯', publisher: '译林出版社', description: '批判当下城市规划理论的经典著作。', tags: ['城市规划', '建筑理论'], journalLevel: null },
+      { title: '明日的田园城市', author: '[英]埃比尼泽·霍华德', publisher: '商务印书馆', description: '具有世界影响力的田园城市经典。', tags: ['城市规划', '建筑理论'], journalLevel: null },
+      { title: '看不见的城市', author: '[意]伊塔洛·卡尔维诺', publisher: '译林出版社', description: '卡尔维诺笔下描绘想象城市的代表作。', tags: ['建筑文化', '建筑理论'], journalLevel: null },
+      { title: '场所精神:迈向建筑现象学', author: '[挪]诺伯舒兹', publisher: '华中科技大学出版社', description: '将建筑视为生活情境具现的建筑理论著作。', tags: ['建筑理论', '建筑文化'], journalLevel: null },
+      { title: '城市意象', author: '[美]凯文·林奇', publisher: '华夏出版社', description: '城市规划经典,提出城市意象五大要素。', tags: ['城市规划', '建筑理论'], journalLevel: null },
+      { title: '建筑空间组合论', author: '彭一刚', publisher: '中国建筑工业出版社', description: '系统阐述建筑构图及空间组合原理。', tags: ['建筑设计', '建筑理论'], journalLevel: null },
+      { title: '城市建筑学', author: '[意]阿尔多·罗西', publisher: '中国建筑工业出版社', description: '罗西1966年著作,对现代城市建筑运动批判。', tags: ['建筑理论', '城市规划'], journalLevel: null },
+      { title: '外部空间设计', author: '[日]芦原义信', publisher: '江苏凤凰文艺出版社', description: '对比意日外部空间,提出积极/消极空间概念。', tags: ['建筑设计', '建筑文化'], journalLevel: null },
+      { title: '外国建筑史', author: '陈志华', publisher: '中国建筑工业出版社', description: '系统介绍19世纪末前外国建筑的发展脉络。', tags: ['高校教材', '建筑史'], journalLevel: null },
+      { title: '中国建筑图解词典', author: '王其钧', publisher: '机械工业出版社', description: '中国古建筑名词的图解词典型工具书。', tags: ['专业工具', '建筑史'], journalLevel: null },
+      { title: '中国园林图解词典', author: '王其钧', publisher: '机械工业出版社', description: '中国园林名词图解词典。', tags: ['专业工具', '建筑史'], journalLevel: null },
+      { title: '西方建筑图解词典', author: '王其钧', publisher: '机械工业出版社', description: '西方建筑名词图解词典。', tags: ['专业工具', '建筑史'], journalLevel: null },
+      { title: '古建筑测绘学', author: '林源', publisher: '中国建筑工业出版社', description: '系统介绍古建筑测绘方法和内容的指南。', tags: ['专业工具', '建筑史'], journalLevel: null },
+      { title: '古建筑测绘', author: '王其亨', publisher: '中国建筑工业出版社', description: '包括古建筑测绘基本理论、测量方法及新技术应用的教材。', tags: ['专业工具', '高校教材'], journalLevel: null },
+      { title: '中国古建筑测绘十年', author: '', publisher: '清华大学出版社', description: '清华大学建筑学院2000-2010年古建筑测绘成果集。', tags: ['专业工具', '建筑史'], journalLevel: null },
+      { title: '阿尔瓦·阿尔托全集', author: '', publisher: '中国建筑工业出版社', description: '阿尔托主要作品全集,含图文资料。', tags: ['建筑史', '作品集'], journalLevel: null },
+      { title: '建筑概念:红不只是一种颜色', author: '[法]伯纳德·屈米', publisher: '电子工业出版社', description: '屈米30年建筑探索的图文回顾著作。', tags: ['建筑理论', '建筑文化'], journalLevel: null },
+      { title: '城市规划原理', author: '吴志强, 李德华', publisher: '中国建筑工业出版社', description: '系统阐述城乡规划基本原理与设计方法的教材。', tags: ['高校教材', '城市规划'], journalLevel: null },
+      { title: '外国建筑历史图说', author: '罗小未', publisher: '同济大学出版社', description: '系统回顾从原始至18世纪的国外建筑历史。', tags: ['高校教材', '建筑史'], journalLevel: null },
+      { title: '中国古代建筑历史图说', author: '侯幼彬, 李婉贞', publisher: '中国建筑工业出版社', description: '按时代脉络介绍中国古代建筑发展历程。', tags: ['建筑史', '专业工具'], journalLevel: null },
+      { title: 'Fundamentals of Building Construction: Materials and Methods', author: 'Edward Allen', publisher: 'Wiley', description: '结构教育的重要经典教材。', tags: ['高校教材', '专业工具'], journalLevel: null },
+      { title: '建筑学教程', author: '[荷]赫曼·赫茨伯格', publisher: '天津大学出版社', description: '荷兰结构主义教育与设计理论教程。', tags: ['建筑教育', '建筑理论'], journalLevel: null },
+      { title: '交往与空间', author: '[丹麦]扬·盖尔', publisher: '中国建筑工业出版社', description: '从人的活动需求角度分析城市公共空间质量的经典著作。', tags: ['建筑设计', '城市规划'], journalLevel: null },
+      { title: '建筑语汇', author: '[美]爱德华·T·怀特', publisher: '大连理工大学出版社', description: '探讨建筑创作普遍规律的设计词典。', tags: ['专业工具', '建筑理论'], journalLevel: null },
+      { title: '走向新建筑', author: '[法]勒·柯布西耶', publisher: '商务印书馆', description: '阐述住宅是居住机器理念的现代建筑经典。', tags: ['建筑理论', '建筑设计'], journalLevel: null },
+      { title: '建筑十书', author: '[古罗马]维特鲁威', publisher: '北京大学出版社', description: '古罗马建筑经典,建筑理论与营建手册之源。(Wikipedia)', tags: ['建筑史', '建筑理论'], journalLevel: null },
+      { title: '建筑师的20岁', author: '东京大学工学部', publisher: '清华大学出版社', description: '安藤邀请多位建筑师讲述青年求学经历的访谈集。', tags: ['建筑教育', '建筑文化'], journalLevel: null },
+      { title: '中国建筑史', author: '梁思成', publisher: '生活·读书·新知三联书店', description: '梁思成研究中国古建筑的开创之作,系统梳理建筑发展脉络。', tags: ['建筑史', '建筑教育', '建筑理论'], journalLevel: null },
+      { title: '图像中国建筑史', author: '梁思成', publisher: '生活·读书·新知三联书店', description: '梁思成著作,图文并茂阐述中国古建筑“有机”结构。', tags: ['建筑史', '建筑教育', '建筑理论'], journalLevel: null },
+      { title: '中国建筑史', author: '潘谷西', publisher: '中国建筑工业出版社', description: '体系阐述中国建筑发展脉络的教材,图文并茂。', tags: ['高校教材', '建筑史'], journalLevel: null },
+      { title: '公共建筑设计原理', author: '张文忠', publisher: '中国建筑工业出版社', description: '系统论述公共建筑设计原则与方法的教材。', tags: ['高校教材', '建筑设计'], journalLevel: null },
+      { title: '建筑初步', author: '田学哲, 郭逊', publisher: '中国建筑工业出版社', description: '本科建筑设计初步教材,介绍建筑形式与构造基础。', tags: ['高校教材', '建筑设计'], journalLevel: null },
+      { title: '华夏意匠', author: '李允鉌', publisher: '天津大学出版社', description: '总结中国古典建筑设计原理,肯定中国传统建筑特色。', tags: ['建筑理论', '建筑史'], journalLevel: null },
+      { title: '建筑设计基础', author: '丁沃沃, 刘铨, 冷天', publisher: '中国建筑工业出版社', description: '本科建筑设计基础教材,系统介绍建筑形式与构造。', tags: ['高校教材', '建筑设计'], journalLevel: null },
+      { title: '剖面手册', author: '[美]保罗·刘易斯等', publisher: '江苏科学技术出版社', description: '通过建筑案例展示剖面分析方法。', tags: ['专业工具', '建筑设计'], journalLevel: null },
+      { title: '建筑构造图解', author: '胡向磊', publisher: '中国建筑工业出版社', description: '针对初学者,图文结合地系统介绍建筑构造基础知识。', tags: ['高校教材', '专业工具'], journalLevel: null },
+      { title: '外国近现代建筑史', author: '罗小未', publisher: '中国建筑工业出版社', description: '系统介绍工业革命后到现代的外国建筑文化与思潮。', tags: ['高校教材', '建筑史'], journalLevel: null },
+      { title: '建筑物理', author: '刘加平', publisher: '中国建筑工业出版社', description: '涵盖建筑热工、光学、声学等基础原理与应用实例的综合教材。', tags: ['高校教材', '专业工具'], journalLevel: null },
+      { title: '场地设计精编学习手册', author: '魏子东', publisher: '阳光出版社', description: '系统介绍场地设计方法,包括道路、绿化、竖向设计等。', tags: ['高校教材', '建筑设计'], journalLevel: null },
+      { title: '建筑力学', author: '周国瑾', publisher: '同济大学出版社', description: '综合传统理论力学、材料力学与结构力学内容的力学教材。', tags: ['高校教材', '专业工具'], journalLevel: null },
+      { title: '西洋建筑发展史话', author: '傅朝卿', publisher: '中国建筑工业出版社', description: '全面介绍现代化前西方建筑发展史,涵盖古典至近代各时期建筑。', tags: ['建筑史', '建筑教育', '建筑理论'], journalLevel: null },
+      { title: '室内设计原理', author: '陈易', publisher: '中国建筑工业出版社', description: '系统介绍室内设计的概念、流程与原则,内容全面系统。', tags: ['高校教材', '建筑设计'], journalLevel: null },
+      { title: '中国古代建筑史', author: '刘敦桢', publisher: '中国建筑工业出版社', description: '系统简述中国古代建筑发展成就,并辅以丰富资料与图像。', tags: ['高校教材', '建筑史'], journalLevel: null },
+      { title: '易学易用建筑模型制作手册', author: '[日]建筑知识', publisher: '上海科学技术出版社', description: '漫画式讲解建筑模型制作的工具与材料。', tags: ['模型制作', '专业工具'], journalLevel: null },
+      { title: '国际环境设计精品教程:建筑模型制作', author: '[日]远藤义则', publisher: '中国青年出版社', description: '全面介绍建筑模型制作技巧,强调模型作为设计工具的作用。', tags: ['模型制作', '专业工具'], journalLevel: null },
+      { title: '小菜场上的家', author: '王方戟等', publisher: '同济大学出版社', description: '记录同济大学建筑设计课程的教学过程,融合实践与创新。', tags: ['建筑教育', '建筑设计'], journalLevel: null },
+      { title: '营造天书', author: '王南', publisher: '新星出版社', description: '解读《营造法式》与梁思成研究中国古建筑的著作。', tags: ['建筑史', '建筑理论'], journalLevel: null },
+      { title: '11堂现代建筑课:课堂上学不到的当代建筑巴黎散步故事', author: '[韩]权善英', publisher: '麦浩斯', description: '结合巴黎实地游学,用插画讲述现代建筑核心概念。', tags: ['建筑教育', '建筑文化'], journalLevel: null },
+      { title: '最后的人间场·建筑的转渡', author: '徐纯一', publisher: '麦浩斯', description: '全球生死主题建筑集,探讨建筑如何抚慰生离死别。', tags: ['建筑文化', '建筑理论'], journalLevel: null },
+      { title: '赤脚建筑师:绿色建筑手册', author: '[荷]约翰·范伦根', publisher: '华中科技大学出版社', description: '介绍绿色建筑设计、材料与实施方法。', tags: ['绿色建筑', '建筑实践'], journalLevel: null },
+      { title: '梁思成的作业', author: '梁思成', publisher: '中国青年出版社', description: '收录梁思成学习时的作业笔记与手绘。', tags: ['建筑史', '建筑教育'], journalLevel: null },
+      { title: '赋形未来:建筑未来史', author: '[丹麦]BIG建筑事务所', publisher: '广西师范大学出版社', description: 'BIG近年项目与未来愿景合集,兼具项目集与理论思考。', tags: ['作品集', '建筑理论'], journalLevel: null },
+      { title: 'Yes Is More', author: '[丹麦]BIG建筑事务所', publisher: 'Bjarke Ingels Group', description: 'BIG的漫画式宣言体专辑,阐述事务所设计理念。', tags: ['作品集', '建筑文化'], journalLevel: null },
+      { title: '建筑实践', author: '', publisher: '中国建筑学会', description: '中国建筑学会会刊,聚焦建筑实践。', tags: ['期刊'], journalLevel: null },
+      { title: '世界建筑', author: '', publisher: '清华大学', description: '清华主办,中英双语建筑月刊。', tags: ['期刊'], journalLevel: 'T2' },
+      { title: '时代建筑', author: '', publisher: '同济大学', description: '同济主办的建筑类双月刊。', tags: ['期刊'], journalLevel: 'T3' },
+      { title: '建筑师', author: '', publisher: '中国建筑工业出版社', description: '理论与设计并重的建筑双月刊。', tags: ['期刊'], journalLevel: 'T2' },
+      { title: '城市规划', author: '', publisher: '中国城市规划学会', description: '中国城市规划学会会刊,权威期刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '城市规划学刊', author: '', publisher: '同济大学', description: '同济主办的学术性城市规划双月刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '建筑材料学报', author: '', publisher: '同济大学', description: '同济主办的建筑材料学术月刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '建筑结构学报', author: '', publisher: '中国建筑学会', description: '报道建筑结构研究与工程实践。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '建筑学报', author: '', publisher: '中国建筑学会', description: '中国建筑学会主办的权威学术月刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '土木工程学报', author: '', publisher: '中国土木工程学会', description: '土木工程领域的综合性学术期刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '岩土工程学报', author: '', publisher: '多学会联合', description: '岩土工程学科的全国性综合期刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '中国园林', author: '', publisher: '中国风景园林学会', description: '风景园林学术研究与实践月刊。', tags: ['期刊'], journalLevel: 'T1' },
+      { title: '当代建筑', author: '', publisher: '哈尔滨工业大学', description: '哈工大主办的当代建筑月刊。', tags: ['期刊'], journalLevel: 'T3' },
+      { title: '新建筑', author: '', publisher: '华中科技大学出版社', description: '华中主办的建筑学术期刊。', tags: ['期刊'], journalLevel: 'T3' },
+      { title: 'a+u', author: '', publisher: '华中科技大学出版社', description: '日英双语的国际建筑月刊。', tags: ['期刊'], journalLevel: null },
+      { title: 'Domus', author: '', publisher: 'DOMUS中文版杂志社', description: '意大利老牌建筑设计月刊。', tags: ['期刊'], journalLevel: null },
+      { title: 'EL Croquis', author: '', publisher: '北京建院建筑文化传播有限公司(中文版)', description: '以单体作品专题著称的建筑期刊。', tags: ['期刊'], journalLevel: null },
+      { title: 'AC', author: '', publisher: '北京建筑大学(中文版)', description: '北京建筑大学主办的创作刊物。', tags: ['期刊'], journalLevel: null },
+      { title: 'Detail', author: '', publisher: '大连理工大学(中文版)', description: '聚焦建筑细部与构造的专业刊物。', tags: ['期刊'], journalLevel: null },
+      { title: '建筑的故事', author: '[英]帕特里克·狄龙 著;[英]斯蒂芬·比斯蒂 绘', publisher: '北京联合出版公司', description: '纵向追溯人类建筑历史。', tags: ['建筑史', '建筑文化'], journalLevel: null },
+      { title: '安藤忠雄论建筑', author: '[日]安藤忠雄', publisher: '中国建筑工业出版社', description: '安藤忠雄自述建筑观与代表作解析。', tags: ['建筑理论', '作品集'], journalLevel: null },
+      { title: '建筑师成长记录:学习建筑的101点体会', author: '[美]马修·弗莱德里克', publisher: '机械工业出版社', description: '漫画式图解回答建筑设计的101个关键问题。', tags: ['建筑教育', '建筑实践'], journalLevel: null },
+      { title: '哈佛大学建筑系的八堂课', author: '拉菲尔·莫内欧', publisher: '田园城市文化事业有限公司', description: '莫内欧阐述八位当代建筑师的理论与教学要点。', tags: ['建筑教育', '建筑理论'], journalLevel: null },
+      { title: '穿墙透壁:剖视中国经典古建筑', author: '李乾朗', publisher: '广西师范大学出版社', description: '图文解析中国古代经典建筑。', tags: ['建筑史', '专业工具'], journalLevel: null }
+    ];
+    this.readings.set(rawData.map((item, index) => ({ ...item, id: `r${index + 1}` })));
   }
 
   private seedArchipediaData() {
@@ -875,27 +973,28 @@ export class DataService {
       ['结构与构造理论', '抗震与防灾设计', '三水准设防', 'Three-level Fortification', '小震不坏：遭遇低于本地区设防烈度的多遇地震，一般不受损坏；中震可修：遭遇本地区设防烈度地震，可能损坏但经修理可继续使用；大震不倒：遭遇罕遇地震，不致倒塌或发生危及生命的严重破坏。', '抗震设计的核心指导思想。'],
       ['结构与构造理论', '抗震与防灾设计', '基础埋置深度', 'Foundation Embedment Depth', '基础底面至自然地面的距离。', '影响基础的稳定性和承载力。'],
       ['结构与构造理论', '抗震与防灾设计', '箱形基础', 'Box Foundation', '箱形基础由顶板、底板、外墙和内隔墙组成，是具有一定高度的整体结构。', '刚度大，整体性好，适用于高层建筑。']
+ 
+      // Data added in previous turn. Keep this to avoid data loss.
     ];
-
-    const entries: Entry[] = [];
-    let idCounter = 0;
-    const nextId = () => `arch_${++idCounter}`;
-
-    const allData = [...rawData];
-
-    allData.forEach((item, index) => {
-      entries.push({
-        id: nextId(),
-        category: item[0],
-        subcategory: item[1],
-        term: item[2],
-        termEn: item[3],
-        definition: item[4],
-        details: item[5],
-        imageUrl: index < 24 ? `/images/arch_${index + 1}.webp` : undefined
-      });
+    
+    // De-duplicate and transform data
+    const uniqueEntries = new Map<string, Entry>();
+    rawData.forEach(row => {
+      const entry: Entry = {
+        id: row[2] + '_' + row[0],
+        category: row[0],
+        subcategory: row[1],
+        term: row[2],
+        termEn: row[3],
+        definition: row[4],
+        details: row[5],
+      };
+      if (!uniqueEntries.has(entry.id)) {
+        uniqueEntries.set(entry.id, entry);
+      }
     });
 
-    this.entries.set(entries);
+    this.entries.set(Array.from(uniqueEntries.values()));
   }
+
 }

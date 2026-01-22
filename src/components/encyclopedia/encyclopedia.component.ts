@@ -6,7 +6,6 @@ import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-encyclopedia',
-  standalone: true,
   imports: [RouterLink, FormsModule],
   template: `
     <div class="h-full flex flex-col p-4 md:p-6 overflow-hidden bg-[#f8f7f5]">

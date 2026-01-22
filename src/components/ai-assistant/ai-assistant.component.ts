@@ -12,7 +12,6 @@ interface AiTool {
 
 @Component({
   selector: 'app-ai-assistant',
-  standalone: true,
   imports: [],
   template: `
     <div class="h-full flex flex-col bg-[#f8f7f5] overflow-y-auto p-6 relative">

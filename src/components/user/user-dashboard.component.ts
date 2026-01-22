@@ -7,8 +7,7 @@ import pinyin from 'pinyin';
 
 @Component({
   selector: 'app-user-dashboard',
-  standalone: true,
-  imports: [RouterLink, NgClass],
+  imports: [RouterLink],
   template: `
     <div class="h-full flex flex-col bg-[#f8f7f5]">
       

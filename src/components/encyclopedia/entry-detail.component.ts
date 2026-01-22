@@ -8,7 +8,6 @@ import { Location as NgLocation } from '@angular/common';
 
 @Component({
   selector: 'app-entry-detail',
-  standalone: true,
   imports: [FormsModule],
   template: `
     <div class="h-full flex flex-col bg-white overflow-hidden relative">

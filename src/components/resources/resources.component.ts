@@ -6,7 +6,6 @@ import { NgStyle } from '@angular/common';
 
 @Component({
   selector: 'app-resources',
-  standalone: true,
   imports: [FormsModule, NgStyle],
   template: `
     <div class="h-full flex flex-col p-6 bg-[#f8f7f5] overflow-y-auto">
