@@ -69,7 +69,7 @@ import pinyin from 'pinyin';
                   @for (item of group.readings; track item.title; let i = $index) {
                     <div 
                        (click)="openModal(item)" 
-                       class="bauhaus-card p-3 md:p-4 flex flex-col h-full animate-pop-in cursor-pointer group hover:bg-yellow-50 transition-colors" 
+                       class="bauhaus-card p-3 md:p-4 flex flex-col h-full animate-pop-in cursor-pointer group hover:bg-white block relative" 
                        [style.animation-delay]="(i % 21 * 30) + 'ms'" 
                      >
                       <div class="flex justify-between items-start mb-1">
@@ -79,7 +79,11 @@ import pinyin from 'pinyin';
                         }
                       </div>
                       <div class="text-xs text-gray-500 mb-2 font-mono">
-                        <span>{{ item.author || 'N/A' }} / {{ item.publisher }}</span>
+                        @if (item.author) {
+                          <span>{{ item.author }} / {{ item.publisher }}</span>
+                        } @else {
+                          <span>{{ item.publisher }}</span>
+                        }
                       </div>
                       <p class="text-sm text-gray-700 mb-3 leading-relaxed font-serif line-clamp-3">{{ item.description }}</p>
                       <div class="flex flex-wrap gap-1.5 mt-auto border-t-2 border-black/10 pt-2">
@@ -135,23 +139,31 @@ import pinyin from 'pinyin';
       <!-- Detail Modal -->
       @if (selectedReading(); as item) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeModal()"></div>
-          <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-lg max-h-[90vh] flex flex-col relative z-10 animate-[fadeIn_0.2s_ease-out] overflow-hidden">
+          <div 
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            [class.animate-backdrop-in]="!isClosing()"
+            [class.animate-backdrop-out]="isClosing()"
+            (click)="closeModal()"
+          ></div>
+          <div 
+            class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-lg max-h-[90vh] flex flex-col relative z-10 overflow-hidden"
+            [class.animate-modal-pop-in]="!isClosing()"
+            [class.animate-modal-pop-out]="isClosing()"
+          >
              
             <!-- Modal Header -->
             <div class="flex justify-between items-start p-4 border-b-4 border-black bg-gray-50">
                <h3 class="text-xl md:text-2xl font-black pr-4 leading-tight">{{ item.title }}</h3>
-               <button (click)="closeModal()" class="flex-shrink-0 w-8 h-8 flex items-center justify-center border-2 border-transparent hover:border-black hover:bg-red-100 transition-all rounded-full">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-black" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-               </button>
             </div>
  
             <!-- Modal Body -->
             <div class="p-6 overflow-y-auto custom-scrollbar">
                <!-- Basic Info Table -->
                <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 mb-6 text-sm">
-                  <span class="font-bold text-gray-500 text-right">作者:</span>
-                  <span class="font-bold">{{ item.author || '未标明 / 机构' }}</span>
+                  @if (item.author) {
+                    <span class="font-bold text-gray-500 text-right">作者:</span>
+                    <span class="font-bold">{{ item.author }}</span>
+                  }
                    
                   <span class="font-bold text-gray-500 text-right">出版社/单位:</span>
                   <span class="font-bold">{{ item.publisher }}</span>
@@ -186,7 +198,7 @@ import pinyin from 'pinyin';
  
             <!-- Modal Footer -->
              <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
-                <button (click)="closeModal()" class="bauhaus-btn bg-white px-6 py-2 hover:bg-black hover:text-white">关闭</button>
+                <button (click)="closeModal()" class="bauhaus-btn bg-white px-4 py-1.5 text-sm hover:bg-black hover:text-white">关闭</button>
              </div>
           </div>
         </div>
@@ -217,6 +229,54 @@ import pinyin from 'pinyin';
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
+    @keyframes backdrop-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modal-pop-in {
+      from { 
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .animate-backdrop-in {
+      animation: backdrop-in 0.2s ease-out forwards;
+    }
+
+    .animate-modal-pop-in {
+      animation: modal-pop-in 0.25s ease-out forwards;
+    }
+
+    @keyframes backdrop-out {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @keyframes modal-pop-out {
+      from { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      to { 
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+    }
+
+    .animate-backdrop-out {
+      animation: backdrop-out 0.2s ease-in forwards;
+    }
+
+    .animate-modal-pop-out {
+      animation: modal-pop-out 0.2s ease-in forwards;
+    }
   `]
 })
 export class ReadingsComponent implements AfterViewInit, OnDestroy {
@@ -224,6 +284,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   searchQuery = signal('');
   selectedTag = signal('all');
   selectedReading = signal<Reading | null>(null);
+  isClosing = signal(false);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('scrubberContainer') scrubberContainer!: ElementRef<HTMLDivElement>;
@@ -257,7 +318,11 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   closeModal() {
-    this.selectedReading.set(null);
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.selectedReading.set(null);
+      this.isClosing.set(false);
+    }, 200); // Animation duration
   }
 
   selectTag(tag: string) {
