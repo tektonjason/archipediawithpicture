@@ -27,7 +27,7 @@ import pinyin from 'pinyin';
         <button 
           (click)="activeTab.set('history')"
           class="flex-1 py-4 font-black text-center text-lg transition-colors"
-          [class.bg-[#E32636]]="activeTab() === 'history'"
+          [class.bg-[#1C39BB]]="activeTab() === 'history'"
           [class.text-white]="activeTab() === 'history'"
         >浏览历史</button>
       </div>
@@ -67,7 +67,7 @@ import pinyin from 'pinyin';
         } @else {
            <div class="flex justify-between items-center mb-4">
               <h2 class="font-bold text-xl">最近访问</h2>
-              <button (click)="dataService.clearHistory()" class="text-sm text-red-500 underline font-bold hover:text-red-700">清空历史</button>
+              <button (click)="dataService.clearHistory()" class="bauhaus-btn bauhaus-btn-danger px-3 py-1 text-xs">清空历史</button>
            </div>
            @if (historyEntries().length === 0) {
               <div class="text-center mt-10 text-gray-500">

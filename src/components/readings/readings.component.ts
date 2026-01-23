@@ -38,8 +38,7 @@ import pinyin from 'pinyin';
           <button 
             (click)="selectedTag.set(tag)"
             class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 border-2 border-black font-bold transition-all text-xs uppercase tracking-wide active:translate-y-0.5"
-            [class.bg-[#1C39BB]]="selectedTag() === tag"
-            [class.text-white]="selectedTag() === tag"
+            [class.bg-[#FFD700]]="selectedTag() === tag"
             [class.shadow-[2px_2px_0px_0px_black]]="selectedTag() === tag"
             [class.bg-white]="selectedTag() !== tag"
           >
