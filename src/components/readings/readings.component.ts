@@ -59,7 +59,7 @@ import pinyin from 'pinyin';
             </div>
           } @else {
             @for (group of groupedReadings(); track group.letter) {
-              <div class="relative px-2">
+              <div class="relative px-2 pb-4">
                 <div [attr.data-letter]="group.letter" class="letter-anchor absolute -top-4"></div>
                 <!-- Sticky Header: Simple Bold Text, Solid BG -->
                 <h2 class="font-black text-2xl sticky top-0 bg-[#f8f7f5] py-2 z-10 border-b-2 border-black mb-4">
