@@ -28,7 +28,7 @@ import pinyin from 'pinyin';
       </div>
 
       <!-- Tags Filter -->
-      <div class="flex flex-nowrap gap-2 mb-4 md:mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar border-b-2 border-transparent hover:border-gray-200 transition-colors">
+      <div class="flex flex-nowrap gap-2 mb-2 md:mb-3 shrink-0 overflow-x-auto pb-2 custom-scrollbar border-b-2 border-transparent hover:border-gray-200 transition-colors">
         <button 
           (click)="selectTag('all')"
           class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 border-2 border-black font-bold transition-all text-xs uppercase tracking-wide active:translate-y-0.5"
@@ -61,9 +61,9 @@ import pinyin from 'pinyin';
           } @else {
             @for (group of groupedReadings(); track group.letter) {
               <div class="relative px-2 pb-4">
-                <div [attr.data-letter]="group.letter" class="letter-anchor absolute -top-4"></div>
+                <div [attr.data-letter]="group.letter" class="letter-anchor absolute top-0"></div>
                 <!-- Sticky Header: Simple Bold Text, Solid BG -->
-                <h2 class="font-black text-2xl sticky top-0 bg-[#f8f7f5] py-2 z-10 border-b-2 border-black mb-4">
+                <h2 class="font-black text-2xl sticky top-0 bg-[#f8f7f5] py-2 z-10 border-b-2 border-black mb-4 -mx-2 px-2">
                   {{ group.letter }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
@@ -104,7 +104,7 @@ import pinyin from 'pinyin';
         @if (groupedReadings().length > 0) {
           <div 
             #scrubberContainer 
-            class="absolute top-0 right-3 h-full flex items-center py-4 z-20"
+            class="absolute top-0 right-0 h-full flex items-center py-4 z-20"
           >
             <!-- Scrubber Bar: Solid White, Black Border, NO Shadow -->
             <div 
