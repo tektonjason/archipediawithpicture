@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
@@ -29,7 +29,7 @@ import pinyin from 'pinyin';
       <!-- Tags Filter -->
       <div class="flex flex-nowrap gap-2 mb-4 md:mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar border-b-2 border-transparent hover:border-gray-200 transition-colors">
         <button 
-          (click)="selectedTag.set('all')"
+          (click)="selectTag('all')"
           class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 border-2 border-black font-bold transition-all text-xs uppercase tracking-wide active:translate-y-0.5"
           [class.bg-[#FFD700]]="selectedTag() === 'all'"
           [class.shadow-[2px_2px_0px_0px_black]]="selectedTag() === 'all'"
@@ -37,7 +37,7 @@ import pinyin from 'pinyin';
         >全部</button>
         @for (tag of allTags(); track tag) {
           <button 
-            (click)="selectedTag.set(tag)"
+            (click)="selectTag(tag)"
             class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 border-2 border-black font-bold transition-all text-xs uppercase tracking-wide active:translate-y-0.5"
             [class.bg-[#FFD700]]="selectedTag() === tag"
             [class.shadow-[2px_2px_0px_0px_black]]="selectedTag() === tag"
@@ -155,7 +155,7 @@ import pinyin from 'pinyin';
     }
   `]
 })
-export class ReadingsComponent implements AfterViewInit {
+export class ReadingsComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
   searchQuery = signal('');
   selectedTag = signal('all');
@@ -183,6 +183,17 @@ export class ReadingsComponent implements AfterViewInit {
     });
     return Array.from(tags).sort((a, b) => a.localeCompare(b));
   });
+
+  ngOnDestroy(): void {
+    this.unlisteners.forEach(unlisten => unlisten());
+  }
+
+  selectTag(tag: string) {
+    this.selectedTag.set(tag);
+    if (this.scrollContainer?.nativeElement) {
+      this.scrollContainer.nativeElement.scrollTop = 0;
+    }
+  }
 
   // Basic filtered list (flat)
   filteredReadings = computed(() => {
@@ -268,12 +279,19 @@ export class ReadingsComponent implements AfterViewInit {
 
     const container = this.scrollContainer.nativeElement;
     const anchors = container.querySelectorAll('.letter-anchor');
-    const containerTop = container.scrollTop;
+    
+    // Use getBoundingClientRect for accurate position checking relative to the viewport
+    const containerRect = container.getBoundingClientRect();
+    // The threshold is slightly below the top of the container to trigger the switch
+    // just as the header comes into view or sticks.
+    const threshold = containerRect.top + 100; 
     
     let current = '';
     
+    // Iterate through all anchors to find the last one that is "above" or at the threshold
     anchors.forEach((anchor: any) => {
-      if (anchor.offsetTop - container.offsetTop <= containerTop + 50) {
+      const anchorRect = anchor.getBoundingClientRect();
+      if (anchorRect.top <= threshold) {
         current = anchor.getAttribute('data-letter') || '';
       }
     });

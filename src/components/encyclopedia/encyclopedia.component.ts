@@ -1,4 +1,3 @@
-
 import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementRef, effect } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -31,7 +30,7 @@ import { DataService } from '../../services/data.service';
       <!-- Categories Filter (Horizontal Scroll) -->
       <div class="flex flex-nowrap gap-2 mb-4 md:mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar border-b-2 border-transparent hover:border-gray-200 transition-colors">
         <button 
-          (click)="selectedCategory.set('all')"
+          (click)="selectCategory('all')"
           class="flex-shrink-0 whitespace-nowrap px-4 py-2 border-2 border-black font-bold transition-all text-sm uppercase tracking-wide active:translate-y-0.5"
           [class.bg-[#FFD700]]="selectedCategory() === 'all'"
           [class.text-black]="selectedCategory() === 'all'"
@@ -41,7 +40,7 @@ import { DataService } from '../../services/data.service';
         >全部</button>
         @for (cat of categories(); track cat) {
           <button 
-            (click)="selectedCategory.set(cat)"
+            (click)="selectCategory(cat)"
              class="flex-shrink-0 whitespace-nowrap px-4 py-2 border-2 border-black font-bold transition-all text-sm uppercase tracking-wide active:translate-y-0.5"
             [class.bg-[#FFD700]]="selectedCategory() === cat"
             [class.text-black]="selectedCategory() === cat"
@@ -55,7 +54,7 @@ import { DataService } from '../../services/data.service';
       </div>
 
       <!-- Content Grid -->
-      <div #scrollContainer class="flex-1 overflow-y-auto pr-1 pb-20 custom-scrollbar">
+      <div id="encyclopedia-scroll-container" #scrollContainer class="flex-1 overflow-y-auto pr-1 pb-20 custom-scrollbar">
         @if (filteredEntries().length === 0) {
           <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
             <div class="text-6xl mb-4">🧐</div>
@@ -185,6 +184,16 @@ export class EncyclopediaComponent implements AfterViewInit {
     });
     return list.slice(0, 200); 
   });
+
+  selectCategory(category: string) {
+    if (this.selectedCategory() !== category) {
+      this.selectedCategory.set(category);
+      this.dataService.encyclopediaScrollPosition.set(0);
+      if (this.scrollContainer?.nativeElement) {
+        this.scrollContainer.nativeElement.scrollTop = 0;
+      }
+    }
+  }
 
   createNew() {
     const currentCat = this.selectedCategory() === 'all' ? '未分类' : this.selectedCategory();
