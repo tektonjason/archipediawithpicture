@@ -1,12 +1,13 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
 import { DataService, Reading } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
 import pinyin from 'pinyin';
 
 @Component({
   selector: 'app-readings',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, NgClass],
   standalone: true,
   template: `
     <div class="h-full flex flex-col p-4 md:p-6 overflow-hidden bg-[#f8f7f5]">
@@ -75,7 +76,7 @@ import pinyin from 'pinyin';
                       <div class="flex justify-between items-start mb-1">
                         <h3 class="text-base md:text-lg font-black tracking-tight group-hover:text-[#1C39BB] transition-colors pr-4 flex-1">{{ item.title }}</h3>
                         @if(item.journalLevel) {
-                          <span class="bg-red-500 text-white px-2 py-0.5 border border-black text-[10px] md:text-xs font-bold shrink-0">{{ item.journalLevel }}</span>
+                          <span class="px-2 py-0.5 border border-black text-[10px] md:text-xs font-bold shrink-0" [ngClass]="getJournalClass(item.journalLevel)">{{ item.journalLevel }}</span>
                         }
                       </div>
                       <div class="text-xs text-gray-500 mb-2 font-mono">
@@ -173,7 +174,7 @@ import pinyin from 'pinyin';
                    
                   @if(item.journalLevel) {
                      <span class="font-bold text-gray-500 text-right">期刊等级:</span>
-                     <span class="bg-red-500 text-white px-2 py-0.5 border border-black text-xs font-bold inline-block w-fit">{{ item.journalLevel }}</span>
+                     <span class="px-2 py-0.5 border border-black text-xs font-bold inline-block w-fit" [ngClass]="getJournalClass(item.journalLevel)">{{ item.journalLevel }}</span>
                   }
  
                   <span class="font-bold text-gray-500 text-right">标签:</span>
@@ -315,6 +316,16 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   openModal(item: Reading) {
     this.selectedReading.set(item);
+  }
+
+  // Helper for Journal Colors
+  getJournalClass(level: string | null): string {
+    if (!level) return '';
+    const l = level.toUpperCase();
+    if (l === 'T1') return 'bg-red-500 text-white';
+    if (l === 'T2') return 'bg-orange-500 text-white';
+    if (l === 'T3') return 'bg-yellow-400 text-black'; // Yellow usually needs dark text
+    return 'bg-red-500 text-white'; // Default
   }
 
   closeModal() {
