@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../services/data.service';
+import { DataService, Reading } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
 import pinyin from 'pinyin';
 
@@ -67,7 +67,11 @@ import pinyin from 'pinyin';
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                   @for (item of group.readings; track item.title; let i = $index) {
-                    <div class="bauhaus-card p-3 md:p-4 flex flex-col h-full animate-pop-in" [style.animation-delay]="(i % 21 * 30) + 'ms'">
+                    <div 
+                       (click)="openModal(item)" 
+                       class="bauhaus-card p-3 md:p-4 flex flex-col h-full animate-pop-in cursor-pointer group hover:bg-yellow-50 transition-colors" 
+                       [style.animation-delay]="(i % 21 * 30) + 'ms'" 
+                     >
                       <div class="flex justify-between items-start mb-1">
                         <h3 class="text-base md:text-lg font-black tracking-tight group-hover:text-[#1C39BB] transition-colors pr-4 flex-1">{{ item.title }}</h3>
                         @if(item.journalLevel) {
@@ -127,6 +131,66 @@ import pinyin from 'pinyin';
           </div>
         }
       </div>
+
+      <!-- Detail Modal -->
+      @if (selectedReading(); as item) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeModal()"></div>
+          <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-lg max-h-[90vh] flex flex-col relative z-10 animate-[fadeIn_0.2s_ease-out] overflow-hidden">
+             
+            <!-- Modal Header -->
+            <div class="flex justify-between items-start p-4 border-b-4 border-black bg-gray-50">
+               <h3 class="text-xl md:text-2xl font-black pr-4 leading-tight">{{ item.title }}</h3>
+               <button (click)="closeModal()" class="flex-shrink-0 w-8 h-8 flex items-center justify-center border-2 border-transparent hover:border-black hover:bg-red-100 transition-all rounded-full">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-black" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+               </button>
+            </div>
+ 
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+               <!-- Basic Info Table -->
+               <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 mb-6 text-sm">
+                  <span class="font-bold text-gray-500 text-right">作者:</span>
+                  <span class="font-bold">{{ item.author || '未标明 / 机构' }}</span>
+                   
+                  <span class="font-bold text-gray-500 text-right">出版社/单位:</span>
+                  <span class="font-bold">{{ item.publisher }}</span>
+                   
+                  <span class="font-bold text-gray-500 text-right">ISBN:</span>
+                  <span class="font-mono text-gray-400">978-7-XXXX-XXXX-X (暂无)</span>
+                   
+                  @if(item.journalLevel) {
+                     <span class="font-bold text-gray-500 text-right">期刊等级:</span>
+                     <span class="bg-red-500 text-white px-2 py-0.5 border border-black text-xs font-bold inline-block w-fit">{{ item.journalLevel }}</span>
+                  }
+ 
+                  <span class="font-bold text-gray-500 text-right">标签:</span>
+                  <div class="flex flex-wrap gap-1">
+                    @for(tag of item.tags; track tag) {
+                        <span class="bg-gray-100 text-gray-700 px-2 py-0.5 border border-black/20 text-xs font-bold">{{ tag }}</span>
+                    }
+                  </div>
+               </div>
+ 
+               <!-- Description -->
+               <div class="prose prose-sm max-w-none border-t-2 border-black/10 pt-4">
+                  <h4 class="font-black text-lg mb-2">内容简介</h4>
+                  <p class="mb-4 font-serif leading-relaxed text-base">{{ item.description }}</p>
+                  <div class="bg-gray-50 border-l-4 border-gray-300 p-3">
+                     <p class="text-gray-400 italic text-xs leading-relaxed">
+                       [此处为更详细的读物内容简介占位符。未来版本将包含该书目的详细目录、核心观点摘要以及学术评价等深度内容。]
+                     </p>
+                  </div>
+               </div>
+            </div>
+ 
+            <!-- Modal Footer -->
+             <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
+                <button (click)="closeModal()" class="bauhaus-btn bg-white px-6 py-2 hover:bg-black hover:text-white">关闭</button>
+             </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -159,6 +223,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
   searchQuery = signal('');
   selectedTag = signal('all');
+  selectedReading = signal<Reading | null>(null);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('scrubberContainer') scrubberContainer!: ElementRef<HTMLDivElement>;
@@ -168,7 +233,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   // Scrubber State
   isScrubbing = signal(false);
   scrubbingLetter = signal('');
-  // scrubbingPosition removed/unused if not needed for tooltip, but kept for logic consistency if extended later
   scrubbingPosition = signal(0);
   currentLetter = signal('');
 
@@ -186,6 +250,14 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unlisteners.forEach(unlisten => unlisten());
+  }
+
+  openModal(item: Reading) {
+    this.selectedReading.set(item);
+  }
+
+  closeModal() {
+    this.selectedReading.set(null);
   }
 
   selectTag(tag: string) {
