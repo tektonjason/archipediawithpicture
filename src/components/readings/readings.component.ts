@@ -169,8 +169,12 @@ import pinyin from 'pinyin';
                   <span class="font-bold text-gray-500 text-right">出版社/单位:</span>
                   <span class="font-bold">{{ item.publisher }}</span>
                    
-                  <span class="font-bold text-gray-500 text-right">ISBN:</span>
-                  <span class="font-mono text-gray-400">978-7-XXXX-XXXX-X (暂无)</span>
+                  @if (item.tags.includes('期刊')) {
+                    <span class="font-bold text-gray-500 text-right">刊号:</span>
+                  } @else {
+                    <span class="font-bold text-gray-500 text-right">ISBN:</span>
+                  }
+                  <span class="font-mono" [class.text-gray-400]="!item.identifier">{{ item.identifier || '(暂无)' }}</span>
                    
                   @if(item.journalLevel) {
                      <span class="font-bold text-gray-500 text-right">期刊等级:</span>
