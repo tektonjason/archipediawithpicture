@@ -17,7 +17,8 @@ import pinyin from 'pinyin';
         <div class="relative flex-1 max-w-lg h-full">
           <input 
             type="text" 
-            [(ngModel)]="searchQuery"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
             placeholder="搜索书名、作者、出版社..." 
             class="w-full h-full px-4 text-sm border-2 border-black shadow-[3px_3px_0px_0px_black] focus:outline-none focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-[2px_2px_0px_0px_black] transition-all font-bold placeholder-gray-400 rounded-none bg-white"
           >
@@ -183,8 +184,8 @@ import pinyin from 'pinyin';
  
                   <span class="font-bold text-gray-500 text-right">标签:</span>
                   <div class="flex flex-wrap gap-1">
-                    @for(tag of item.tags; track tag) {
-                        <span class="bg-gray-100 text-gray-700 px-2 py-0.5 border border-black/20 text-xs font-bold">{{ tag }}</span>
+                    @for(t of item.tags; track $index) {
+                        <span class="bg-gray-100 text-gray-700 px-2 py-0.5 border border-black/20 text-xs font-bold">{{ t }}</span>
                     }
                   </div>
                </div>
@@ -202,9 +203,12 @@ import pinyin from 'pinyin';
             </div>
  
             <!-- Modal Footer -->
-             <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
-                <button (click)="closeModal()" class="bauhaus-btn bg-white px-4 py-1.5 text-sm hover:bg-black hover:text-white">关闭</button>
-             </div>
+              <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end gap-3">
+                 <a [href]="getSearchUrl(item)" target="_blank" rel="noopener noreferrer" class="bauhaus-btn bauhaus-btn-accent px-4 py-1.5 text-sm">
+                   在线搜索
+                 </a>
+                 <button (click)="closeModal()" class="bauhaus-btn bg-white px-4 py-1.5 text-sm hover:bg-black hover:text-white">关闭</button>
+              </div>
           </div>
         </div>
       }
@@ -331,6 +335,25 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (l === 'T3') return 'bg-yellow-400 text-black'; // Yellow usually needs dark text
     return 'bg-red-500 text-white'; // Default
   }
+
+  getSearchUrl(item: Reading): string {
+        let searchTitle = item.title;
+        // Special handling for titles with both English and Chinese names
+        if (item.title === 'Architecture & Detail（建筑细部）') {
+          searchTitle = '建筑细部';
+        } else if (item.title === 'ArchiCreation（建筑创作）') {
+          searchTitle = '建筑创作';
+        } else if (item.title === 'a+u（建筑与都市）') {
+          searchTitle = 'a+u';
+        }
+        
+        const title = encodeURIComponent(searchTitle);
+        if (item.tags && item.tags.includes('期刊')) {
+          return `https://www.zazhi.com.cn/s.html?t=&q=${title}`;
+        } else {
+          return `https://search.douban.com/book/subject_search?search_text=${title}`;
+        }
+      }
 
   closeModal() {
     this.isClosing.set(true);
