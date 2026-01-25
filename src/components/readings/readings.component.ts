@@ -26,6 +26,9 @@ import pinyin from 'pinyin';
             <button (click)="searchQuery.set('')" class="absolute right-0 top-0 h-full w-10 flex items-center justify-center font-bold text-gray-400 hover:text-red-500">X</button>
           }
         </div>
+        <button (click)="startEResourceFlow()" class="bauhaus-btn bauhaus-btn-primary px-4 whitespace-nowrap">
+          电子资源
+        </button>
       </div>
 
       <!-- Tags Filter -->
@@ -212,6 +215,96 @@ import pinyin from 'pinyin';
           </div>
         </div>
       }
+
+      <!-- E-Resource Access Modals -->
+      @if (eResourceFlowStep() !== 'closed') {
+        <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeEResourceFlow()"></div>
+          
+          @switch(eResourceFlowStep()) {
+            @case('verification') {
+              <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-md flex flex-col relative z-10 animate-modal-pop-in">
+                <h3 class="font-black text-xl text-center p-4 border-b-4 border-black bg-gray-50">信息核验</h3>
+                <div class="p-6 flex flex-col gap-4">
+                  <div>
+                    <label class="font-bold text-sm text-gray-600">学校</label>
+                    <input [(ngModel)]="verificationForm().school" type="text" placeholder="请输入学校全称" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
+                  </div>
+                  <div>
+                    <label class="font-bold text-sm text-gray-600">学院</label>
+                    <input [(ngModel)]="verificationForm().college" type="text" placeholder="请输入学院全称" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
+                  </div>
+                  <div>
+                    <label class="font-bold text-sm text-gray-600">专业</label>
+                    <input [(ngModel)]="verificationForm().major" type="text" placeholder="请输入专业全称" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
+                  </div>
+                  <div>
+                    <label class="font-bold text-sm text-gray-600">学号</label>
+                    <input [(ngModel)]="verificationForm().studentId" type="text" placeholder="请输入11位学号" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
+                  </div>
+
+                  @if (verificationStatus() !== 'idle' && verificationMessage()) {
+                    <div class="text-center font-bold p-2 border-2" 
+                      [class.text-green-700]="verificationStatus() === 'success'"
+                      [class.bg-green-100]="verificationStatus() === 'success'"
+                      [class.border-green-700]="verificationStatus() === 'success'"
+                      [class.text-red-700]="verificationStatus() === 'error'"
+                      [class.bg-red-100]="verificationStatus() === 'error'"
+                      [class.border-red-700]="verificationStatus() === 'error'"
+                    >
+                       {{ verificationMessage() }}
+                    </div>
+                  }
+                </div>
+                <div class="p-4 border-t-4 border-black bg-gray-50 flex gap-3">
+                  <button (click)="closeEResourceFlow()" class="bauhaus-btn bg-white px-4 py-2 text-sm flex-1">取消</button>
+                  <button (click)="handleVerification()" class="bauhaus-btn bauhaus-btn-primary px-4 py-2 text-sm flex-1">
+                    @if(verificationStatus() === 'verifying') {
+                      <span>核验中...</span>
+                    } @else {
+                      <span>核验</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+            @case('declaration') {
+              <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-lg flex flex-col relative z-10 animate-modal-pop-in">
+                <h3 class="font-black text-xl text-center p-4 border-b-4 border-black bg-gray-50">资源使用声明与承诺</h3>
+                <div class="p-6 overflow-y-auto text-sm space-y-4 leading-relaxed max-h-[60vh]">
+                  <p><strong class="font-bold text-base">本人确认：</strong><br>本人为宁夏大学建筑学院{{ verificationForm().major }}专业学生，学号 {{ verificationForm().studentId }}。</p>
+                  <p><strong class="font-bold text-base">本人已知晓：</strong><br>本应用所提供的电子读物资源仅限宁夏大学建筑学院校内教学与学习使用，不具备对外传播、商业使用或二次分发授权。</p>
+                  <p><strong class="font-bold text-base">本人承诺：</strong><br>不对上述电子资源进行传播、转卖、公开分享或任何形式的非法使用。</p>
+                  <p>若因本人违反上述约定而产生任何版权纠纷或法律责任，均由本人自行承担，与平台及资源整理方无关。</p>
+                </div>
+                <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
+                  <button (click)="goToResourcesStep()" [disabled]="declarationCountdown() > 0" class="bauhaus-btn bauhaus-btn-primary px-6 py-2" [class.opacity-50]="declarationCountdown() > 0" [class.cursor-not-allowed]="declarationCountdown() > 0">
+                    @if (declarationCountdown() > 0) {
+                      <span>确认并继续 ({{declarationCountdown()}})</span>
+                    } @else {
+                      <span>确认并继续</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+            @case('resources') {
+              <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-md flex flex-col relative z-10 animate-modal-pop-in">
+                <h3 class="font-black text-xl text-center p-4 border-b-4 border-black bg-gray-50">电子资源获取方式</h3>
+                <div class="p-6">
+                  <div class="bg-gray-100 p-4 border-2 border-dashed border-black text-sm font-mono whitespace-pre-wrap leading-relaxed break-all">
+                    {{ resourceLinkText() }}
+                  </div>
+                </div>
+                <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
+                  <button (click)="copyResourceInfo()" class="bauhaus-btn bauhaus-btn-accent px-6 py-2">{{ copyButtonText() }}</button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+
     </div>
   `,
   styles: [`
@@ -309,6 +402,46 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   private letterElements: Map<string, HTMLElement> = new Map();
   private unlisteners: (() => void)[] = [];
 
+  // E-Resource Flow State
+  eResourceFlowStep = signal<'closed' | 'verification' | 'declaration' | 'resources'>('closed');
+  verificationForm = signal({ school: '', college: '', major: '', studentId: '' });
+  verificationStatus = signal<'idle' | 'verifying' | 'success' | 'error'>('idle');
+  verificationMessage = signal('');
+  declarationCountdown = signal(5);
+  private countdownInterval: any;
+  copyButtonText = signal('一键复制');
+  resourceLinkText = signal('');
+
+  // --------------------------------------------------------------------------------
+  // Obfuscated Secrets (Using Character Code Arrays for "Encryption")
+  // --------------------------------------------------------------------------------
+   
+  // 
+  private readonly SECRET_SCHOOL = [23425, 22799, 22823, 23398];
+   
+  // 
+  private readonly SECRET_COLLEGE = [24314, 31569, 23398, 38498];
+   
+  // Majors
+  private readonly SECRET_MAJORS = [
+    [24314, 31569, 23398], 
+    [22478, 20061, 35268, 21010], 
+    [24314, 31569]
+  ];
+   
+  // 
+  private readonly SECRET_PREFIX = [49, 50, 48];
+
+  // Resource Link Parts
+  // Part 1
+  private readonly LINK_PART_1 = [36890, 36807, 30334, 24230, 32593, 30424, 20998, 20139, 30340, 25991, 20214, 65306, 49, 24314, 31569, 31867, 30005, 23376, 20070, 32, 10];
+   
+  // Part 2
+  private readonly LINK_PART_2 = [104, 116, 116, 112, 115, 58, 47, 47, 112, 97, 110, 46, 98, 97, 105, 100, 117, 46, 99, 111, 109, 47, 115, 47, 49, 99, 119, 80, 108, 52, 75, 86, 54, 85, 105, 105, 71, 120, 109, 52, 55, 81, 48, 68, 121, 76, 119];
+   
+  // Part 3
+  private readonly LINK_PART_3 = [32, 10, 25552, 21462, 30721, 58, 98, 111, 111, 107, 32, 10, 22797, 21046, 36825, 27573, 20869, 23481, 25171, 24320, 12300, 30334, 24230, 32593, 30424, 65, 80, 80, 32, 21363, 21487, 33719, 21462, 12301];
+
   // get all tags from readings
   allTags = computed(() => {
     const tags = new Set<string>();
@@ -320,6 +453,87 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unlisteners.forEach(unlisten => unlisten());
+    clearInterval(this.countdownInterval);
+  }
+
+  // Security Helper: Decodes Character Code Arrays
+  private decodeCodes(codes: number[]): string {
+    return String.fromCharCode(...codes);
+  }
+
+  startEResourceFlow() {
+    this.eResourceFlowStep.set('verification');
+    this.verificationForm.set({ school: '', college: '', major: '', studentId: '' });
+    this.verificationStatus.set('idle');
+    this.verificationMessage.set('');
+  }
+
+  closeEResourceFlow() {
+    this.eResourceFlowStep.set('closed');
+    clearInterval(this.countdownInterval);
+  }
+  
+  handleVerification() {
+    this.verificationStatus.set('verifying');
+    this.verificationMessage.set('');
+
+    setTimeout(() => {
+      const form = this.verificationForm();
+      const schoolTarget = this.decodeCodes(this.SECRET_SCHOOL);
+      const collegeTarget = this.decodeCodes(this.SECRET_COLLEGE);
+      const majorsTarget = this.SECRET_MAJORS.map(m => this.decodeCodes(m));
+      const prefixTarget = this.decodeCodes(this.SECRET_PREFIX);
+
+      const isSchoolValid = form.school.trim() === schoolTarget;
+      const isCollegeValid = form.college.trim() === collegeTarget;
+      const isMajorValid = majorsTarget.includes(form.major.trim());
+      
+      const idInput = form.studentId.trim();
+      const isStudentIdValid = idInput.length === 11 && 
+                               idInput.startsWith(prefixTarget) && 
+                               /^\d+$/.test(idInput);
+
+      if (isSchoolValid && isCollegeValid && isMajorValid && isStudentIdValid) {
+        this.verificationStatus.set('success');
+        this.verificationMessage.set('条件匹配成功');
+        setTimeout(() => this.goToDeclarationStep(), 1500);
+      } else {
+        this.verificationStatus.set('error');
+        this.verificationMessage.set('条件不匹配，无法获取资源');
+      }
+    }, 500);
+  }
+
+  goToDeclarationStep() {
+    this.eResourceFlowStep.set('declaration');
+    this.startDeclarationCountdown();
+  }
+
+  startDeclarationCountdown() {
+    this.declarationCountdown.set(5);
+    clearInterval(this.countdownInterval);
+    this.countdownInterval = setInterval(() => {
+      this.declarationCountdown.update(v => v - 1);
+      if (this.declarationCountdown() <= 0) {
+        clearInterval(this.countdownInterval);
+      }
+    }, 1000);
+  }
+
+  goToResourcesStep() {
+    // Dynamically assemble the resource link ONLY when needed
+    const fullText = this.decodeCodes(this.LINK_PART_1) + 
+                     this.decodeCodes(this.LINK_PART_2) + 
+                     this.decodeCodes(this.LINK_PART_3);
+    this.resourceLinkText.set(fullText);
+    this.eResourceFlowStep.set('resources');
+  }
+
+  copyResourceInfo() {
+    navigator.clipboard.writeText(this.resourceLinkText()).then(() => {
+      this.copyButtonText.set('已复制!');
+      setTimeout(() => this.copyButtonText.set('一键复制'), 2000);
+    });
   }
 
   openModal(item: Reading) {
