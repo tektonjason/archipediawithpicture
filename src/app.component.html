@@ -1,153 +1,133 @@
-<div class="flex h-screen w-screen bg-[#f8f7f5] overflow-hidden relative">
+<div class="flex h-screen w-screen bg-[#0f0f11] overflow-hidden relative text-gray-300 font-sans">
   
   <!-- Sidebar -->
-  <!-- 
-    Logic:
-    - Mobile: Fixed, z-50, Translate X to toggle.
-    - Desktop: Relative, z-0, Width to toggle.
-    - Inner Container: Fixed width to prevent content reflow during width transition.
-  -->
   <aside 
-    class="bg-white border-black flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden
-           fixed inset-y-0 left-0 z-50
+    class="bg-[#18181b] flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden
+           fixed inset-y-0 left-0 z-50 border-r border-white/5
            md:relative md:z-auto md:translate-x-0"
-    [class.w-72]="true"
-    [class.border-r-4]="dataService.isSidebarOpen()" 
+    [class.w-64]="true"
     [class.-translate-x-full]="!dataService.isSidebarOpen()"
     [class.translate-x-0]="dataService.isSidebarOpen()"
-    [class.md:w-72]="dataService.isSidebarOpen()"
+    [class.md:w-64]="dataService.isSidebarOpen()"
     [class.md:w-0]="!dataService.isSidebarOpen()"
-    [class.md:border-none]="!dataService.isSidebarOpen()"
-    [class.shadow-2xl]="dataService.isSidebarOpen()"
-    [class.md:shadow-none]="true"
   >
-    <!-- Fixed Width Inner Container to prevent squashing -->
-    <div class="w-72 flex flex-col h-full min-w-[18rem]">
+    <!-- Fixed Width Inner Container -->
+    <div class="w-64 flex flex-col h-full min-w-[16rem]">
       
       <!-- Logo Area -->
-      <div class="p-6 border-b-4 border-black bg-white flex items-center justify-between gap-2 shrink-0">
-         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-[#1C39BB] border-4 border-black rounded-full shrink-0"></div>
-            <h1 class="text-2xl font-black uppercase tracking-tighter leading-none">
-              <span class="text-[#E32636]">ARCHI</span>PEDIA
-            </h1>
+      <div class="p-6 flex items-center gap-4 shrink-0">
+         <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="/icon/archipediaicon.webp" alt="Archipedia Logo" class="w-full h-full object-cover">
+         </div>
+         <div class="flex flex-col">
+            <h1 class="text-lg font-bold text-white tracking-wide leading-none">ARCHIPEDIA</h1>
+            <span class="text-xs text-gray-500 font-medium">Knowledge Base</span>
          </div>
          <!-- Close Button (Mobile Only) -->
-         <button (click)="dataService.toggleSidebar()" class="md:hidden flex items-center justify-center w-8 h-8 hover:bg-gray-100 border-2 border-transparent hover:border-black transition-all rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
+         <button (click)="dataService.toggleSidebar()" class="md:hidden ml-auto text-gray-400 hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
          </button>
       </div>
 
       <!-- Nav Links -->
-      <nav class="flex-1 overflow-y-auto py-4 flex flex-col font-bold text-sm">
-        <a routerLink="/encyclopedia" routerLinkActive #rla1="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla1.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <path d="M3 9h18M9 21V9" />
+      <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1 text-sm font-medium">
+        <a routerLink="/encyclopedia" routerLinkActive #rla1="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla1.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+             <rect x="3" y="3" width="7" height="7" rx="1" />
+             <rect x="14" y="3" width="7" height="7" rx="1" />
+             <rect x="14" y="14" width="7" height="7" rx="1" />
+             <rect x="3" y="14" width="7" height="7" rx="1" />
           </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">百科全书</span>
+          <span>百科全书</span>
         </a>
-        <a routerLink="/ai" routerLinkActive #rla2="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla2.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9" />
-            <circle cx="12" cy="12" r="3" fill="black"/>
+        <a routerLink="/ai" routerLinkActive #rla2="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla2.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+            <path d="M12 8v8"/>
+            <path d="M8 12h8"/>
           </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">AI 导师</span>
+          <span>AI 导师</span>
         </a>
-        <a routerLink="/resources" routerLinkActive #rla3="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla3.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        <a routerLink="/resources" routerLinkActive #rla3="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla3.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
           </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">资源库</span>
+          <span>资源库</span>
         </a>
-        <a routerLink="/readings" routerLinkActive #rla4="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla4.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <a routerLink="/readings" routerLinkActive #rla4="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla4.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
           </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">建筑读物</span>
+          <span>建筑读物</span>
         </a>
-        <a routerLink="/user" [queryParams]="{tab: 'favorites'}" routerLinkActive #rla5="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla5.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        <a routerLink="/user" [queryParams]="{tab: 'favorites'}" routerLinkActive #rla5="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla5.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
           </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">我的收藏</span>
+          <span>我的收藏</span>
         </a>
-        <a routerLink="/user" [queryParams]="{tab: 'history'}" routerLinkActive #rla6="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla6.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">浏览历史</span>
+        <a routerLink="/user" [queryParams]="{tab: 'history'}" routerLinkActive #rla6="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla6.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+             <circle cx="12" cy="12" r="10"/>
+             <path d="M12 6v6l4 2"/>
+           </svg>
+          <span>浏览历史</span>
         </a>
-        <a routerLink="/contact" routerLinkActive #rla7="routerLinkActive" [class]="'px-6 py-4 flex items-center gap-4 transition-all group ' + (rla7.isActive ? 'bg-[#FFD700] border-y-2 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'hover:bg-gray-100')">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-black fill-none stroke-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-          </svg>
-          <span class="transition-transform duration-200 group-hover:translate-x-1">关于应用</span>
+        <a routerLink="/contact" routerLinkActive #rla7="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla7.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+             <circle cx="12" cy="12" r="10"/>
+             <path d="M12 16v-4"/>
+             <path d="M12 8h.01"/>
+           </svg>
+          <span>关于应用</span>
         </a>
       </nav>
 
-      <!-- Footer Area Wrapper for Animation -->
-      <div 
-        class="shrink-0 min-w-[18rem] transition-all duration-500 ease-in-out overflow-hidden"
-        [class.max-h-96]="isFooterVisible()"
-        [class.max-h-0]="!isFooterVisible()"
-      >
-        <!-- Original Footer Area -->
-        <div 
-          class="p-3 bg-gray-50 border-t-4 border-black space-y-3"
-          [class.cursor-pointer]="isFooterVisible()"
-          (click)="hideFooter()"
+      <!-- Sidebar Footer (Disclaimer & Copyright) -->
+      <div class="border-t border-white/5 bg-[#18181b]">
+        <button 
+          (click)="toggleSidebarFooter()"
+          class="w-full flex items-center justify-between p-4 text-xs text-gray-500 hover:text-gray-300 transition-colors"
         >
-        <div class="space-y-2">
-            <div class="flex items-start gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-600 shrink-0 mt-px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-                <div class="text-[10px] text-gray-700 leading-snug">
-                    <strong class="font-bold text-black">AI生成提示</strong>: 百科全书中部分内容由 AI 生成，可能存在不准确之处，仅供参考。
-                </div>
-            </div>
-            <div class="flex items-start gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 shrink-0 mt-px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                <div class="text-[10px] text-gray-700 leading-snug">
-                    <strong class="font-bold text-black">使用声明</strong>: 本资源仅限校内学习使用，禁止商业用途。违规使用所产生的法律责任由使用者自行承担。
-                </div>
-            </div>
+          <span class="font-medium">© 2026 曾若宽 版权所有</span>
+          <svg 
+            class="w-4 h-4 transition-transform duration-300" 
+            [class.rotate-180]="!isSidebarFooterCollapsed()"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        
+        <div 
+          class="overflow-hidden transition-all duration-300 ease-in-out px-4"
+          [class.max-h-0]="isSidebarFooterCollapsed()"
+          [class.max-h-60]="!isSidebarFooterCollapsed()"
+          [class.pb-0]="isSidebarFooterCollapsed()"
+          [class.pb-4]="!isSidebarFooterCollapsed()"
+        >
+           <p class="text-[10px] leading-relaxed text-gray-600 text-justify">
+             <strong class="text-gray-500">AI生成提示：</strong>百科全书中部分内容由 AI 生成，可能存在不准确之处，仅供参考。<br><br>
+             <strong class="text-gray-500">使用声明：</strong>本资源仅限校内学习使用，禁止商业用途。违规使用所产生的法律责任由使用者自行承担。
+           </p>
         </div>
-        <div class="border-t border-black/10 pt-2 text-center text-gray-500 text-[9px] font-medium tracking-wider">
-           © 2026 曾若宽 版权所有
-        </div>
-      </div>
       </div>
 
-      <!-- Admin Status -->
-      <div class="p-4 border-t-4 border-black bg-gray-50 shrink-0">
-        <button 
-          (click)="handleAdminAction()" 
-          class="w-full border-2 border-black px-4 py-3 text-xs font-bold uppercase hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2"
-          [class.bg-[#E32636]]="dataService.isAdmin()"
-          [class.text-white]="dataService.isAdmin()"
-          [class.bg-white]="!dataService.isAdmin()"
-        >
-          <span class="w-2 h-2 bg-current rounded-full"></span>
-          {{ dataService.isAdmin() ? 'ADMIN: LOGOUT' : 'ADMIN LOGIN' }}
-        </button>
-      </div>
     </div>
   </aside>
 
   <!-- Main Content Area -->
   <div class="flex-1 flex flex-col h-full min-w-0 relative">
     
-    <!-- Global Navigation Toggle (Visible primarily when sidebar is closed, or always on desktop to toggle) -->
-    <!-- Positioned absolutely in the top-left of the content area -->
+    <!-- Global Nav Toggle -->
     <div class="absolute top-4 left-4 z-40">
        <button 
          (click)="dataService.toggleSidebar()"
-         class="w-12 h-12 bg-white border-2 border-black shadow-[4px_4px_0px_0px_black] active:shadow-[2px_2px_0px_0px_black] active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center hover:bg-yellow-100"
-         title="切换导航栏"
+         class="p-2 bg-[#18181b] rounded-md text-gray-300 hover:text-white border border-white/10 shadow-lg"
        >
          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -159,54 +139,53 @@
     @if (dataService.isSidebarOpen()) {
       <div 
         (click)="dataService.toggleSidebar()" 
-        class="absolute inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden cursor-pointer animate-[fadeIn_0.2s_ease-out]"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-[fadeIn_0.2s_ease-out]"
         aria-hidden="true"
       ></div>
     }
 
     <!-- Router Content -->
-    <main class="flex-1 overflow-hidden relative bg-[#f8f7f5]">
+    <main class="flex-1 overflow-hidden relative bg-[#0f0f11] text-gray-300">
       <router-outlet></router-outlet>
     </main>
-
   </div>
 
   <!-- Modals (Login/Logout) -->
-  @if (showLoginModal()) {
+  @if (dataService.showLoginModal()) {
     <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeLoginModal()"></div>
-      <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-sm p-8 relative z-10 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
-        <h2 class="text-2xl font-black uppercase text-center border-b-4 border-black pb-3 mb-2 font-serif">管理员登录</h2>
+      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="dataService.closeLoginModal()"></div>
+      <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm p-6 relative z-10 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
+        <h2 class="text-xl font-bold text-white mb-2">管理员登录</h2>
         <div class="flex flex-col gap-2">
-          <label class="font-bold text-sm uppercase tracking-wider text-gray-600">邮箱账号</label>
-          <input [(ngModel)]="loginEmail" type="email" placeholder="admin@example.com" class="border-2 border-black p-3 font-medium focus:outline-none focus:bg-yellow-50 focus:ring-2 ring-offset-2 ring-black w-full">
+          <label class="text-xs font-medium text-gray-400 uppercase tracking-wider">邮箱账号</label>
+          <input [(ngModel)]="dataService.loginEmail" type="email" placeholder="admin@example.com" class="bg-[#27272a] border border-white/10 rounded-lg p-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full transition-all">
         </div>
         <div class="flex flex-col gap-2">
-          <label class="font-bold text-sm uppercase tracking-wider text-gray-600">密码</label>
-          <input [(ngModel)]="loginPass" type="password" placeholder="••••••" class="border-2 border-black p-3 font-medium focus:outline-none focus:bg-yellow-50 focus:ring-2 ring-offset-2 ring-black w-full">
+          <label class="text-xs font-medium text-gray-400 uppercase tracking-wider">密码</label>
+          <input [(ngModel)]="dataService.loginPass" type="password" placeholder="••••••" class="bg-[#27272a] border border-white/10 rounded-lg p-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full transition-all">
         </div>
-        @if (loginError()) {
-          <div class="bg-red-100 text-[#E32636] font-bold text-sm p-3 border-2 border-[#E32636] text-center">
-            {{ loginError() }}
+        @if (dataService.loginError()) {
+          <div class="bg-red-500/10 text-red-400 text-sm p-3 rounded-lg border border-red-500/20 text-center">
+            {{ dataService.loginError() }}
           </div>
         }
-        <div class="flex gap-4 mt-4">
-          <button (click)="closeLoginModal()" class="flex-1 py-3 font-bold border-2 border-black bg-white hover:bg-gray-100">取消</button>
-          <button (click)="performLogin()" class="flex-1 py-3 font-bold bg-[#1C39BB] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_black] transition-all">登录</button>
+        <div class="flex gap-3 mt-4">
+          <button (click)="dataService.closeLoginModal()" class="flex-1 py-2.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">取消</button>
+          <button (click)="dataService.performLogin()" class="flex-1 py-2.5 rounded-lg font-bold bg-white text-black hover:bg-gray-200 transition-colors">登录</button>
         </div>
       </div>
     </div>
   }
 
-  @if (showLogoutModal()) {
+  @if (dataService.showLogoutModal()) {
     <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="showLogoutModal.set(false)"></div>
-      <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-sm p-8 relative z-10 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
-        <h2 class="text-2xl font-black uppercase text-center border-b-4 border-black pb-3 font-serif">管理员登出</h2>
-        <p class="text-center font-bold py-4">确定要退出管理员模式吗？<br><span class="text-sm text-gray-500 font-normal">您的所有修改已自动保存。</span></p>
-        <div class="flex gap-4 mt-2">
-          <button (click)="showLogoutModal.set(false)" class="flex-1 py-3 font-bold border-2 border-black bg-white hover:bg-gray-100">取消</button>
-          <button (click)="confirmLogout()" class="flex-1 py-3 font-bold bg-[#E32636] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_black] transition-all">确认退出</button>
+      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="dataService.showLogoutModal.set(false)"></div>
+      <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm p-6 relative z-10 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
+        <h2 class="text-xl font-bold text-white mb-1">管理员登出</h2>
+        <p class="text-gray-400 text-sm">确定要退出管理员模式吗？<br>您的所有修改已自动保存。</p>
+        <div class="flex gap-3 mt-4">
+          <button (click)="dataService.showLogoutModal.set(false)" class="flex-1 py-2.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">取消</button>
+          <button (click)="dataService.confirmLogout()" class="flex-1 py-2.5 rounded-lg font-bold bg-red-600 text-white hover:bg-red-500 transition-colors">确认退出</button>
         </div>
       </div>
     </div>

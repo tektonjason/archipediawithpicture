@@ -14,7 +14,10 @@ export class AppComponent {
   dataService = inject(DataService);
   // isSidebarOpen signal removed; using dataService.isSidebarOpen
 
-  // Footer visibility state
+  // Footer visibility state - Sidebar version
+  isSidebarFooterCollapsed = signal(false);
+  
+  // Main Footer visibility (kept for backward compatibility if needed, but we are moving content to sidebar)
   isFooterVisible = signal(true);
 
   constructor() {
@@ -24,6 +27,18 @@ export class AppComponent {
       if (footerState === 'false') {
         this.isFooterVisible.set(false);
       }
+      
+      const sidebarFooterState = localStorage.getItem('arch_sidebar_footer_collapsed');
+      if (sidebarFooterState === 'true') {
+        this.isSidebarFooterCollapsed.set(true);
+      }
+    }
+  }
+
+  toggleSidebarFooter() {
+    this.isSidebarFooterCollapsed.update(v => !v);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('arch_sidebar_footer_collapsed', String(this.isSidebarFooterCollapsed()));
     }
   }
 
@@ -36,46 +51,7 @@ export class AppComponent {
     }
   }
 
-  // Login Modal State
-  showLoginModal = signal(false);
-  loginEmail = signal('');
-  loginPass = signal('');
-  loginError = signal('');
-
-  // Logout Modal State
-  showLogoutModal = signal(false);
-
   toggleSidebar() {
     this.dataService.toggleSidebar();
-  }
-
-  handleAdminAction() {
-    if (this.dataService.isAdmin()) {
-      // Use custom modal instead of window.confirm
-      this.showLogoutModal.set(true);
-    } else {
-      // Reset and open modal instead of using window.prompt
-      this.loginEmail.set('');
-      this.loginPass.set('');
-      this.loginError.set('');
-      this.showLoginModal.set(true);
-    }
-  }
-
-  performLogin() {
-    if (this.dataService.login(this.loginEmail(), this.loginPass())) {
-      this.showLoginModal.set(false);
-    } else {
-      this.loginError.set('认证失败：账号或密码错误');
-    }
-  }
-
-  confirmLogout() {
-    this.dataService.logout();
-    this.showLogoutModal.set(false);
-  }
-
-  closeLoginModal() {
-    this.showLoginModal.set(false);
   }
 }

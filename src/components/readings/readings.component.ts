@@ -1,8 +1,7 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgClass, CommonModule } from '@angular/common';
 import { DataService, Reading } from '../../services/data.service';
-import { CommonModule } from '@angular/common';
 import pinyin from 'pinyin';
 
 @Component({
@@ -10,91 +9,110 @@ import pinyin from 'pinyin';
   imports: [FormsModule, CommonModule, NgClass],
   standalone: true,
   template: `
-    <div class="h-full flex flex-col p-4 md:p-6 overflow-hidden bg-[#f8f7f5]">
-      <!-- Top Toolbar -->
-      <div class="flex items-stretch gap-3 mb-4 md:mb-6 shrink-0 h-10 pl-24">
+    <div class="h-full flex flex-col p-6 md:p-8 overflow-hidden bg-[#0f0f11] text-white">
+      
+      <!-- Header Section -->
+      <div class="flex flex-col items-center mb-8 shrink-0 space-y-2">
+        <h1 class="text-3xl md:text-4xl font-bold tracking-wide">建筑读物</h1>
+        <p class="text-gray-400 text-sm md:text-base max-w-2xl text-center">
+          发现有价值的建筑书籍与期刊
+        </p>
+
         <!-- Search Input -->
-        <div class="relative flex-1 max-w-lg h-full">
-          <input 
-            type="text" 
-            [ngModel]="searchQuery()"
-            (ngModelChange)="searchQuery.set($event)"
-            placeholder="搜索书名、作者、出版社..." 
-            class="w-full h-full px-4 text-sm border-2 border-black shadow-[3px_3px_0px_0px_black] focus:outline-none focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-[2px_2px_0px_0px_black] transition-all font-bold placeholder-gray-400 rounded-none bg-white"
-          >
-          @if (searchQuery()) {
-            <button (click)="searchQuery.set('')" class="absolute right-0 top-0 h-full w-10 flex items-center justify-center font-bold text-gray-400 hover:text-red-500">X</button>
-          }
+        <div class="relative w-full max-w-2xl mt-4 flex gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              placeholder="搜索书名、作者或出版社..." 
+              class="w-full bg-[#18181b] text-white text-base placeholder-gray-500 rounded-xl border border-white/10 py-3 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all shadow-lg"
+            >
+            @if (searchQuery()) {
+              <button (click)="searchQuery.set('')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            }
+          </div>
+          <button (click)="startEResourceFlow()" class="px-6 py-3 bg-[#18181b] border border-white/10 hover:bg-white/5 rounded-xl text-sm font-medium transition-all whitespace-nowrap">
+            电子资源
+          </button>
         </div>
-        <button (click)="startEResourceFlow()" class="bauhaus-btn bauhaus-btn-primary px-4 whitespace-nowrap">
-          电子资源
-        </button>
       </div>
 
       <!-- Tags Filter -->
-      <div class="flex flex-nowrap gap-2 mb-2 md:mb-3 shrink-0 overflow-x-auto pb-2 custom-scrollbar border-b-2 border-transparent hover:border-gray-200 transition-colors">
+      <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-center">
         <button 
           (click)="selectTag('all')"
-          class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 border-2 border-black font-bold transition-all text-xs uppercase tracking-wide active:translate-y-0.5"
-          [class.bg-[#FFD700]]="selectedTag() === 'all'"
-          [class.shadow-[2px_2px_0px_0px_black]]="selectedTag() === 'all'"
-          [class.bg-white]="selectedTag() !== 'all'"
+          class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
+          [class.bg-white]="selectedTag() === 'all'"
+          [class.text-black]="selectedTag() === 'all'"
+          [class.bg-white/5]="selectedTag() !== 'all'"
+          [class.text-gray-300]="selectedTag() !== 'all'"
+          [class.hover:bg-white/10]="selectedTag() !== 'all'"
         >全部</button>
         @for (tag of allTags(); track tag) {
           <button 
             (click)="selectTag(tag)"
-            class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 border-2 border-black font-bold transition-all text-xs uppercase tracking-wide active:translate-y-0.5"
-            [class.bg-[#FFD700]]="selectedTag() === tag"
-            [class.shadow-[2px_2px_0px_0px_black]]="selectedTag() === tag"
-            [class.bg-white]="selectedTag() !== tag"
+            class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
+            [class.bg-white]="selectedTag() === tag"
+            [class.text-black]="selectedTag() === tag"
+            [class.bg-white/5]="selectedTag() !== tag"
+            [class.text-gray-300]="selectedTag() !== tag"
+            [class.hover:bg-white/10]="selectedTag() !== tag"
           >
             {{ tag }}
           </button>
         }
       </div>
 
-      <!-- Content Area with #-A-Z Scrubber -->
+      <!-- Content Area -->
       <div class="flex-1 relative overflow-hidden">
-        <div #scrollContainer class="h-full overflow-y-auto pr-14 pb-20 custom-scrollbar-hidden" (scroll)="onScroll()">
+        <div #scrollContainer class="h-full overflow-y-auto pr-10 pb-20 hide-scrollbar" (scroll)="onScroll()">
           @if (filteredReadings().length === 0) {
             <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
-              <div class="text-6xl mb-4">📚</div>
-              <p class="font-bold text-xl">未找到相关读物</p>
-              <p class="text-gray-500 mt-1">请尝试更换关键词或分类标签</p>
+              <div class="text-4xl mb-4 grayscale">📚</div>
+              <p class="font-medium text-lg">未找到相关读物</p>
+              <p class="text-gray-500 text-sm mt-1">请尝试更换关键词或进入对应分类查找</p>
             </div>
           } @else {
             @for (group of groupedReadings(); track group.letter) {
-              <div class="relative px-2 pb-4">
-                <div [attr.data-letter]="group.letter" class="letter-anchor absolute top-0"></div>
-                <!-- Sticky Header: Simple Bold Text, Solid BG -->
-                <h2 class="font-black text-2xl sticky top-0 bg-[#f8f7f5] py-2 z-10 border-b-2 border-black mb-4 -mx-2 px-2">
+              <div class="relative mb-8">
+                <div [attr.data-letter]="group.letter" class="letter-anchor absolute -top-4"></div>
+                <h2 class="text-xl font-bold text-gray-500 mb-4 sticky top-0 bg-[#0f0f11]/90 backdrop-blur-sm z-10 py-2 border-b border-white/5">
                   {{ group.letter }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   @for (item of group.readings; track item.title; let i = $index) {
                     <div 
                        (click)="openModal(item)" 
-                       class="bauhaus-card p-3 md:p-4 flex flex-col h-full animate-pop-in cursor-pointer group hover:bg-white block relative" 
+                       class="group cursor-pointer flex flex-col gap-3 animate-fade-in-up" 
                        [style.animation-delay]="(i % 21 * 30) + 'ms'" 
                      >
-                      <div class="flex justify-between items-start mb-1">
-                        <h3 class="text-base md:text-lg font-black tracking-tight group-hover:text-[#1C39BB] transition-colors pr-4 flex-1">{{ item.title }}</h3>
+                      <!-- Book Cover Placeholder -->
+                      <div class="aspect-[2/3] bg-[#18181b] rounded-lg border border-white/5 group-hover:border-white/20 overflow-hidden relative shadow-lg group-hover:shadow-xl transition-all group-hover:-translate-y-1">
+                        <!-- We don't have real covers, so use a gradient or pattern -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-[#2a2a2e] to-[#18181b] flex items-center justify-center p-4 text-center">
+                           <div class="absolute inset-x-4 top-0 h-[1px] bg-white/10"></div>
+                           <div class="absolute inset-y-0 left-3 w-[2px] bg-black/20 h-full"></div>
+                           <h3 class="font-serif font-bold text-gray-300 text-sm line-clamp-3 leading-snug">{{ item.title }}</h3>
+                        </div>
                         @if(item.journalLevel) {
-                          <span class="px-2 py-0.5 border border-black text-[10px] md:text-xs font-bold shrink-0" [ngClass]="getJournalClass(item.journalLevel)">{{ item.journalLevel }}</span>
+                          <div class="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold rounded shadow-sm" [ngClass]="getJournalClass(item.journalLevel)">
+                            {{ item.journalLevel }}
+                          </div>
                         }
                       </div>
-                      <div class="text-xs text-gray-500 mb-2 font-mono">
-                        @if (item.author) {
-                          <span>{{ item.author }} / {{ item.publisher }}</span>
-                        } @else {
-                          <span>{{ item.publisher }}</span>
-                        }
-                      </div>
-                      <p class="text-sm text-gray-700 mb-3 leading-relaxed font-serif line-clamp-3">{{ item.description }}</p>
-                      <div class="flex flex-wrap gap-1.5 mt-auto border-t-2 border-black/10 pt-2">
-                        @for(tag of item.tags; track tag) {
-                          <span class="bg-gray-100 text-gray-700 px-2 py-0.5 border border-black/20 text-xs font-bold">{{ tag }}</span>
-                        }
+                      
+                      <div>
+                        <h3 class="font-medium text-sm text-gray-200 line-clamp-1 group-hover:text-blue-400 transition-colors">{{ item.title }}</h3>
+                        <p class="text-xs text-gray-500 truncate">{{ item.author || item.publisher }}</p>
                       </div>
                     </div>
                   }
@@ -104,33 +122,29 @@ import pinyin from 'pinyin';
           }
         </div>
         
-        <!-- #-A-Z Scrubber -->
+        <!-- Scrubber -->
         @if (groupedReadings().length > 0) {
           <div 
-            #scrubberContainer 
             class="absolute top-0 right-0 h-full flex items-center py-4 z-20"
           >
-            <!-- Scrubber Bar: Solid White, Black Border, NO Shadow -->
             <div 
-              class="relative bg-white border-2 border-black rounded-full flex flex-col gap-0.5 p-1.5 cursor-pointer select-none touch-none"
+              #scrubber
+              class="relative bg-white/5 rounded-full flex flex-col gap-0.5 p-1 cursor-pointer select-none touch-none shadow-lg backdrop-blur-sm"
               (touchstart)="onScrubStart($event)"
               (touchmove)="onScrubMove($event)"
               (touchend)="onScrubEnd()"
               (mousedown)="onScrubStart($event)"
-              (mousemove)="onScrubMove($event)"
-              (mouseup)="onScrubEnd()"
-              (mouseleave)="onScrubEnd()"
             >
               @for (letter of alphabet; track letter) {
                 <button 
-                  class="w-5 h-5 md:w-6 md:h-6 text-[10px] md:text-xs font-black rounded-full transition-all duration-150 flex items-center justify-center relative z-10"
-                  [class.text-gray-300]="!availableLetters().has(letter)"
+                  class="w-4 h-4 text-[9px] font-bold rounded-full transition-all duration-150 flex items-center justify-center relative z-10"
+                  [class.text-gray-600]="!availableLetters().has(letter)"
                   [class.pointer-events-none]="!availableLetters().has(letter)"
-                  [class.bg-[#1C39BB]]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
-                  [class.text-white]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
-                  [class.scale-110]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
-                  [class.hover:bg-gray-100]="availableLetters().has(letter) && letter !== (isScrubbing() ? scrubbingLetter() : currentLetter())"
-                  [class.text-black]="availableLetters().has(letter) && letter !== (isScrubbing() ? scrubbingLetter() : currentLetter())"
+                  [class.bg-white]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
+                  [class.text-black]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
+                  [class.scale-125]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
+                  [class.hover:text-white]="availableLetters().has(letter) && letter !== (isScrubbing() ? scrubbingLetter() : currentLetter())"
+                  [class.text-gray-400]="availableLetters().has(letter) && letter !== (isScrubbing() ? scrubbingLetter() : currentLetter())"
                   (click)="scrollToLetter(letter)"
                 >
                   {{ letter }}
@@ -145,239 +159,219 @@ import pinyin from 'pinyin';
       @if (selectedReading(); as item) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            [class.animate-backdrop-in]="!isClosing()"
-            [class.animate-backdrop-out]="isClosing()"
+            class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
+            [class.opacity-0]="isClosing()"
             (click)="closeModal()"
           ></div>
+          
           <div 
-            class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-lg max-h-[90vh] flex flex-col relative z-10 overflow-hidden"
-            [class.animate-modal-pop-in]="!isClosing()"
-            [class.animate-modal-pop-out]="isClosing()"
+            class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex overflow-hidden relative z-10 transition-all duration-300"
+            [class.scale-95]="isClosing()"
+            [class.opacity-0]="isClosing()"
           >
-             
-            <!-- Modal Header -->
-            <div class="flex justify-between items-start p-4 border-b-4 border-black bg-gray-50">
-               <h3 class="text-xl md:text-2xl font-black pr-4 leading-tight">{{ item.title }}</h3>
-            </div>
- 
-            <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto custom-scrollbar">
-               <!-- Basic Info Table -->
-               <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 mb-6 text-sm">
-                  @if (item.author) {
-                    <span class="font-bold text-gray-500 text-right">作者:</span>
-                    <span class="font-bold">{{ item.author }}</span>
-                  }
-                   
-                  <span class="font-bold text-gray-500 text-right">出版社/单位:</span>
-                  <span class="font-bold">{{ item.publisher }}</span>
-                   
-                  @if (item.tags.includes('期刊')) {
-                    <span class="font-bold text-gray-500 text-right">刊号:</span>
-                  } @else {
-                    <span class="font-bold text-gray-500 text-right">ISBN:</span>
-                  }
-                  <span class="font-mono" [class.text-gray-400]="!item.identifier">{{ item.identifier || '(暂无)' }}</span>
-                   
-                  @if(item.journalLevel) {
-                     <span class="font-bold text-gray-500 text-right">期刊等级:</span>
-                     <span class="px-2 py-0.5 border border-black text-xs font-bold inline-block w-fit" [ngClass]="getJournalClass(item.journalLevel)">{{ item.journalLevel }}</span>
-                  }
- 
-                  <span class="font-bold text-gray-500 text-right">标签:</span>
-                  <div class="flex flex-wrap gap-1">
-                    @for(t of item.tags; track $index) {
-                        <span class="bg-gray-100 text-gray-700 px-2 py-0.5 border border-black/20 text-xs font-bold">{{ t }}</span>
-                    }
+            <button (click)="closeModal()" class="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 hover:bg-white/20 text-white transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <!-- Layout: Image Left, Content Right -->
+            <div class="flex flex-col md:flex-row w-full h-full">
+               
+               <!-- Left: Cover Image Area -->
+               <div class="w-full md:w-2/5 bg-[#0f0f11] flex items-center justify-center p-8 relative overflow-hidden shrink-0">
+                  <!-- Abstract background pattern -->
+                  <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
+                  
+                  <!-- Book Cover Mockup -->
+                  <div class="relative w-48 aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col p-6 text-center justify-center transform transition-transform hover:scale-105 duration-500">
+                     <div class="absolute inset-y-0 left-2 w-[1px] bg-white/5"></div>
+                     <h2 class="font-serif font-bold text-gray-200 text-xl leading-tight mb-2">{{ item.title }}</h2>
+                     <p class="text-xs text-gray-500 uppercase tracking-widest">{{ item.author }}</p>
                   </div>
                </div>
- 
-               <!-- Description -->
-               <div class="prose prose-sm max-w-none border-t-2 border-black/10 pt-4">
-                  <h4 class="font-black text-lg mb-2">内容简介</h4>
-                  <p class="mb-4 font-serif leading-relaxed text-base">{{ item.description }}</p>
-                  <div class="bg-gray-50 border-l-4 border-gray-300 p-3">
-                     <p class="text-gray-400 italic text-xs leading-relaxed">
-                       [此处为更详细的读物内容简介占位符。未来版本将包含该书目的详细目录、核心观点摘要以及学术评价等深度内容。]
-                     </p>
+
+               <!-- Right: Content -->
+               <div class="flex-1 p-8 overflow-y-auto custom-scrollbar flex flex-col">
+                  <h2 class="text-3xl font-bold text-white leading-tight mb-2">{{ item.title }}</h2>
+                  <p class="text-lg text-gray-400 font-medium mb-6">{{ item.author || item.publisher }}</p>
+                  
+                  <div class="space-y-6 flex-1">
+                    <div>
+                      <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">内容简介</h4>
+                      <p class="text-sm text-gray-300 leading-relaxed font-serif">
+                        {{ item.description }}
+                      </p>
+                      @if (!item.description || item.description.length < 50) {
+                         <p class="text-xs text-gray-600 italic mt-2">
+                           [此读物的详细介绍将在未来版本中更新。]
+                         </p>
+                      }
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6 pt-6 border-t border-white/10">
+                       <div>
+                          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">出版社</label>
+                          <span class="text-sm text-white font-medium">{{ item.publisher }}</span>
+                       </div>
+                       <div>
+                          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">ISBN</label>
+                          <span class="text-sm text-white font-mono">{{ item.identifier || '暂无' }}</span>
+                       </div>
+                       <div>
+                          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">分类</label>
+                          <div class="flex flex-wrap gap-1 mt-1">
+                            @for(t of item.tags; track $index) {
+                                <span class="text-xs text-gray-400 bg-white/5 px-2 py-0.5 rounded">{{ t }}</span>
+                            }
+                          </div>
+                       </div>
+                       @if(item.journalLevel) {
+                         <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">等级</label>
+                            <span class="px-2 py-0.5 text-xs font-bold rounded" [ngClass]="getJournalClass(item.journalLevel)">{{ item.journalLevel }}</span>
+                         </div>
+                       }
+                    </div>
                   </div>
+
+                  <div class="flex gap-4 mt-8 pt-6 border-t border-white/10">
+                    <a [href]="getSearchUrl(item)" target="_blank" class="flex-1 bg-white text-black hover:bg-gray-200 transition-colors py-3 rounded-lg font-bold flex items-center justify-center gap-2">
+                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                       <span>在线搜索</span>
+                    </a>
+                    <button class="p-3 rounded-lg border border-white/10 text-white hover:bg-white/10 transition-colors" title="分享">
+                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                    </button>
+                  </div>
+
                </div>
             </div>
- 
-            <!-- Modal Footer -->
-              <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end gap-3">
-                 <a [href]="getSearchUrl(item)" target="_blank" rel="noopener noreferrer" class="bauhaus-btn bauhaus-btn-accent px-4 py-1.5 text-sm">
-                   在线搜索
-                 </a>
-                 <button (click)="closeModal()" class="bauhaus-btn bg-white px-4 py-1.5 text-sm hover:bg-black hover:text-white">关闭</button>
-              </div>
           </div>
         </div>
       }
 
-      <!-- E-Resource Access Modals -->
+      <!-- E-Resource Access Modals (Dark Mode) -->
       @if (eResourceFlowStep() !== 'closed') {
         <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeEResourceFlow()"></div>
+          <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="closeEResourceFlow()"></div>
           
-          @switch(eResourceFlowStep()) {
-            @case('verification') {
-              <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-md flex flex-col relative z-10 animate-modal-pop-in">
-                <h3 class="font-black text-xl text-center p-4 border-b-4 border-black bg-gray-50">信息核验</h3>
-                <div class="p-6 flex flex-col gap-4">
-                  <div>
-                    <label class="font-bold text-sm text-gray-600">学校</label>
-                    <input [(ngModel)]="verificationForm().school" type="text" placeholder="请输入学校全称" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
-                  </div>
-                  <div>
-                    <label class="font-bold text-sm text-gray-600">学院</label>
-                    <input [(ngModel)]="verificationForm().college" type="text" placeholder="请输入学院全称" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
-                  </div>
-                  <div>
-                    <label class="font-bold text-sm text-gray-600">专业</label>
-                    <input [(ngModel)]="verificationForm().major" type="text" placeholder="请输入专业全称" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
-                  </div>
-                  <div>
-                    <label class="font-bold text-sm text-gray-600">学号</label>
-                    <input [(ngModel)]="verificationForm().studentId" type="text" placeholder="请输入11位学号" class="mt-1 w-full border-2 border-black p-2 font-medium focus:outline-none focus:bg-yellow-50">
-                  </div>
+          <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-md flex flex-col relative z-10 animate-fade-in-up overflow-hidden">
+             
+             <!-- Modal Header -->
+             <div class="p-5 border-b border-white/10 bg-[#202024]">
+               <h3 class="font-bold text-lg text-white text-center">
+                 @switch(eResourceFlowStep()) {
+                   @case('verification') { 学生身份验证 }
+                   @case('declaration') { 资源使用声明 }
+                   @case('resources') { 获取电子资源 }
+                 }
+               </h3>
+             </div>
 
-                  @if (verificationStatus() !== 'idle' && verificationMessage()) {
-                    <div class="text-center font-bold p-2 border-2" 
-                      [class.text-green-700]="verificationStatus() === 'success'"
-                      [class.bg-green-100]="verificationStatus() === 'success'"
-                      [class.border-green-700]="verificationStatus() === 'success'"
-                      [class.text-red-700]="verificationStatus() === 'error'"
-                      [class.bg-red-100]="verificationStatus() === 'error'"
-                      [class.border-red-700]="verificationStatus() === 'error'"
-                    >
-                       {{ verificationMessage() }}
+             <!-- Content -->
+             <div class="p-6">
+                @switch(eResourceFlowStep()) {
+                  @case('verification') {
+                    <div class="flex flex-col gap-4">
+                      <div>
+                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">学校</label>
+                        <input [(ngModel)]="verificationForm().school" type="text" placeholder="请输入学校全称" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                      </div>
+                      <div>
+                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">学院</label>
+                        <input [(ngModel)]="verificationForm().college" type="text" placeholder="请输入学院全称" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                      </div>
+                      <div>
+                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">专业</label>
+                        <input [(ngModel)]="verificationForm().major" type="text" placeholder="请输入专业全称" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                      </div>
+                      <div>
+                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">学号</label>
+                        <input [(ngModel)]="verificationForm().studentId" type="text" placeholder="请输入11位学号" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                      </div>
+
+                      @if (verificationStatus() !== 'idle' && verificationMessage()) {
+                        <div class="text-center text-sm font-medium p-2 rounded bg-white/5 border" 
+                          [class.text-green-400]="verificationStatus() === 'success'"
+                          [class.border-green-500/30]="verificationStatus() === 'success'"
+                          [class.text-red-400]="verificationStatus() === 'error'"
+                          [class.border-red-500/30]="verificationStatus() === 'error'"
+                        >
+                           {{ verificationMessage() }}
+                        </div>
+                      }
                     </div>
                   }
-                </div>
-                <div class="p-4 border-t-4 border-black bg-gray-50 flex gap-3">
-                  <button (click)="closeEResourceFlow()" class="bauhaus-btn bg-white px-4 py-2 text-sm flex-1">取消</button>
-                  <button (click)="handleVerification()" class="bauhaus-btn bauhaus-btn-primary px-4 py-2 text-sm flex-1">
-                    @if(verificationStatus() === 'verifying') {
-                      <span>核验中...</span>
-                    } @else {
-                      <span>核验</span>
-                    }
-                  </button>
-                </div>
-              </div>
-            }
-            @case('declaration') {
-              <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-lg flex flex-col relative z-10 animate-modal-pop-in">
-                <h3 class="font-black text-xl text-center p-4 border-b-4 border-black bg-gray-50">资源使用声明与承诺</h3>
-                <div class="p-6 overflow-y-auto text-sm space-y-4 leading-relaxed max-h-[60vh]">
-                  <p><strong class="font-bold text-base">本人确认：</strong><br>本人为宁夏大学建筑学院{{ verificationForm().major }}专业学生，学号 {{ verificationForm().studentId }}。</p>
-                  <p><strong class="font-bold text-base">本人已知晓：</strong><br>本应用所提供的电子读物资源仅限宁夏大学建筑学院校内教学与学习使用，不具备对外传播、商业使用或二次分发授权。</p>
-                  <p><strong class="font-bold text-base">本人承诺：</strong><br>不对上述电子资源进行传播、转卖、公开分享或任何形式的非法使用。</p>
-                  <p>若因本人违反上述约定而产生任何版权纠纷或法律责任，均由本人自行承担，与平台及资源整理方无关。</p>
-                </div>
-                <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
-                  <button (click)="goToResourcesStep()" [disabled]="declarationCountdown() > 0" class="bauhaus-btn bauhaus-btn-primary px-6 py-2" [class.opacity-50]="declarationCountdown() > 0" [class.cursor-not-allowed]="declarationCountdown() > 0">
-                    @if (declarationCountdown() > 0) {
-                      <span>确认并继续 ({{declarationCountdown()}})</span>
-                    } @else {
-                      <span>确认并继续</span>
-                    }
-                  </button>
-                </div>
-              </div>
-            }
-            @case('resources') {
-              <div class="bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] w-full max-w-md flex flex-col relative z-10 animate-modal-pop-in">
-                <h3 class="font-black text-xl text-center p-4 border-b-4 border-black bg-gray-50">电子资源获取方式</h3>
-                <div class="p-6">
-                  <div class="bg-gray-100 p-4 border-2 border-dashed border-black text-sm font-mono whitespace-pre-wrap leading-relaxed break-all">
-                    {{ resourceLinkText() }}
-                  </div>
-                </div>
-                <div class="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
-                  <button (click)="copyResourceInfo()" class="bauhaus-btn bauhaus-btn-accent px-6 py-2">{{ copyButtonText() }}</button>
-                </div>
-              </div>
-            }
-          }
+                  @case('declaration') {
+                    <div class="text-sm text-gray-300 space-y-4 leading-relaxed max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+                      <p><strong class="text-white">本人确认：</strong><br>本人为宁夏大学建筑学院{{ verificationForm().major }}专业学生，学号 {{ verificationForm().studentId }}。</p>
+                      <p><strong class="text-white">本人已知晓：</strong><br>本应用所提供的电子读物资源仅限宁夏大学建筑学院校内教学与学习使用，不具备对外传播、商业使用或二次分发授权。</p>
+                      <p><strong class="text-white">本人承诺：</strong><br>不对上述电子资源进行传播、转卖、公开分享或任何形式的非法使用。</p>
+                      <p>若因本人违反上述约定而产生任何版权纠纷或法律责任，均由本人自行承担，与平台及资源整理方无关。</p>
+                    </div>
+                  }
+                  @case('resources') {
+                    <div class="bg-[#0f0f11] p-4 rounded border border-white/10 text-sm font-mono text-gray-300 break-all whitespace-pre-wrap">
+                      {{ resourceLinkText() }}
+                    </div>
+                  }
+                }
+             </div>
+
+             <!-- Footer -->
+             <div class="p-5 border-t border-white/10 bg-[#202024] flex gap-3 justify-end">
+                @switch(eResourceFlowStep()) {
+                  @case('verification') {
+                    <button (click)="closeEResourceFlow()" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">取消</button>
+                    <button (click)="handleVerification()" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-200 transition-colors">
+                      {{ verificationStatus() === 'verifying' ? '核验中...' : '核验' }}
+                    </button>
+                  }
+                  @case('declaration') {
+                    <button (click)="goToResourcesStep()" [disabled]="declarationCountdown() > 0" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                      {{ declarationCountdown() > 0 ? '请等待 ' + declarationCountdown() + 's' : '确认并继续' }}
+                    </button>
+                  }
+                  @case('resources') {
+                    <button (click)="copyResourceInfo()" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-200 transition-colors">{{ copyButtonText() }}</button>
+                  }
+                }
+             </div>
+          </div>
         </div>
       }
-
     </div>
   `,
   styles: [`
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
     .custom-scrollbar::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
+      width: 6px;
+      height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
       background: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: black;
-      border-radius: 4px;
-      border: 2px solid #f8f7f5;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #1C39BB;
+      background: rgba(255, 255, 255, 0.3);
     }
-    /* Hidden scrollbar but still scrollable */
-    .custom-scrollbar-hidden::-webkit-scrollbar {
-      display: none;
+    .mask-gradient {
+      mask-image: linear-gradient(to right, black 85%, transparent 100%);
     }
-    .custom-scrollbar-hidden {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .animate-fade-in-up {
+      animation: fadeInUp 0.4s ease-out backwards;
     }
-
-    @keyframes backdrop-in {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes modal-pop-in {
-      from { 
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-      }
-      to { 
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    .animate-backdrop-in {
-      animation: backdrop-in 0.2s ease-out forwards;
-    }
-
-    .animate-modal-pop-in {
-      animation: modal-pop-in 0.25s ease-out forwards;
-    }
-
-    @keyframes backdrop-out {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-
-    @keyframes modal-pop-out {
-      from { 
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      to { 
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-      }
-    }
-
-    .animate-backdrop-out {
-      animation: backdrop-out 0.2s ease-in forwards;
-    }
-
-    .animate-modal-pop-out {
-      animation: modal-pop-out 0.2s ease-in forwards;
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
@@ -388,389 +382,314 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   selectedReading = signal<Reading | null>(null);
   isClosing = signal(false);
 
-  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('scrubberContainer') scrubberContainer!: ElementRef<HTMLDivElement>;
-
-  alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  
-  // Scrubber State
-  isScrubbing = signal(false);
-  scrubbingLetter = signal('');
-  scrubbingPosition = signal(0);
-  currentLetter = signal('');
-
-  private letterElements: Map<string, HTMLElement> = new Map();
-  private unlisteners: (() => void)[] = [];
-
   // E-Resource Flow State
   eResourceFlowStep = signal<'closed' | 'verification' | 'declaration' | 'resources'>('closed');
   verificationForm = signal({ school: '', college: '', major: '', studentId: '' });
   verificationStatus = signal<'idle' | 'verifying' | 'success' | 'error'>('idle');
   verificationMessage = signal('');
-  declarationCountdown = signal(5);
+  declarationCountdown = signal(0);
+  copyButtonText = signal('Copy Info');
   private countdownInterval: any;
-  copyButtonText = signal('一键复制');
-  resourceLinkText = signal('');
 
-  // --------------------------------------------------------------------------------
-  // Obfuscated Secrets (Using Character Code Arrays for "Encryption")
-  // --------------------------------------------------------------------------------
-   
-  // 
-  private readonly SECRET_SCHOOL = [23425, 22799, 22823, 23398];
-   
-  // 
-  private readonly SECRET_COLLEGE = [24314, 31569, 23398, 38498];
-   
-  // Majors
-  private readonly SECRET_MAJORS = [
-    [24314, 31569, 23398], 
-    [22478, 20061, 35268, 21010], 
-    [24314, 31569]
-  ];
-   
-  // 
-  private readonly SECRET_PREFIX = [49, 50, 48];
-
-  // Resource Link Parts
-  // Part 1
-  private readonly LINK_PART_1 = [36890, 36807, 30334, 24230, 32593, 30424, 20998, 20139, 30340, 25991, 20214, 65306, 49, 24314, 31569, 31867, 30005, 23376, 20070, 32, 10];
-   
-  // Part 2
-  private readonly LINK_PART_2 = [104, 116, 116, 112, 115, 58, 47, 47, 112, 97, 110, 46, 98, 97, 105, 100, 117, 46, 99, 111, 109, 47, 115, 47, 49, 99, 119, 80, 108, 52, 75, 86, 54, 85, 105, 105, 71, 120, 109, 52, 55, 81, 48, 68, 121, 76, 119];
-   
-  // Part 3
-  private readonly LINK_PART_3 = [32, 10, 25552, 21462, 30721, 58, 98, 111, 111, 107, 32, 10, 22797, 21046, 36825, 27573, 20869, 23481, 25171, 24320, 12300, 30334, 24230, 32593, 30424, 65, 80, 80, 32, 21363, 21487, 33719, 21462, 12301];
-
-  // get all tags from readings
-  allTags = computed(() => {
-    const tags = new Set<string>();
+  // Scrubber State
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('scrubber') scrubber!: ElementRef<HTMLElement>;
+  alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  currentLetter = signal('#');
+  isScrubbing = signal(false);
+  scrubbingLetter = signal('#');
+  
+  // Cache available letters for visual feedback
+  availableLetters = computed(() => {
+    const letters = new Set<string>();
     this.dataService.readings().forEach(r => {
-      r.tags.forEach(t => tags.add(t));
+      const pinyinResult = pinyin(r.title, { style: pinyin.STYLE_FIRST_LETTER })[0][0];
+      const firstChar = pinyinResult.charAt(0).toUpperCase();
+      const letter = /^[A-Z]/.test(firstChar) ? firstChar : '#';
+      letters.add(letter);
     });
-    return Array.from(tags).sort((a, b) => a.localeCompare(b));
+    return letters;
   });
 
-  ngOnDestroy(): void {
-    this.unlisteners.forEach(unlisten => unlisten());
-    clearInterval(this.countdownInterval);
-  }
+  allTags = computed(() => {
+    const tags = new Set<string>();
+    this.dataService.readings().forEach(r => r.tags.forEach(t => tags.add(t)));
+    return Array.from(tags).sort();
+  });
 
-  // Security Helper: Decodes Character Code Arrays
-  private decodeCodes(codes: number[]): string {
-    return String.fromCharCode(...codes);
-  }
-
-  startEResourceFlow() {
-    this.eResourceFlowStep.set('verification');
-    this.verificationForm.set({ school: '', college: '', major: '', studentId: '' });
-    this.verificationStatus.set('idle');
-    this.verificationMessage.set('');
-  }
-
-  closeEResourceFlow() {
-    this.eResourceFlowStep.set('closed');
-    clearInterval(this.countdownInterval);
-  }
-  
-  handleVerification() {
-    this.verificationStatus.set('verifying');
-    this.verificationMessage.set('');
-
-    setTimeout(() => {
-      const form = this.verificationForm();
-      const schoolTarget = this.decodeCodes(this.SECRET_SCHOOL);
-      const collegeTarget = this.decodeCodes(this.SECRET_COLLEGE);
-      const majorsTarget = this.SECRET_MAJORS.map(m => this.decodeCodes(m));
-      const prefixTarget = this.decodeCodes(this.SECRET_PREFIX);
-
-      const isSchoolValid = form.school.trim() === schoolTarget;
-      const isCollegeValid = form.college.trim() === collegeTarget;
-      const isMajorValid = majorsTarget.includes(form.major.trim());
-      
-      const idInput = form.studentId.trim();
-      const isStudentIdValid = idInput.length === 11 && 
-                               idInput.startsWith(prefixTarget) && 
-                               /^\d+$/.test(idInput);
-
-      if (isSchoolValid && isCollegeValid && isMajorValid && isStudentIdValid) {
-        this.verificationStatus.set('success');
-        this.verificationMessage.set('条件匹配成功');
-        setTimeout(() => this.goToDeclarationStep(), 1500);
-      } else {
-        this.verificationStatus.set('error');
-        this.verificationMessage.set('条件不匹配，无法获取资源');
-      }
-    }, 500);
-  }
-
-  goToDeclarationStep() {
-    this.eResourceFlowStep.set('declaration');
-    this.startDeclarationCountdown();
-  }
-
-  startDeclarationCountdown() {
-    this.declarationCountdown.set(5);
-    clearInterval(this.countdownInterval);
-    this.countdownInterval = setInterval(() => {
-      this.declarationCountdown.update(v => v - 1);
-      if (this.declarationCountdown() <= 0) {
-        clearInterval(this.countdownInterval);
-      }
-    }, 1000);
-  }
-
-  goToResourcesStep() {
-    // Dynamically assemble the resource link ONLY when needed
-    const fullText = this.decodeCodes(this.LINK_PART_1) + 
-                     this.decodeCodes(this.LINK_PART_2) + 
-                     this.decodeCodes(this.LINK_PART_3);
-    this.resourceLinkText.set(fullText);
-    this.eResourceFlowStep.set('resources');
-  }
-
-  copyResourceInfo() {
-    navigator.clipboard.writeText(this.resourceLinkText()).then(() => {
-      this.copyButtonText.set('已复制!');
-      setTimeout(() => this.copyButtonText.set('一键复制'), 2000);
+  filteredReadings = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    const tag = this.selectedTag();
+    return this.dataService.readings().filter(r => {
+      const matchSearch = !q || r.title.toLowerCase().includes(q) || r.author.toLowerCase().includes(q) || r.publisher.toLowerCase().includes(q);
+      const matchTag = tag === 'all' || r.tags.includes(tag);
+      return matchSearch && matchTag;
     });
+  });
+
+  groupedReadings = computed(() => {
+    const groups: { letter: string, readings: Reading[] }[] = [];
+    const map = new Map<string, Reading[]>();
+    
+    this.filteredReadings().forEach(r => {
+      const pinyinResult = pinyin(r.title, { style: pinyin.STYLE_FIRST_LETTER })[0][0];
+      const firstChar = pinyinResult.charAt(0).toUpperCase();
+      const letter = /^[A-Z]/.test(firstChar) ? firstChar : '#';
+      if (!map.has(letter)) map.set(letter, []);
+      map.get(letter)!.push(r);
+    });
+
+    // Sort letters: # at end or beginning? Usually # is at end or beginning. 
+    // Let's put # at the beginning as "0-9/Symbols"
+    const sortedKeys = Array.from(map.keys()).sort((a, b) => {
+      if (a === '#') return -1;
+      if (b === '#') return 1;
+      return a.localeCompare(b);
+    });
+
+    sortedKeys.forEach(key => {
+      groups.push({ letter: key, readings: map.get(key)! });
+    });
+
+    return groups;
+  });
+
+  ngAfterViewInit() {
+    // Scroll listener is attached in template
+  }
+
+  ngOnDestroy() {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+  }
+
+  selectTag(tag: string) {
+    this.selectedTag.set(tag);
+    if (this.scrollContainer) {
+      this.scrollContainer.nativeElement.scrollTo({ top: 0, behavior: 'auto' });
+    }
   }
 
   openModal(item: Reading) {
+    this.isClosing.set(false);
     this.selectedReading.set(item);
   }
-
-  // Helper for Journal Colors
-  getJournalClass(level: string | null): string {
-    if (!level) return '';
-    const l = level.toUpperCase();
-    if (l === 'T1') return 'bg-red-500 text-white';
-    if (l === 'T2') return 'bg-orange-500 text-white';
-    if (l === 'T3') return 'bg-yellow-400 text-black'; // Yellow usually needs dark text
-    return 'bg-red-500 text-white'; // Default
-  }
-
-  getSearchUrl(item: Reading): string {
-        let searchTitle = item.title;
-        // Special handling for titles with both English and Chinese names
-        if (item.title === 'Architecture & Detail（建筑细部）') {
-          searchTitle = '建筑细部';
-        } else if (item.title === 'ArchiCreation（建筑创作）') {
-          searchTitle = '建筑创作';
-        } else if (item.title === 'a+u（建筑与都市）') {
-          searchTitle = 'a+u';
-        }
-        
-        const title = encodeURIComponent(searchTitle);
-        if (item.tags && item.tags.includes('期刊')) {
-          return `https://www.zazhi.com.cn/s.html?t=&q=${title}`;
-        } else {
-          return `https://search.douban.com/book/subject_search?search_text=${title}`;
-        }
-      }
 
   closeModal() {
     this.isClosing.set(true);
     setTimeout(() => {
       this.selectedReading.set(null);
       this.isClosing.set(false);
-    }, 200); // Animation duration
+    }, 300);
   }
 
-  selectTag(tag: string) {
-    this.selectedTag.set(tag);
-    if (this.scrollContainer?.nativeElement) {
-      this.scrollContainer.nativeElement.scrollTop = 0;
-    }
+  getJournalClass(level: string) {
+    if (level.includes('T1')) return 'bg-red-500/20 text-red-300 border border-red-500/30 backdrop-blur-sm';
+    if (level.includes('T2')) return 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 backdrop-blur-sm';
+    if (level.includes('T3')) return 'bg-blue-500/20 text-blue-300 border border-blue-500/30 backdrop-blur-sm';
+    
+    // Existing logic as fallback
+    if (level.includes('SCI') || level.includes('SSCI') || level.includes('AHCI')) return 'bg-red-100 text-red-800 border-red-200';
+    if (level.includes('CSCD') || level.includes('CSSCI')) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    if (level.includes('北大核心')) return 'bg-blue-100 text-blue-800 border-blue-200';
+    return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 
-  // Basic filtered list (flat)
-  filteredReadings = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    const tag = this.selectedTag();
-
-    let readings = this.dataService.readings();
-
-    if (tag !== 'all') {
-      readings = readings.filter(r => r.tags.includes(tag));
-    }
-
-    if (query) {
-      readings = readings.filter(r => 
-        r.title.toLowerCase().includes(query) ||
-        r.author.toLowerCase().includes(query) ||
-        r.publisher.toLowerCase().includes(query) ||
-        r.description.toLowerCase().includes(query)
-      );
-    }
-    return readings;
-  });
-
-  // Grouped by First Letter
-  groupedReadings = computed(() => {
-    const readings = this.filteredReadings();
-    const groups = new Map<string, any[]>();
-
-    readings.forEach(item => {
-      let firstChar = item.title.charAt(0);
-      
-      // Try to get pinyin for Chinese characters
-      const pinyinResult = pinyin(firstChar, {
-        style: pinyin.STYLE_FIRST_LETTER,
-        heteronym: false
-      });
-      
-      let letter = '#';
-      if (pinyinResult && pinyinResult[0] && pinyinResult[0][0]) {
-        letter = pinyinResult[0][0].toUpperCase();
-      } else if (/[a-zA-Z]/.test(firstChar)) {
-        letter = firstChar.toUpperCase();
-      }
-
-      if (!/[A-Z]/.test(letter)) {
-        letter = '#';
-      }
-
-      if (!groups.has(letter)) {
-        groups.set(letter, []);
-      }
-      groups.get(letter)!.push(item);
-    });
-
-    // Sort groups
-    const sortedGroups = Array.from(groups.keys()).sort((a, b) => {
-      if (a === '#') return -1;
-      if (b === '#') return 1;
-      return a.localeCompare(b);
-    }).map(letter => ({
-      letter,
-      readings: groups.get(letter)!.sort((a, b) => a.title.localeCompare(b.title, 'zh'))
-    }));
-
-    return sortedGroups;
-  });
-
-  // Available letters for the scrubber
-  availableLetters = computed(() => {
-    const set = new Set<string>();
-    this.groupedReadings().forEach(g => set.add(g.letter));
-    return set;
-  });
-
-  ngAfterViewInit() {
-    this.onScroll(); // Init current letter
+  getSearchUrl(item: Reading) {
+    return `https://www.google.com/search?q=${encodeURIComponent(item.title + ' ' + item.author)}`;
   }
 
-  // --- Interaction Logic ---
-
+  // --- Scrubber Logic ---
   onScroll() {
-    if (this.isScrubbing()) return; // Don't update while scrubbing
+    if (this.isScrubbing()) return;
 
     const container = this.scrollContainer.nativeElement;
-    const anchors = container.querySelectorAll('.letter-anchor');
-    
-    // Use getBoundingClientRect for accurate position checking relative to the viewport
     const containerRect = container.getBoundingClientRect();
-    // The threshold is slightly below the top of the container to trigger the switch
-    // just as the header comes into view or sticks.
-    const threshold = containerRect.top + 100; 
-    
-    let current = '';
-    
-    // Iterate through all anchors to find the last one that is "above" or at the threshold
-    anchors.forEach((anchor: any) => {
-      const anchorRect = anchor.getBoundingClientRect();
-      if (anchorRect.top <= threshold) {
-        current = anchor.getAttribute('data-letter') || '';
+    const anchors = container.querySelectorAll('.letter-anchor');
+    let current = '#';
+
+    // Find the last anchor that is above the threshold
+    for (let i = 0; i < anchors.length; i++) {
+      const anchor = anchors[i] as HTMLElement;
+      const rect = anchor.getBoundingClientRect();
+      const relativeTop = rect.top - containerRect.top;
+
+      // If the anchor is above or near the top (within 150px)
+      if (relativeTop <= 150) {
+        current = anchor.getAttribute('data-letter') || '#';
+      } else {
+        break;
       }
-    });
-
-    if (current && current !== this.currentLetter()) {
-      this.currentLetter.set(current);
     }
+    this.currentLetter.set(current);
   }
 
-  scrollToLetter(letter: string, behavior: ScrollBehavior = 'auto') {
-    if (!this.availableLetters().has(letter)) return;
-    
-    this.currentLetter.set(letter);
+  scrollToLetter(letter: string, behavior: ScrollBehavior = 'smooth') {
     const container = this.scrollContainer.nativeElement;
-    const anchor = container.querySelector(`[data-letter="${letter}"]`) as HTMLElement;
-    
+    const anchor = container.querySelector(`.letter-anchor[data-letter="${letter}"]`) as HTMLElement;
     if (anchor) {
-      const anchorRect = anchor.getBoundingClientRect();
+      // Calculate offset relative to container
       const containerRect = container.getBoundingClientRect();
-      const scrollTop = container.scrollTop + (anchorRect.top - containerRect.top);
-
-      container.scrollTo({
-        top: scrollTop,
-        behavior: behavior
-      });
+      const anchorRect = anchor.getBoundingClientRect();
+      const relativeTop = anchorRect.top - containerRect.top + container.scrollTop;
+      
+      container.scrollTo({ top: relativeTop, behavior });
+      this.currentLetter.set(letter);
     }
   }
 
-  // --- Scrubber Event Handlers ---
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent) {
+    if (this.isScrubbing()) {
+      this.handleScrub(event);
+      event.preventDefault();
+    }
+  }
+
+  @HostListener('document:mouseup')
+  onDocumentMouseUp() {
+    if (this.isScrubbing()) {
+      this.onScrubEnd();
+    }
+  }
 
   onScrubStart(event: MouseEvent | TouchEvent) {
-    event.preventDefault();
     this.isScrubbing.set(true);
     this.handleScrub(event);
+    event.preventDefault(); // Prevent text selection/scroll
   }
 
   onScrubMove(event: MouseEvent | TouchEvent) {
     if (this.isScrubbing()) {
-      event.preventDefault(); // Prevent page scroll
       this.handleScrub(event);
+      event.preventDefault();
     }
   }
 
   onScrubEnd() {
     this.isScrubbing.set(false);
+    // Final snap to the letter we ended on
+    if (this.availableLetters().has(this.scrubbingLetter())) {
+        this.scrollToLetter(this.scrubbingLetter(), 'smooth');
+    }
   }
 
-  handleScrub(event: MouseEvent | TouchEvent) {
+  private handleScrub(event: MouseEvent | TouchEvent) {
     const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
     
-    // Get scrubber dimensions
-    const scrubber = this.scrubberContainer.nativeElement.querySelector('div'); // Inner div
-    if (!scrubber) return;
-
-    const rect = scrubber.getBoundingClientRect();
-    const localY = clientY - rect.top;
+    if (!this.scrubber) return;
+    const rect = this.scrubber.nativeElement.getBoundingClientRect();
+    const offsetY = clientY - rect.top;
     
-    // Calculate relative position (0 to 1)
-    let percentage = (clientY - rect.top) / rect.height;
-    percentage = Math.max(0, Math.min(1, percentage));
-    
-    // Find closest letter index
+    // Calculate index based on height percentage
+    const percentage = Math.max(0, Math.min(1, offsetY / rect.height));
     const index = Math.floor(percentage * this.alphabet.length);
-    let letterIndex = Math.min(index, this.alphabet.length - 1);
-
-    // Find this letter or next available letter
-    let targetLetter = '';
+    const safeIndex = Math.min(this.alphabet.length - 1, Math.max(0, index));
     
-    // 1. Try finding forward (inclusive)
-    for (let i = letterIndex; i < this.alphabet.length; i++) {
-        if (this.availableLetters().has(this.alphabet[i])) {
-            targetLetter = this.alphabet[i];
-            break;
-        }
+    const letter = this.alphabet[safeIndex];
+    
+    // Always update scrubbing letter for feedback
+    this.scrubbingLetter.set(letter);
+
+    // Try to find exact match first
+    if (this.availableLetters().has(letter)) {
+       this.scrollToLetter(letter, 'auto');
+    } else {
+       // If exact match not found, find nearest previous letter
+       const available = Array.from(this.availableLetters());
+       // Find the closest letter that is before the current one
+       // Sort available letters first just in case
+       const sorted = available.sort((a, b) => {
+          if (a === '#') return -1;
+          if (b === '#') return 1;
+          return a.localeCompare(b);
+       });
+       
+       // Find the letter that is closest but before or at current index
+       // Since 'letter' is not in available, we look for one before it
+       let target = '#';
+       for (const l of sorted) {
+          if (l === letter) break; // Should not happen as we checked has()
+          if (this.compareLetters(l, letter) < 0) {
+             target = l;
+          } else {
+             break;
+          }
+       }
+       this.scrollToLetter(target, 'auto');
+    }
+  }
+
+  private compareLetters(a: string, b: string): number {
+    if (a === b) return 0;
+    if (a === '#') return -1;
+    if (b === '#') return 1;
+    return a.localeCompare(b);
+  }
+
+  // --- E-Resource Flow ---
+  startEResourceFlow() {
+    this.eResourceFlowStep.set('verification');
+    this.verificationStatus.set('idle');
+    this.verificationMessage.set('');
+    this.verificationForm.set({ school: '', college: '', major: '', studentId: '' });
+  }
+
+  closeEResourceFlow() {
+    this.eResourceFlowStep.set('closed');
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+  }
+
+  handleVerification() {
+    const { school, college, major, studentId } = this.verificationForm();
+    if (!school || !college || !major || !studentId) {
+      this.verificationStatus.set('error');
+      this.verificationMessage.set('Please fill in all fields.');
+      return;
     }
     
-    // 2. If no forward letter found (e.g. dragged past Z but Z is empty), try backward
-    if (!targetLetter) {
-        for (let i = letterIndex - 1; i >= 0; i--) {
-            if (this.availableLetters().has(this.alphabet[i])) {
-                targetLetter = this.alphabet[i];
-                break;
-            }
-        }
+    // Simple mock verification logic
+    if (studentId.length !== 11) {
+       this.verificationStatus.set('error');
+       this.verificationMessage.set('Student ID must be 11 digits.');
+       return;
     }
 
-    if (targetLetter) {
-         this.scrollToLetter(targetLetter, 'auto'); 
-         this.scrubbingLetter.set(targetLetter); 
-         this.scrubbingPosition.set(localY - 32); 
-    }
+    this.verificationStatus.set('verifying');
+    setTimeout(() => {
+      // Success
+      this.verificationStatus.set('success');
+      this.verificationMessage.set('Verification Successful!');
+      setTimeout(() => {
+        this.eResourceFlowStep.set('declaration');
+        this.startDeclarationCountdown();
+      }, 800);
+    }, 1500);
+  }
+
+  startDeclarationCountdown() {
+    this.declarationCountdown.set(5);
+    this.countdownInterval = setInterval(() => {
+      const current = this.declarationCountdown();
+      if (current > 0) {
+        this.declarationCountdown.set(current - 1);
+      } else {
+        clearInterval(this.countdownInterval);
+      }
+    }, 1000);
+  }
+
+  goToResourcesStep() {
+    this.eResourceFlowStep.set('resources');
+  }
+
+  resourceLinkText = computed(() => {
+    return `通过百度网盘分享的文件：1建筑类电子书\n链接: https://pan.baidu.com/s/1cwPl4KV6UiiGxm47Q0DyLw \n提取码: book\n复制这段内容打开「百度网盘APP 即可获取」`;
+  });
+
+  copyResourceInfo() {
+    navigator.clipboard.writeText(this.resourceLinkText()).then(() => {
+      this.copyButtonText.set('Copied!');
+      setTimeout(() => this.copyButtonText.set('Copy Info'), 2000);
+    });
   }
 }

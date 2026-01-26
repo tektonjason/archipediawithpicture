@@ -53,6 +53,13 @@ export class DataService {
   // --- Admin State ---
   isAdmin = signal<boolean>(false);
   
+  // --- Global Modal States ---
+  showLoginModal = signal(false);
+  showLogoutModal = signal(false);
+  loginEmail = signal('');
+  loginPass = signal('');
+  loginError = signal('');
+
   // --- Data Stores ---
   entries = signal<Entry[]>([]);
   favorites = signal<string[]>([]);
@@ -99,6 +106,35 @@ export class DataService {
 
   setSidebarState(isOpen: boolean) {
     this.isSidebarOpen.set(isOpen);
+  }
+
+  // --- Auth/Modal Logic ---
+  handleAdminAction() {
+    if (this.isAdmin()) {
+      this.showLogoutModal.set(true);
+    } else {
+      this.loginEmail.set('');
+      this.loginPass.set('');
+      this.loginError.set('');
+      this.showLoginModal.set(true);
+    }
+  }
+
+  performLogin() {
+    if (this.login(this.loginEmail(), this.loginPass())) {
+      this.showLoginModal.set(false);
+    } else {
+      this.loginError.set('认证失败：账号或密码错误');
+    }
+  }
+
+  confirmLogout() {
+    this.logout();
+    this.showLogoutModal.set(false);
+  }
+
+  closeLoginModal() {
+    this.showLoginModal.set(false);
   }
 
   // --- Auth ---
