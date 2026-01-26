@@ -16,51 +16,72 @@ import { NgStyle } from '@angular/common';
       </div>
       
       @for (group of groupedLinks(); track group.category) {
-        <section class="mb-10">
-          <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-            <span class="w-4 h-4 bg-black"></span>
-            {{ group.category }}
-          </h3>
-          <!-- 
-             Mobile: grid-cols-2, gap-3
-             Desktop: grid-cols-2/3, gap-4 
-          -->
-          <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            @for (link of group.links; track link.id) {
-              <!-- Mobile: p-3, Desktop: p-4 -->
-              <div class="bauhaus-card p-3 md:p-4 flex flex-col h-full relative group hover:bg-white">
-                
-                <!-- Tags (Top Right) -->
-                @if (link.tags && link.tags.length > 0) {
-                  <div class="absolute top-2 right-2 flex gap-1 flex-wrap justify-end max-w-[50%]">
-                    @for (tag of link.tags; track tag) {
-                      <span 
-                        class="text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 border border-black/20 backdrop-blur-sm"
-                        [ngStyle]="getTagStyle(tag)"
-                      >
-                        {{ tag }}
-                      </span>
+        <div class="mb-2 border-2 bg-white overflow-hidden transition-colors duration-300"
+             [class.border-blue-400]="expandedCategory() === group.category"
+             [class.border-black]="expandedCategory() !== group.category">
+          <button 
+            (click)="toggleCategory(group.category)" 
+            class="w-full text-left p-4 hover:bg-gray-50/50 transition-colors flex justify-between items-center"
+            [class.border-b-2]="expandedCategory() === group.category"
+            [class.border-gray-200]="expandedCategory() === group.category"
+            [class.bg-blue-50/30]="expandedCategory() === group.category"
+          >
+            <h3 class="text-lg font-bold flex items-center gap-3">
+              <span class="w-3 h-3 bg-black"></span>
+              {{ group.category }}
+            </h3>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 transition-transform duration-300 shrink-0" [class.rotate-180]="expandedCategory() === group.category" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+           
+          <div class="transition-all duration-500 ease-in-out overflow-hidden bg-white" [class.max-h-0]="expandedCategory() !== group.category" [class.max-h-[1500px]]="expandedCategory() === group.category">
+            <div class="p-4">
+              @if (group.category === '院校展览') {
+                <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-sm text-gray-800 leading-relaxed font-serif">
+                  <strong class="font-bold text-black">为什么要看这些院校的作品？</strong>
+                  建筑设计不能只看小红书、Pinterest这类碎片化灵感图和ArchDaily、gooood这类偏实践的项目展示——因为前者零散难以传授完整的设计逻辑，后者侧重施工与实现、创意性受限，而顶尖院校的学生作品则系统呈现从概念到方案的完整思路、批判性方法与国际教学趋势，更利于提升设计视野与方法论。
+                </div>
+              }
+
+              <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                @for (link of group.links; track link.id) {
+                  <!-- Link Card -->
+                  <div class="bauhaus-card p-3 md:p-4 flex flex-col h-full relative group !shadow-[3px_3px_0px_0px_black] hover:!shadow-[5px_5px_0px_0px_black] hover:bg-gray-50">
+                    
+                    <!-- Tags (Top Right) -->
+                    @if (link.tags && link.tags.length > 0) {
+                      <div class="absolute top-2 right-2 flex gap-1 flex-wrap justify-end max-w-[50%]">
+                        @for (tag of link.tags; track tag) {
+                          <span 
+                            class="text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 border border-black/20 backdrop-blur-sm"
+                            [ngStyle]="getTagStyle(tag)"
+                          >
+                            {{ tag }}
+                          </span>
+                        }
+                      </div>
                     }
+
+                    <div class="flex justify-between items-start mb-2 pr-8 min-h-[2.5rem] md:min-h-[3.5rem]">
+                       <!-- Mobile: text-sm, Desktop: text-lg -->
+                       <h4 class="text-sm md:text-lg font-black w-full break-words" title="{{link.title}}">{{ link.title }}</h4>
+                       @if (dataService.isAdmin()) {
+                         <button (click)="deleteLink(link.id)" class="text-red-600 font-bold text-xs hover:bg-red-50 px-1 border border-red-600 shrink-0 ml-1">X</button>
+                       }
+                    </div>
+                    <!-- Mobile: text-xs, line-clamp-3. Desktop: text-sm -->
+                    <p class="text-xs md:text-sm text-gray-600 mb-2 md:mb-4 flex-1 line-clamp-3 md:line-clamp-none">{{ link.description }}</p>
+                    <!-- Mobile: smaller text/padding -->
+                    <a [href]="link.url" target="_blank" class="bauhaus-btn bg-white text-black text-[10px] md:text-xs text-center py-1.5 md:py-2 px-2 md:px-4 hover:bg-black hover:text-white mt-auto">
+                      访问网站 ➜
+                    </a>
                   </div>
                 }
-
-                <div class="flex justify-between items-start mb-2 pr-8 min-h-[2.5rem] md:min-h-[3.5rem]">
-                   <!-- Mobile: text-sm, Desktop: text-lg -->
-                   <h4 class="text-sm md:text-lg font-black w-full break-words" title="{{link.title}}">{{ link.title }}</h4>
-                   @if (dataService.isAdmin()) {
-                     <button (click)="deleteLink(link.id)" class="text-red-600 font-bold text-xs hover:bg-red-50 px-1 border border-red-600 shrink-0 ml-1">X</button>
-                   }
-                </div>
-                <!-- Mobile: text-xs, line-clamp-3. Desktop: text-sm -->
-                <p class="text-xs md:text-sm text-gray-600 mb-2 md:mb-4 flex-1 line-clamp-3 md:line-clamp-none">{{ link.description }}</p>
-                <!-- Mobile: smaller text/padding -->
-                <a [href]="link.url" target="_blank" class="bauhaus-btn bg-white text-black text-[10px] md:text-xs text-center py-1.5 md:py-2 px-2 md:px-4 hover:bg-black hover:text-white mt-auto">
-                  访问网站 ➜
-                </a>
               </div>
-            }
+            </div>
           </div>
-        </section>
+        </div>
       }
 
       @if (dataService.isAdmin()) {
@@ -97,9 +118,10 @@ export class ResourcesComponent {
   newTitle = signal('');
   newUrl = signal('');
   newDesc = signal('');
+  expandedCategory = signal<string | null>(null);
 
   private categoryOrder = [
-    '建筑资讯与媒体', '规范、学习与学术', '地图、气象与数据', '软件、插件与渲染',
+    '院校展览','建筑资讯与媒体', '规范、学习与学术', '地图、气象与数据', '软件、插件与渲染',
     '材质、配景与素材', '配色、平面与图解', '实用工具'
   ];
 
@@ -120,6 +142,10 @@ export class ResourcesComponent {
       return valA - valB;
     });
   });
+
+  toggleCategory(category: string) {
+    this.expandedCategory.update(current => (current === category ? null : category));
+  }
 
   addLink() {
     if (this.newTitle() && this.newUrl() && this.newCategory()) {
