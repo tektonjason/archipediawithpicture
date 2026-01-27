@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementRef, effect } from '@angular/core';
+import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementRef, effect, OnDestroy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -11,7 +11,9 @@ import { DataService } from '../../services/data.service';
       
       <!-- Header Section -->
       <div class="flex flex-col items-center mb-8 shrink-0 space-y-2">
-                <h1 class="text-3xl md:text-4xl font-bold tracking-wide">建筑百科</h1>
+        <h1 class="text-3xl md:text-4xl font-bold tracking-wide h-[48px] flex items-center">
+          {{ currentTitle() }}<span class="animate-pulse text-gray-400 font-thin">|</span>
+        </h1>
         <p class="text-gray-400 text-sm md:text-base max-w-2xl text-center">
           探索全面的建筑知识库
         </p>
@@ -242,7 +244,7 @@ import { DataService } from '../../services/data.service';
     }
   `]
 })
-export class EncyclopediaComponent implements AfterViewInit {
+export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
   router: Router = inject(Router);
   searchQuery = signal('');
@@ -250,6 +252,14 @@ export class EncyclopediaComponent implements AfterViewInit {
   viewMode = this.dataService.encyclopediaViewMode;
   displayLimit = signal(200);
   isSwitching = signal(false);
+
+  // Typewriter properties
+  currentTitle = signal('');
+  private titles = ['建筑百科', 'ARCHIPEDIA'];
+  private titleIndex = 0;
+  private charIndex = 0;
+  private isDeleting = false;
+  private timer: any;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
@@ -266,12 +276,44 @@ export class EncyclopediaComponent implements AfterViewInit {
     });
   }
 
+  ngOnDestroy() {
+    if (this.timer) clearTimeout(this.timer);
+  }
+
   ngAfterViewInit(): void {
     setTimeout(() => {
       if (this.scrollContainer?.nativeElement) {
         this.scrollContainer.nativeElement.scrollTop = this.dataService.encyclopediaScrollPosition();
       }
     }, 0);
+    
+    // Start typewriter
+    this.typewriterEffect();
+  }
+
+  private typewriterEffect() {
+    const currentFullTitle = this.titles[this.titleIndex];
+
+    if (this.isDeleting) {
+      this.currentTitle.set(currentFullTitle.substring(0, this.charIndex - 1));
+      this.charIndex--;
+    } else {
+      this.currentTitle.set(currentFullTitle.substring(0, this.charIndex + 1));
+      this.charIndex++;
+    }
+
+    let delta = this.isDeleting ? 100 : 150;
+
+    if (!this.isDeleting && this.charIndex === currentFullTitle.length) {
+      delta = 2000; // Pause at end
+      this.isDeleting = true;
+    } else if (this.isDeleting && this.charIndex === 0) {
+      this.isDeleting = false;
+      this.titleIndex = (this.titleIndex + 1) % this.titles.length;
+      delta = 500; // Pause before typing next
+    }
+
+    this.timer = setTimeout(() => this.typewriterEffect(), delta);
   }
 
   switchView(mode: 'grid' | 'list') {

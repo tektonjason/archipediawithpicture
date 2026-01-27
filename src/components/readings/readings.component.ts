@@ -184,7 +184,7 @@ import pinyin from 'pinyin';
             <div class="flex flex-col md:flex-row w-full h-full">
                
                <!-- Left: Cover Image Area -->
-               <div class="w-full md:w-2/5 bg-[#0f0f11] flex items-center justify-center p-6 md:p-8 relative overflow-hidden shrink-0">
+               <div class="hidden md:flex md:w-2/5 bg-[#0f0f11] items-center justify-center p-6 md:p-8 relative overflow-hidden shrink-0">
                   <!-- Abstract background pattern -->
                   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
                   
@@ -197,8 +197,9 @@ import pinyin from 'pinyin';
                </div>
 
                <!-- Right: Content -->
-               <div class="flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col">
-                  <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight mb-2">{{ item.title }}</h2>
+               <div class="flex-1 flex flex-col overflow-hidden">
+                  <div class="flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col">
+                  <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ item.title }}</h2>
                   <p class="text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
                   
                   <div class="space-y-4 md:space-y-6 flex-1">
@@ -207,11 +208,14 @@ import pinyin from 'pinyin';
                       <p class="text-sm text-gray-300 leading-relaxed font-serif">
                         {{ item.description }}
                       </p>
-                      @if (!item.description || item.description.length < 50) {
-                         <p class="text-xs text-gray-600 italic mt-2">
-                           [此读物的详细介绍将在未来版本中更新。]
-                         </p>
-                      }
+
+                    </div>
+
+                    <div class="mt-6">
+                      <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细介绍</h4>
+                      <div class="max-h-[25vh] overflow-y-auto custom-scrollbar pr-2">
+                        <p class="text-sm text-gray-300 leading-relaxed font-serif whitespace-pre-wrap">{{ item.detailContent }}</p>
+                      </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-6 border-t border-white/10">
@@ -239,8 +243,9 @@ import pinyin from 'pinyin';
                        }
                     </div>
                   </div>
+                  </div>
 
-                  <div class="flex gap-4 mt-8 pt-6 border-t border-white/10">
+                  <div class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-[#18181b] border-t border-white/10 z-10 shrink-0 flex gap-4">
                     <a [href]="getSearchUrl(item)" target="_blank" class="flex-1 bg-white text-black hover:bg-gray-200 transition-colors py-3 rounded-lg font-bold flex items-center justify-center gap-2">
                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                        <span>在线搜索</span>
@@ -571,7 +576,12 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   getSearchUrl(item: Reading) {
-    return `https://www.google.com/search?q=${encodeURIComponent(item.title + ' ' + item.author)}`;
+    const name = item.title || '';
+    const encoded = encodeURIComponent(name);
+    if (this.isJournal(item)) {
+      return `https://www.zazhi.com.cn/s.html?t=&q=${encoded}`;
+    }
+    return `https://search.douban.com/book/subject_search?search_text=${encoded}`;
   }
 
   // --- Scrubber Logic ---

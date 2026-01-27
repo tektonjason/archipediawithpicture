@@ -138,7 +138,7 @@ import { NgStyle, CommonModule } from '@angular/common';
                          @if (link.tags && link.tags.length > 0) {
                            <div class="flex flex-wrap gap-1 mt-3">
                              @for (tag of link.tags; track tag) {
-                               <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-gray-400 border border-white/5">{{ tag }}</span>
+                               <span [class]="getTagClass(group.category, tag)">{{ tag }}</span>
                              }
                            </div>
                          }
@@ -338,6 +338,30 @@ export class ResourcesComponent {
     if(confirm('确定要删除这个资源吗?')) {
       this.dataService.removeLink(id);
     }
+  }
+
+  private tagColors: Record<string, string> = {
+    '环境': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20',
+    '材质': 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20',
+    '模型': 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20',
+    '人物': 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20',
+    '配景': 'bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20',
+    '尺寸': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 hover:bg-yellow-500/20',
+    '素材': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20',
+    '剪影': 'bg-zinc-500/30 text-zinc-300 border-zinc-500/20 hover:bg-zinc-500/40'
+  };
+
+  getTagClass(category: string, tag: string): string {
+    const baseClasses = 'text-[10px] px-2 py-0.5 rounded backdrop-blur-sm border transition-all duration-300 font-medium tracking-wide';
+    
+    // 只有“材质、配景与素材”分类才使用特殊颜色
+    if (category === '材质、配景与素材') {
+      const colorClass = this.tagColors[tag] || 'bg-white/10 text-gray-300 border-white/10 hover:bg-white/15';
+      return `${baseClasses} ${colorClass}`;
+    }
+    
+    // 默认样式
+    return `${baseClasses} bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-gray-300`;
   }
 
   getCategoryDescription(category: string): string {
