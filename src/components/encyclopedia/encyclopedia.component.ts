@@ -79,7 +79,7 @@ import { DataService } from '../../services/data.service';
               <!-- Image Section -->
               <div class="h-48 overflow-hidden relative bg-gray-800">
                 @if (entry.imageUrl) {
-                   <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" [alt]="entry.term">
+                   <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term">
                 } @else {
                    <!-- Fallback Pattern -->
                    <div class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative">

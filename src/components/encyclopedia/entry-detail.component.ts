@@ -123,7 +123,7 @@ import { Location as NgLocation } from '@angular/common';
                   [class.cursor-pointer]="e.imageUrl"
                   (click)="openImageModal()">
                   @if(e.imageUrl) {
-                    <img [src]="e.imageUrl" class="w-full h-full object-contain md:object-cover transition-transform duration-700 group-hover/image:scale-105" alt="{{e.term}}">
+                    <img [src]="e.imageUrl" class="w-full h-full object-contain md:object-cover transition-transform duration-700 group-hover/image:scale-105" [style.object-position]="e.imagePosition || 'center'" alt="{{e.term}}">
                     <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-all duration-300">
                       <div class="bg-white/10 p-3 rounded-full backdrop-blur-md border border-white/20 text-white transform translate-y-4 group-hover/image:translate-y-0 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -32,9 +32,9 @@ import { NgStyle, CommonModule } from '@angular/common';
       
       <div class="space-y-4">
         @for (group of groupedLinks(); track group.category) {
-          <div class="bg-[#18181b] border border-white/5 rounded-xl overflow-hidden transition-all duration-300">
+          <div #categoryElement class="scroll-mt-4 bg-[#18181b] border border-white/5 rounded-xl overflow-hidden transition-all duration-300">
             <button 
-              (click)="toggleCategory(group.category)" 
+              (click)="toggleCategory(group.category, categoryElement)" 
               class="w-full text-left p-4 md:p-5 hover:bg-white/5 transition-colors flex justify-between items-center group"
             >
               <div class="flex items-center gap-4">
@@ -218,8 +218,80 @@ export class ResourcesComponent {
     });
   });
 
-  toggleCategory(category: string) {
-    this.expandedCategory.update(current => (current === category ? null : category));
+  toggleCategory(category: string, element?: HTMLElement) {
+    const isExpanding = this.expandedCategory() !== category;
+    
+    // 如果是关闭操作，直接执行
+    if (!isExpanding) {
+      this.expandedCategory.set(null);
+      return;
+    }
+
+    // 如果是展开操作
+    if (element) {
+      const container = element.closest('.overflow-y-auto') as HTMLElement;
+      if (!container) {
+        this.expandedCategory.set(category);
+        return;
+      }
+
+      // 1. 计算当前的相对位置 (Start Point)
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const startRelativeTop = elementRect.top - containerRect.top;
+
+      // 2. 切换状态，触发布局变化
+      this.expandedCategory.set(category);
+
+      // 3. 启动自定义动画插值补偿 (Dynamic Interpolation Compensation)
+      this.animateScroll(element, container, startRelativeTop);
+
+    } else {
+       this.expandedCategory.set(category);
+    }
+  }
+
+  private animateScroll(element: HTMLElement, container: HTMLElement, startRelativeTop: number) {
+      const startTime = Date.now();
+      const duration = 500; // 动画时长，覆盖 CSS transition
+      const targetOffset = 24; // 目标：距离顶部 24px (scroll-mt-6)
+
+      // 缓动函数: Quartic Ease-Out (开始快，结束慢)
+      const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+
+      const step = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          if (progress < 1) {
+              const easedT = easeOutQuart(progress);
+
+              // 1. 计算当前时刻的“理想相对位置”
+              // 从 startRelativeTop 逐渐过渡到 targetOffset (24px)
+              const idealRelativeTop = startRelativeTop + (targetOffset - startRelativeTop) * easedT;
+
+              // 2. 获取当前的“实际相对位置”
+              const currentElementRect = element.getBoundingClientRect();
+              const currentContainerRect = container.getBoundingClientRect();
+              const actualRelativeTop = currentElementRect.top - currentContainerRect.top;
+
+              // 3. 计算误差并修正
+              // 如果 actual > ideal，说明元素在理想位置下方，需要往下滚 (scrollTop += positive)
+              // 如果 actual < ideal，说明元素在理想位置上方，需要往上滚 (scrollTop += negative)
+              const correction = actualRelativeTop - idealRelativeTop;
+
+              if (Math.abs(correction) > 0.5) {
+                  container.scrollTop += correction;
+              }
+
+              requestAnimationFrame(step);
+          } else {
+              // 动画结束，做最后一次校准确保精确到位
+              // 此时应该完全到位
+          }
+      };
+
+      requestAnimationFrame(step);
   }
 
   addLink() {

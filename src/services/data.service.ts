@@ -11,6 +11,7 @@ export interface Entry {
   definition: string;
   details: string;
   imageUrl?: string;
+  imagePosition?: string;
   isCustom?: boolean;
 }
 
@@ -1062,7 +1063,8 @@ export class DataService {
         termEn: row[3],
         definition: row[4],
         details: row[5],
-        imageUrl: imageUrl, 
+        imageUrl: imageUrl,
+        imagePosition: row[2] === '北京宪章' ? 'top' : (existing?.imagePosition ?? 'center'),
         isCustom: existing?.isCustom ?? false
       };
 
