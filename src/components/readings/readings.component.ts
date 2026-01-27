@@ -46,7 +46,7 @@ import pinyin from 'pinyin';
       </div>
 
       <!-- Tags Filter -->
-      <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-center">
+      <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-start px-1">
         <button 
           (click)="selectTag('all')"
           class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
@@ -402,7 +402,8 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   // Cache available letters for visual feedback
   availableLetters = computed(() => {
     const letters = new Set<string>();
-    this.dataService.readings().forEach(r => {
+    // Use filteredReadings() instead of all readings to match current category context
+    this.filteredReadings().forEach(r => {
       const pinyinResult = pinyin(r.title, { style: pinyin.STYLE_FIRST_LETTER })[0][0];
       const firstChar = pinyinResult.charAt(0).toUpperCase();
       const letter = /^[A-Z]/.test(firstChar) ? firstChar : '#';
@@ -464,9 +465,25 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   selectTag(tag: string) {
     this.selectedTag.set(tag);
-    if (this.scrollContainer) {
-      this.scrollContainer.nativeElement.scrollTo({ top: 0, behavior: 'auto' });
-    }
+    // Allow the view to update and computed signals (like filteredReadings and availableLetters) to re-evaluate
+    setTimeout(() => {
+      if (this.scrollContainer) {
+        this.scrollContainer.nativeElement.scrollTo({ top: 0, behavior: 'auto' });
+        
+        // Reset current letter to the first available letter in the new list
+        const available = Array.from(this.availableLetters()).sort((a, b) => {
+          if (a === '#') return -1;
+          if (b === '#') return 1;
+          return a.localeCompare(b);
+        });
+        
+        if (available.length > 0) {
+          this.currentLetter.set(available[0]);
+        } else {
+          this.currentLetter.set('#');
+        }
+      }
+    }, 0);
   }
 
   openModal(item: Reading) {

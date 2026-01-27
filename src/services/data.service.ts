@@ -72,6 +72,7 @@ export class DataService {
   // --- Encyclopedia View State ---
   encyclopediaScrollPosition = signal<number>(0);
   encyclopediaSelectedCategory = signal<string>('all');
+  encyclopediaViewMode = signal<'grid' | 'list'>('grid');
 
   constructor() {
     this.initLayout();
@@ -89,6 +90,7 @@ export class DataService {
     effect(() => localStorage.setItem('arch_chat', JSON.stringify(this.chatHistory())));
     effect(() => localStorage.setItem('arch_entries', JSON.stringify(this.entries())));
     effect(() => localStorage.setItem('arch_links', JSON.stringify(this.webLinks())));
+    effect(() => localStorage.setItem('arch_view_mode', this.encyclopediaViewMode()));
   }
 
   private initLayout() {
@@ -272,6 +274,8 @@ export class DataService {
       if (c) this.chatHistory.set(JSON.parse(c));
       const w = localStorage.getItem('arch_links');
       if (w) this.webLinks.set(JSON.parse(w));
+      const vm = localStorage.getItem('arch_view_mode');
+      if (vm) this.encyclopediaViewMode.set(vm as 'grid' | 'list');
     } catch (err) {
       console.error('Failed to load storage', err);
     }

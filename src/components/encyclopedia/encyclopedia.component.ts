@@ -17,18 +17,50 @@ import { DataService } from '../../services/data.service';
         </p>
 
         <!-- Search Input -->
-        <div class="relative w-full max-w-2xl mt-4">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-            </svg>
+        <div class="relative w-full max-w-2xl mt-4 flex gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+              placeholder="搜索..." 
+              class="w-full bg-[#18181b] text-white text-base placeholder-gray-500 rounded-xl border border-white/10 py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all shadow-lg"
+            >
           </div>
-          <input 
-            type="text" 
-            [(ngModel)]="searchQuery"
-            placeholder="搜索..." 
-            class="w-full bg-[#18181b] text-white text-base placeholder-gray-500 rounded-xl border border-white/10 py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all shadow-lg"
-          >
+          <!-- View Toggle Button -->
+          <div class="flex bg-[#18181b] rounded-xl border border-white/10 p-1 shrink-0">
+            <button 
+              (click)="viewMode.set('grid')"
+              class="p-2 rounded-lg transition-all"
+              [class.bg-white/10]="viewMode() === 'grid'"
+              [class.text-white]="viewMode() === 'grid'"
+              [class.text-gray-500]="viewMode() !== 'grid'"
+              [class.hover:text-gray-300]="viewMode() !== 'grid'"
+              title="网格视图"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            <button 
+              (click)="viewMode.set('list')"
+              class="p-2 rounded-lg transition-all"
+              [class.bg-white/10]="viewMode() === 'list'"
+              [class.text-white]="viewMode() === 'list'"
+              [class.text-gray-500]="viewMode() !== 'list'"
+              [class.hover:text-gray-300]="viewMode() !== 'list'"
+              title="列表视图"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -59,7 +91,7 @@ import { DataService } from '../../services/data.service';
       </div>
 
       <!-- Content Grid -->
-      <div id="encyclopedia-scroll-container" #scrollContainer class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2">
+      <div id="encyclopedia-scroll-container" #scrollContainer (scroll)="onScroll()" class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2">
         @if (filteredEntries().length === 0) {
           <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
             <div class="text-4xl mb-4 grayscale">🏛️</div>
@@ -68,16 +100,21 @@ import { DataService } from '../../services/data.service';
           </div>
         }
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+        <div class="grid gap-6 pb-20" [class.grid-cols-1]="viewMode() === 'list'" [class.md:grid-cols-2]="viewMode() === 'grid'" [class.lg:grid-cols-3]="viewMode() === 'grid'" [class.xl:grid-cols-4]="viewMode() === 'grid'">
           @for (entry of filteredEntries(); track entry.id; let i = $index) {
             <a 
               [routerLink]="['/entry', entry.id]" 
               (click)="saveState(scrollContainer.scrollTop)" 
-              class="group bg-[#18181b] rounded-xl overflow-hidden border border-white/5 hover:border-white/20 transition-all hover:translate-y-[-2px] hover:shadow-xl flex flex-col h-full animate-fade-in-up"
+              class="group bg-[#18181b] rounded-xl overflow-hidden border border-white/5 hover:border-white/20 transition-all hover:translate-y-[-2px] hover:shadow-xl animate-fade-in-up"
+              [class.flex]="viewMode() === 'list'"
+              [class.flex-col]="viewMode() === 'grid'"
+              [class.h-full]="viewMode() === 'grid'"
+              [class.flex-row]="viewMode() === 'list'"
+              [class.h-24]="viewMode() === 'list'"
               [style.animation-delay]="i < 12 ? (i * 50) + 'ms' : '0ms'"
             >
               <!-- Image Section -->
-              <div class="h-48 overflow-hidden relative bg-gray-800">
+              <div class="overflow-hidden relative bg-gray-800" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
                 @if (entry.imageUrl) {
                    <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term">
                 } @else {
@@ -93,21 +130,21 @@ import { DataService } from '../../services/data.service';
               </div>
 
               <!-- Content Section -->
-              <div class="p-4 flex flex-col flex-1">
-                <div class="flex justify-between items-start gap-2 mb-1">
-                  <h3 class="text-lg font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-1">{{ entry.term }}</h3>
+              <div class="flex flex-col flex-1 min-w-0" [class.p-4]="viewMode() === 'grid'" [class.p-2]="viewMode() === 'list'">
+                <div class="flex justify-between items-start gap-2 mb-1 shrink-0">
+                  <h3 class="font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-1" [class.text-lg]="viewMode() === 'grid'" [class.text-base]="viewMode() === 'list'">{{ entry.term }}</h3>
                   @if (entry.details?.includes('19')) {
                     <span class="text-xs font-mono text-gray-500 shrink-0 bg-white/5 px-1.5 py-0.5 rounded">{{ extractYear(entry.details) }}</span>
                   }
                 </div>
                 
-                <p class="text-xs text-gray-500 mb-3 italic truncate">{{ entry.termEn }}</p>
+                <p class="text-xs text-gray-500 italic truncate shrink-0" [class.mb-3]="viewMode() === 'grid'" [class.mb-1]="viewMode() === 'list'">{{ entry.termEn }}</p>
                 
-                <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-1 leading-relaxed">
+                <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-1 leading-relaxed" [class.hidden]="viewMode() === 'list'">
                   {{ entry.definition }}
                 </p>
                 
-                <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5" [class.border-t-0]="viewMode() === 'list'" [class.pt-0]="viewMode() === 'list'">
                    <span class="text-xs text-gray-600 font-medium truncate max-w-[70%]">{{ entry.category }}</span>
                    <div class="flex items-center text-xs font-medium text-gray-500 group-hover:text-white transition-colors">
                      阅读更多 
@@ -164,6 +201,8 @@ export class EncyclopediaComponent implements AfterViewInit {
   router: Router = inject(Router);
   searchQuery = signal('');
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
+  viewMode = this.dataService.encyclopediaViewMode;
+  displayLimit = signal(200);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
@@ -188,6 +227,24 @@ export class EncyclopediaComponent implements AfterViewInit {
     }, 0);
   }
 
+  onScroll() {
+    const element = this.scrollContainer.nativeElement;
+    // Buffer of 200px
+    if (element.scrollHeight - element.scrollTop - element.clientHeight < 200) {
+      if (this.displayLimit() < this._allFilteredEntries().length) {
+        this.displayLimit.update(limit => limit + 100);
+      }
+    }
+  }
+
+  updateSearch(query: string) {
+    this.searchQuery.set(query);
+    this.displayLimit.set(200);
+    if (this.scrollContainer?.nativeElement) {
+      this.scrollContainer.nativeElement.scrollTop = 0;
+    }
+  }
+
   saveState(scrollTop: number) {
     this.dataService.encyclopediaScrollPosition.set(scrollTop);
   }
@@ -201,7 +258,7 @@ export class EncyclopediaComponent implements AfterViewInit {
     });
   });
 
-  filteredEntries = computed(() => {
+  private _allFilteredEntries = computed(() => {
     const q = this.searchQuery().toLowerCase();
     const cat = this.selectedCategory();
     let list = this.dataService.entries().filter(e => {
@@ -211,12 +268,17 @@ export class EncyclopediaComponent implements AfterViewInit {
                           e.definition.toLowerCase().includes(q);
       return matchCat && matchSearch;
     });
-    return list.slice(0, 200); 
+    return list; 
+  });
+
+  filteredEntries = computed(() => {
+    return this._allFilteredEntries().slice(0, this.displayLimit());
   });
 
   selectCategory(category: string) {
     if (this.selectedCategory() !== category) {
       this.selectedCategory.set(category);
+      this.displayLimit.set(200);
       this.dataService.encyclopediaScrollPosition.set(0);
       if (this.scrollContainer?.nativeElement) {
         this.scrollContainer.nativeElement.scrollTop = 0;
