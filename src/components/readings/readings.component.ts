@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, CommonModule } from '@angular/common';
 import { DataService, Reading } from '../../services/data.service';
@@ -6,7 +7,7 @@ import pinyin from 'pinyin';
 
 @Component({
   selector: 'app-readings',
-  imports: [FormsModule, CommonModule, NgClass],
+  imports: [FormsModule, CommonModule, NgClass, RouterLink],
   standalone: true,
   template: `
     <div class="h-full flex flex-col p-6 md:p-8 overflow-hidden bg-[#0f0f11] text-white">
@@ -73,12 +74,18 @@ import pinyin from 'pinyin';
 
       <!-- Content Area -->
       <div class="flex-1 relative overflow-hidden">
-        <div #scrollContainer class="h-full overflow-y-auto pr-10 pb-20 hide-scrollbar" (scroll)="onScroll()">
+        <div #scrollContainer class="h-full overflow-y-auto pb-20 hide-scrollbar" [class.pr-10]="filteredReadings().length > 0" (scroll)="onScroll()">
           @if (filteredReadings().length === 0) {
             <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
               <div class="text-4xl mb-4 grayscale">📚</div>
               <p class="font-medium text-lg">未找到相关读物</p>
               <p class="text-gray-500 text-sm mt-1">请尝试更换关键词或进入对应分类查找</p>
+              <button 
+                [routerLink]="['/about']"
+                class="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors border border-white/5"
+              >
+                向我们反馈
+              </button>
             </div>
           } @else {
             @for (group of groupedReadings(); track group.letter) {
@@ -177,24 +184,24 @@ import pinyin from 'pinyin';
             <div class="flex flex-col md:flex-row w-full h-full">
                
                <!-- Left: Cover Image Area -->
-               <div class="w-full md:w-2/5 bg-[#0f0f11] flex items-center justify-center p-8 relative overflow-hidden shrink-0">
+               <div class="w-full md:w-2/5 bg-[#0f0f11] flex items-center justify-center p-6 md:p-8 relative overflow-hidden shrink-0">
                   <!-- Abstract background pattern -->
                   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
                   
                   <!-- Book Cover Mockup -->
-                  <div class="relative w-48 aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col p-6 text-center justify-center transform transition-transform hover:scale-105 duration-500">
+                  <div class="relative w-32 md:w-48 aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col p-4 md:p-6 text-center justify-center transform transition-transform hover:scale-105 duration-500">
                      <div class="absolute inset-y-0 left-2 w-[1px] bg-white/5"></div>
-                     <h2 class="font-serif font-bold text-gray-200 text-xl leading-tight mb-2">{{ item.title }}</h2>
+                     <h2 class="font-serif font-bold text-gray-200 text-lg md:text-xl leading-tight mb-2">{{ item.title }}</h2>
                      <p class="text-xs text-gray-500 uppercase tracking-widest">{{ item.author }}</p>
                   </div>
                </div>
 
                <!-- Right: Content -->
-               <div class="flex-1 p-8 overflow-y-auto custom-scrollbar flex flex-col">
-                  <h2 class="text-3xl font-bold text-white leading-tight mb-2">{{ item.title }}</h2>
-                  <p class="text-lg text-gray-400 font-medium mb-6">{{ item.author || item.publisher }}</p>
+               <div class="flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col">
+                  <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight mb-2">{{ item.title }}</h2>
+                  <p class="text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
                   
-                  <div class="space-y-6 flex-1">
+                  <div class="space-y-4 md:space-y-6 flex-1">
                     <div>
                       <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">内容简介</h4>
                       <p class="text-sm text-gray-300 leading-relaxed font-serif">
@@ -207,7 +214,7 @@ import pinyin from 'pinyin';
                       }
                     </div>
 
-                    <div class="grid grid-cols-2 gap-6 pt-6 border-t border-white/10">
+                    <div class="grid grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-6 border-t border-white/10">
                        <div>
                           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">出版社</label>
                           <span class="text-sm text-white font-medium">{{ item.publisher }}</span>
@@ -238,9 +245,60 @@ import pinyin from 'pinyin';
                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                        <span>在线搜索</span>
                     </a>
-                    <button class="p-3 rounded-lg border border-white/10 text-white hover:bg-white/10 transition-colors" title="分享">
-                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                    </button>
+                    
+                    <div class="relative">
+                      <button 
+                        (click)="handleShare(item)" 
+                        class="h-full px-4 rounded-lg border border-white/10 text-white hover:bg-white/10 transition-colors flex items-center justify-center gap-2" 
+                        title="分享并搜索"
+                      >
+                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                      </button>
+
+                      <!-- Share Menu -->
+                      @if (showShareMenu()) {
+                        <div class="absolute bottom-full right-0 mb-3 w-40 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-fade-in-up z-30 flex flex-col">
+                           @if (shareMenuCopied()) {
+                             <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
+                               已复制信息 ✅
+                             </div>
+                           }
+                           
+                           <div class="p-1.5 flex flex-col gap-1">
+                             <a [href]="getPlatformUrl('wechat', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
+                               <div class="w-6 h-6 rounded bg-[#07c160] flex items-center justify-center shrink-0">
+                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8.5,1.5c-4.1,0-7.5,2.9-7.5,6.5c0,2.1,1.1,3.9,2.9,5.1c-0.1,0.6-0.4,2.2-0.5,2.6c0,0,0,0,0,0c0,0.1,0,0.2,0.1,0.2c0.1,0,0.2,0,0.4-0.1c1.3-0.7,2.9-1.8,3.3-2.1c0.4,0.1,0.9,0.2,1.3,0.2c4.1,0,7.5-2.9,7.5-6.5S12.6,1.5,8.5,1.5z M17.5,8c-3.6,0-6.5,2.6-6.5,5.8c0,1.9,1,3.5,2.6,4.6c-0.1,0.5-0.4,1.9-0.4,2.3c0,0,0,0,0,0c0,0.1,0.1,0.2,0.2,0.2c0.1,0,0.2,0,0.3-0.1c1.2-0.6,2.6-1.6,2.9-1.9c0.4,0.1,0.8,0.2,1.2,0.2c3.6,0,6.5-2.6,6.5-5.8S21.1,8,17.5,8z"/></svg>
+                               </div>
+                               微信
+                             </a>
+                             <a [href]="getPlatformUrl('taobao', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
+                               <div class="w-6 h-6 rounded bg-[#ff5000] flex items-center justify-center shrink-0">
+                                 <span class="text-[10px] font-bold text-white">淘</span>
+                               </div>
+                               淘宝
+                             </a>
+                             <a [href]="getPlatformUrl('jd', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
+                               <div class="w-6 h-6 rounded bg-[#e1251b] flex items-center justify-center shrink-0">
+                                 <span class="text-[10px] font-bold text-white">JD</span>
+                               </div>
+                               京东
+                             </a>
+                             <a [href]="getPlatformUrl('duozhuayu', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
+                               <div class="w-6 h-6 rounded bg-[#499d75] flex items-center justify-center shrink-0">
+                                 <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                               </div>
+                               多抓鱼
+                             </a>
+                             <a [href]="getPlatformUrl('zhuanzhuan', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
+                               <div class="w-6 h-6 rounded bg-[#ff3d3d] flex items-center justify-center shrink-0">
+                                 <span class="text-[10px] font-bold text-white">转</span>
+                               </div>
+                               转转
+                             </a>
+                           </div>
+                        </div>
+                      }
+                    </div>
                   </div>
 
                </div>
@@ -388,7 +446,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   verificationStatus = signal<'idle' | 'verifying' | 'success' | 'error'>('idle');
   verificationMessage = signal('');
   declarationCountdown = signal(0);
-  copyButtonText = signal('Copy Info');
+  copyButtonText = signal('复制链接');
   private countdownInterval: any;
 
   // Scrubber State
@@ -493,6 +551,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   closeModal() {
     this.isClosing.set(true);
+    this.showShareMenu.set(false);
     setTimeout(() => {
       this.selectedReading.set(null);
       this.isClosing.set(false);
@@ -660,14 +719,14 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     const { school, college, major, studentId } = this.verificationForm();
     if (!school || !college || !major || !studentId) {
       this.verificationStatus.set('error');
-      this.verificationMessage.set('Please fill in all fields.');
+      this.verificationMessage.set('请填写所有必填项。');
       return;
     }
     
     // Simple mock verification logic
     if (studentId.length !== 11) {
        this.verificationStatus.set('error');
-       this.verificationMessage.set('Student ID must be 11 digits.');
+       this.verificationMessage.set('学号必须为11位数字。');
        return;
     }
 
@@ -675,7 +734,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       // Success
       this.verificationStatus.set('success');
-      this.verificationMessage.set('Verification Successful!');
+      this.verificationMessage.set('验证成功！');
       setTimeout(() => {
         this.eResourceFlowStep.set('declaration');
         this.startDeclarationCountdown();
@@ -705,8 +764,77 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   copyResourceInfo() {
     navigator.clipboard.writeText(this.resourceLinkText()).then(() => {
-      this.copyButtonText.set('Copied!');
-      setTimeout(() => this.copyButtonText.set('Copy Info'), 2000);
+      this.copyButtonText.set('已复制');
+      setTimeout(() => this.copyButtonText.set('复制链接'), 2000);
     });
+  }
+
+  // --- Share & Jump Logic ---
+  showShareMenu = signal(false);
+  shareMenuCopied = signal(false);
+
+  handleShare(item: Reading) {
+    // 1. Determine type and format text
+    const isJournal = this.isJournal(item);
+    let text = '';
+    
+    if (isJournal) {
+      text = `${item.title} 杂志`;
+    } else {
+      // Book: Title + Author + ISBN
+      const parts = [item.title];
+      if (item.author) parts.push(item.author);
+      if (item.identifier) parts.push(item.identifier);
+      text = parts.join(' ');
+    }
+
+    // 2. Copy to clipboard
+    navigator.clipboard.writeText(text).then(() => {
+      this.shareMenuCopied.set(true);
+      setTimeout(() => this.shareMenuCopied.set(false), 2000);
+    });
+
+    // 3. Toggle Menu
+    this.showShareMenu.set(!this.showShareMenu());
+  }
+
+  getPlatformUrl(platform: string, item: Reading): string {
+    const isJournal = this.isJournal(item);
+    let keyword = '';
+    
+    if (isJournal) {
+      keyword = `${item.title} 杂志`;
+    } else {
+      // For search, Title + Author is usually good enough. ISBN is very specific.
+      // User said "copy format" is Title+Author+ISBN.
+      // For search, maybe we use the same?
+      const parts = [item.title];
+      if (item.author) parts.push(item.author);
+      // ISBN might be too specific if the platform doesn't index it well, but usually they do.
+      if (item.identifier) parts.push(item.identifier);
+      keyword = parts.join(' ');
+    }
+    
+    const encoded = encodeURIComponent(keyword);
+
+    switch (platform) {
+      case 'wechat':
+        return 'weixin://'; // Tries to open app
+      case 'taobao':
+        return `https://s.taobao.com/search?q=${encoded}`;
+      case 'jd':
+        return `https://search.jd.com/Search?keyword=${encoded}`;
+      case 'duozhuayu':
+        return `https://www.duozhuayu.com/search?q=${encoded}`;
+      case 'zhuanzhuan':
+        // Mobile web search for Zhuanzhuan
+        return `https://m.zhuanzhuan.com/search/result?info=${encoded}`;
+      default:
+        return '#';
+    }
+  }
+
+  private isJournal(item: Reading): boolean {
+    return !!item.journalLevel || item.tags.some(t => t.includes('期刊') || t.includes('杂志'));
   }
 }

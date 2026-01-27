@@ -17,4 +17,5 @@ export const routes: Routes = [
   { path: 'readings', component: ReadingsComponent },
   { path: 'user', component: UserDashboardComponent }, // Handles History & Favorites
   { path: 'contact', component: ContactComponent },
+  { path: 'about', component: ContactComponent },
 ];

@@ -97,6 +97,12 @@ import { DataService } from '../../services/data.service';
             <div class="text-4xl mb-4 grayscale">🏛️</div>
             <p class="font-medium text-lg">未找到相关条目</p>
             <p class="text-gray-500 text-sm mt-1">请尝试更换关键词或进入对应分类查找</p>
+            <button 
+              [routerLink]="['/about']"
+              class="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors border border-white/5"
+            >
+              向我们反馈
+            </button>
           </div>
         }
 

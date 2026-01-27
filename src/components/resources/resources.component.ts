@@ -1,12 +1,13 @@
 
 import { Component, inject, signal, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { DataService, Link } from '../../services/data.service';
 import { FormsModule } from '@angular/forms';
 import { NgStyle, CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-resources',
-  imports: [FormsModule, NgStyle, CommonModule],
+  imports: [FormsModule, NgStyle, CommonModule, RouterLink],
   template: `
     <div class="h-full flex flex-col p-6 md:p-8 bg-[#0f0f11] text-white overflow-y-auto custom-scrollbar">
       
@@ -24,6 +25,8 @@ import { NgStyle, CommonModule } from '@angular/common';
            </div>
            <input 
              type="text" 
+             [ngModel]="searchQuery()"
+             (ngModelChange)="searchQuery.set($event)"
              placeholder="搜索资源..." 
              class="w-full bg-[#18181b] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-base text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-lg"
            >
@@ -31,7 +34,20 @@ import { NgStyle, CommonModule } from '@angular/common';
       </div>
       
       <div class="space-y-4">
-        @for (group of groupedLinks(); track group.category) {
+        @if (groupedLinks().length === 0) {
+          <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
+            <div class="text-4xl mb-4 grayscale">📦</div>
+            <p class="font-medium text-lg">未找到相关资源</p>
+            <p class="text-gray-500 text-sm mt-1">请尝试更换关键词查找</p>
+            <button 
+              [routerLink]="['/about']"
+              class="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors border border-white/5"
+            >
+              向我们反馈
+            </button>
+          </div>
+        } @else {
+          @for (group of groupedLinks(); track group.category) {
           <div #categoryElement class="scroll-mt-4 bg-[#18181b] border border-white/5 rounded-xl overflow-hidden transition-all duration-300">
             <button 
               (click)="toggleCategory(group.category, categoryElement)" 
@@ -78,15 +94,15 @@ import { NgStyle, CommonModule } from '@angular/common';
               
               <div class="flex items-center gap-4">
                  <span class="bg-white/10 text-gray-300 text-xs font-bold px-2.5 py-1 rounded-full">{{ group.links.length }}</span>
-                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 transition-transform duration-300" [class.rotate-180]="expandedCategory() === group.category" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 transition-transform duration-300" [class.rotate-180]="expandedCategory() === group.category || searchQuery()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                  </svg>
               </div>
             </button>
              
             <div class="transition-all duration-300 ease-in-out overflow-hidden bg-[#0f0f11]" 
-                 [style.max-height]="expandedCategory() === group.category ? '2000px' : '0px'"
-                 [style.opacity]="expandedCategory() === group.category ? '1' : '0'">
+                 [style.max-height]="(expandedCategory() === group.category || searchQuery()) ? '2000px' : '0px'"
+                 [style.opacity]="(expandedCategory() === group.category || searchQuery()) ? '1' : '0'">
               <div class="p-4 md:p-6 border-t border-white/5">
                 
                 @if (group.category === '院校展览') {
@@ -137,6 +153,7 @@ import { NgStyle, CommonModule } from '@angular/common';
               </div>
             </div>
           </div>
+        }
         }
       </div>
 
@@ -194,6 +211,7 @@ export class ResourcesComponent {
   newUrl = signal('');
   newDesc = signal('');
   expandedCategory = signal<string | null>('null'); // Default expand one for demo
+  searchQuery = signal('');
 
   private categoryOrder = [
     '院校展览','建筑资讯与媒体', '规范、学习与学术', '地图、气象与数据', '软件、插件与渲染',
@@ -201,7 +219,14 @@ export class ResourcesComponent {
   ];
 
   groupedLinks = computed(() => {
-    const links = this.dataService.webLinks();
+    const q = this.searchQuery().toLowerCase();
+    const links = this.dataService.webLinks().filter(l => {
+      if (!q) return true;
+      return l.title.toLowerCase().includes(q) || 
+             l.description.toLowerCase().includes(q) || 
+             (l.tags && l.tags.some(t => t.toLowerCase().includes(q)));
+    });
+
     const map = new Map<string, Link[]>();
     links.forEach(l => {
       const cat = l.category || '未分类';
