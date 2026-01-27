@@ -35,7 +35,7 @@ import { DataService } from '../../services/data.service';
           <!-- View Toggle Button -->
           <div class="flex bg-[#18181b] rounded-xl border border-white/10 p-1 shrink-0">
             <button 
-              (click)="viewMode.set('grid')"
+              (click)="switchView('grid')"
               class="p-2 rounded-lg transition-all"
               [class.bg-white/10]="viewMode() === 'grid'"
               [class.text-white]="viewMode() === 'grid'"
@@ -48,7 +48,7 @@ import { DataService } from '../../services/data.service';
               </svg>
             </button>
             <button 
-              (click)="viewMode.set('list')"
+              (click)="switchView('list')"
               class="p-2 rounded-lg transition-all"
               [class.bg-white/10]="viewMode() === 'list'"
               [class.text-white]="viewMode() === 'list'"
@@ -106,21 +106,23 @@ import { DataService } from '../../services/data.service';
           </div>
         }
 
-        <div class="grid gap-6 pb-20" [class.grid-cols-1]="viewMode() === 'list'" [class.md:grid-cols-2]="viewMode() === 'grid'" [class.lg:grid-cols-3]="viewMode() === 'grid'" [class.xl:grid-cols-4]="viewMode() === 'grid'">
+        <div class="grid gap-6 pb-20 entries-grid" [class.grid-cols-1]="viewMode() === 'list'" [class.md:grid-cols-2]="viewMode() === 'grid'" [class.lg:grid-cols-3]="viewMode() === 'grid'" [class.xl:grid-cols-4]="viewMode() === 'grid'" [class.entries-grid-list]="viewMode() === 'list'" [class.entries-grid-grid]="viewMode() === 'grid'" [class.switching]="isSwitching()">
           @for (entry of filteredEntries(); track entry.id; let i = $index) {
             <a 
               [routerLink]="['/entry', entry.id]" 
               (click)="saveState(scrollContainer.scrollTop)" 
-              class="group bg-[#18181b] rounded-xl overflow-hidden border border-white/5 hover:border-white/20 transition-all hover:translate-y-[-2px] hover:shadow-xl animate-fade-in-up"
+              class="group bg-[#18181b] rounded-xl overflow-hidden border border-white/5 hover:border-white/20 transition-all hover:translate-y-[-2px] hover:shadow-xl animate-fade-in-up entry-card"
               [class.flex]="viewMode() === 'list'"
               [class.flex-col]="viewMode() === 'grid'"
               [class.h-full]="viewMode() === 'grid'"
               [class.flex-row]="viewMode() === 'list'"
               [class.h-24]="viewMode() === 'list'"
+              [class.entry-card-list]="viewMode() === 'list'"
+              [class.entry-card-grid]="viewMode() === 'grid'"
               [style.animation-delay]="i < 12 ? (i * 50) + 'ms' : '0ms'"
             >
               <!-- Image Section -->
-              <div class="overflow-hidden relative bg-gray-800" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
+              <div class="overflow-hidden relative bg-gray-800 entry-image" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
                 @if (entry.imageUrl) {
                    <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term">
                 } @else {
@@ -136,7 +138,7 @@ import { DataService } from '../../services/data.service';
               </div>
 
               <!-- Content Section -->
-              <div class="flex flex-col flex-1 min-w-0" [class.p-4]="viewMode() === 'grid'" [class.p-2]="viewMode() === 'list'">
+              <div class="flex flex-col flex-1 min-w-0 entry-content" [class.p-4]="viewMode() === 'grid'" [class.p-2]="viewMode() === 'list'">
                 <div class="flex justify-between items-start gap-2 mb-1 shrink-0">
                   <h3 class="font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-1" [class.text-lg]="viewMode() === 'grid'" [class.text-base]="viewMode() === 'list'">{{ entry.term }}</h3>
                   @if (entry.details?.includes('19')) {
@@ -176,6 +178,10 @@ import { DataService } from '../../services/data.service';
     </div>
   `,
   styles: [`
+    :host {
+      --view-dur: 380ms;
+      --view-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -200,6 +206,40 @@ import { DataService } from '../../services/data.service';
     .animate-fade-in-up {
       animation: fadeInUp 0.5s ease-out backwards;
     }
+    .entries-grid {
+      transition: grid-template-columns var(--view-dur) var(--view-ease), gap var(--view-dur) var(--view-ease);
+    }
+    .entries-grid.switching .entry-card {
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+    .entry-card {
+      transition: transform 300ms cubic-bezier(0.2, 0, 0, 1), box-shadow 300ms ease, border-color 300ms ease, background-color 300ms ease, opacity 300ms ease;
+      will-change: transform, opacity;
+    }
+    .entry-image {
+      /* Removed layout transitions to prevent jank */
+      transition: border-radius 300ms ease;
+    }
+    .entry-image img {
+      transition: opacity 300ms ease, transform 500ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    .entry-content {
+      transition: opacity 300ms ease;
+    }
+    .entries-grid.switching .entry-image img,
+    .entries-grid.switching .entry-content {
+      opacity: 1; /* Keep internal opacity consistent during switch */
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .entries-grid,
+      .entry-card,
+      .entry-image,
+      .entry-content {
+        transition-duration: 0ms;
+      }
+    }
   `]
 })
 export class EncyclopediaComponent implements AfterViewInit {
@@ -209,6 +249,7 @@ export class EncyclopediaComponent implements AfterViewInit {
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
   viewMode = this.dataService.encyclopediaViewMode;
   displayLimit = signal(200);
+  isSwitching = signal(false);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
@@ -231,6 +272,26 @@ export class EncyclopediaComponent implements AfterViewInit {
         this.scrollContainer.nativeElement.scrollTop = this.dataService.encyclopediaScrollPosition();
       }
     }, 0);
+  }
+
+  switchView(mode: 'grid' | 'list') {
+    if (this.viewMode() === mode) {
+      return;
+    }
+    // 1. Start exit animation (fade out + scale down)
+    this.isSwitching.set(true);
+    
+    // 2. Wait for exit animation to complete (200ms matches CSS)
+    setTimeout(() => {
+      // 3. Change layout (invisible)
+      this.viewMode.set(mode);
+      
+      // 4. Slight delay to let DOM update layout
+      setTimeout(() => {
+         // 5. Start enter animation (fade in + scale up)
+         this.isSwitching.set(false);
+      }, 50);
+    }, 200);
   }
 
   onScroll() {
