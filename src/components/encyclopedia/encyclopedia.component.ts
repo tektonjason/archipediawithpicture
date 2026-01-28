@@ -368,13 +368,39 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   });
 
   private _allFilteredEntries = computed(() => {
-    const q = this.searchQuery().toLowerCase();
+    const rawQuery = this.searchQuery().trim().toLowerCase();
+    const hasQuery = !!rawQuery;
+    
+    // “栱”/“拱” 互通：为当前查询构造同义变体
+    const queryVariants = new Set<string>();
+    if (hasQuery) {
+      queryVariants.add(rawQuery);
+      if (rawQuery.includes('栱')) {
+        queryVariants.add(rawQuery.replace(/栱/g, '拱'));
+      }
+      if (rawQuery.includes('拱')) {
+        queryVariants.add(rawQuery.replace(/拱/g, '栱'));
+      }
+    }
+
     const cat = this.selectedCategory();
     let list = this.dataService.entries().filter(e => {
       const matchCat = cat === 'all' || e.category === cat;
-      const matchSearch = !q || e.term.toLowerCase().includes(q) || 
-                          e.termEn.toLowerCase().includes(q) || 
-                          e.definition.toLowerCase().includes(q);
+      
+      let matchSearch = true;
+      if (hasQuery) {
+        const fields = [
+          e.term || '',
+          e.termEn || '',
+          e.definition || '',
+          e.details || ''
+        ].map(v => v.toLowerCase());
+
+        matchSearch = Array.from(queryVariants).some(qv =>
+          fields.some(f => f.includes(qv))
+        );
+      }
+
       return matchCat && matchSearch;
     });
     return list; 
