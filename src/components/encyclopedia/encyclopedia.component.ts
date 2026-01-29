@@ -250,7 +250,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   searchQuery = signal('');
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
   viewMode = this.dataService.encyclopediaViewMode;
-  displayLimit = signal(200);
+  displayLimit = signal(50);
   isSwitching = signal(false);
 
   // Typewriter properties
@@ -348,7 +348,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
 
   updateSearch(query: string) {
     this.searchQuery.set(query);
-    this.displayLimit.set(200);
+    this.displayLimit.set(50);
     if (this.scrollContainer?.nativeElement) {
       this.scrollContainer.nativeElement.scrollTop = 0;
     }
@@ -413,7 +413,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   selectCategory(category: string) {
     if (this.selectedCategory() !== category) {
       this.selectedCategory.set(category);
-      this.displayLimit.set(200);
+      this.displayLimit.set(50);
       this.dataService.encyclopediaScrollPosition.set(0);
       if (this.scrollContainer?.nativeElement) {
         this.scrollContainer.nativeElement.scrollTop = 0;
