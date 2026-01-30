@@ -8,6 +8,10 @@ import { UserDashboardComponent } from './components/user/user-dashboard.compone
 import { ContactComponent } from './components/contact/contact.component';
 import { ReadingsComponent } from './components/readings/readings.component';
 import { CompetitionsComponent } from './components/competitions/competitions.component';
+import { EssentialsComponent } from './components/essentials/essentials.component';
+import { MethodologyComponent } from './components/essentials/methodology.component';
+import { QnaComponent } from './components/essentials/qna.component';
+import { CareerComponent } from './components/essentials/career.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'encyclopedia', pathMatch: 'full' },
@@ -17,6 +21,10 @@ export const routes: Routes = [
   { path: 'resources', component: ResourcesComponent },
   { path: 'readings', component: ReadingsComponent },
   { path: 'competitions', component: CompetitionsComponent },
+  { path: 'essentials', component: EssentialsComponent },
+  { path: 'essentials/methodology', component: MethodologyComponent },
+  { path: 'essentials/qna', component: QnaComponent },
+  { path: 'essentials/career', component: CareerComponent },
   { path: 'user', component: UserDashboardComponent }, // Handles History & Favorites
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: ContactComponent },

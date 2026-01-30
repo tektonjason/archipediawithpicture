@@ -250,7 +250,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   searchQuery = signal('');
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
   viewMode = this.dataService.encyclopediaViewMode;
-  displayLimit = signal(50);
+  displayLimit = this.dataService.encyclopediaDisplayLimit;
   isSwitching = signal(false);
 
   // Typewriter properties

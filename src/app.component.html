@@ -71,6 +71,12 @@
           </svg>
           <span>竞赛合集</span>
         </a>
+        <a routerLink="/essentials" routerLinkActive #rlaEssentials="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rlaEssentials.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span>建筑干货</span>
+        </a>
         <a routerLink="/user" [queryParams]="{tab: 'favorites'}" routerLinkActive #rla5="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla5.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>

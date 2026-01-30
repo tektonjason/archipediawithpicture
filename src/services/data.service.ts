@@ -120,6 +120,7 @@ export class DataService {
 
   // --- Encyclopedia View State ---
   encyclopediaScrollPosition = signal<number>(0);
+  encyclopediaDisplayLimit = signal<number>(50);
   encyclopediaSelectedCategory = signal<string>('all');
   encyclopediaViewMode = signal<'grid' | 'list'>('grid');
 
