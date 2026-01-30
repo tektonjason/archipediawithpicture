@@ -102,14 +102,17 @@ import pinyin from 'pinyin';
                        class="group cursor-pointer flex flex-col gap-3 animate-fade-in-up" 
                        [style.animation-delay]="(i % 21 * 30) + 'ms'" 
                      >
-                      <!-- Book Cover Placeholder -->
+                      <!-- Book Cover -->
                       <div class="aspect-[2/3] bg-[#18181b] rounded-lg border border-white/5 group-hover:border-white/20 overflow-hidden relative shadow-lg group-hover:shadow-xl transition-all group-hover:-translate-y-1">
-                        <!-- We don't have real covers, so use a gradient or pattern -->
-                        <div class="absolute inset-0 bg-gradient-to-br from-[#2a2a2e] to-[#18181b] flex items-center justify-center p-4 text-center">
-                           <div class="absolute inset-x-4 top-0 h-[1px] bg-white/10"></div>
-                           <div class="absolute inset-y-0 left-3 w-[2px] bg-black/20 h-full"></div>
-                           <h3 class="font-serif font-bold text-gray-300 text-sm line-clamp-3 leading-snug">{{ item.title }}</h3>
-                        </div>
+                        @if (item.imageUrl && !failedImages().has(item.id)) {
+                          <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
+                        } @else {
+                          <div class="absolute inset-0 bg-gradient-to-br from-[#2a2a2e] to-[#18181b] flex items-center justify-center p-4 text-center">
+                             <div class="absolute inset-x-4 top-0 h-[1px] bg-white/10"></div>
+                             <div class="absolute inset-y-0 left-3 w-[2px] bg-black/20 h-full"></div>
+                             <h3 class="font-serif font-bold text-gray-300 text-sm line-clamp-3 leading-snug">{{ item.title }}</h3>
+                          </div>
+                        }
                         @if(item.journalLevel) {
                           <div class="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold rounded shadow-sm" [ngClass]="getJournalClass(item.journalLevel)">
                             {{ item.journalLevel }}
@@ -189,10 +192,16 @@ import pinyin from 'pinyin';
                   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
                   
                   <!-- Book Cover Mockup -->
-                  <div class="relative w-32 md:w-48 aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col p-4 md:p-6 text-center justify-center transform transition-transform hover:scale-105 duration-500">
-                     <div class="absolute inset-y-0 left-2 w-[1px] bg-white/5"></div>
-                     <h2 class="font-serif font-bold text-gray-200 text-lg md:text-xl leading-tight mb-2">{{ item.title }}</h2>
-                     <p class="text-xs text-gray-500 uppercase tracking-widest">{{ item.author }}</p>
+                  <div class="relative w-full max-w-[320px] aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col items-center justify-center transform transition-transform hover:scale-105 duration-500 overflow-hidden">
+                     @if (item.imageUrl && !failedImages().has(item.id)) {
+                       <img [src]="item.imageUrl" [alt]="item.title" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
+                     } @else {
+                       <div class="flex flex-col p-4 md:p-6 text-center justify-center h-full w-full relative">
+                         <div class="absolute inset-y-0 left-2 w-[1px] bg-white/5"></div>
+                         <h2 class="font-serif font-bold text-gray-200 text-lg md:text-xl leading-tight mb-2">{{ item.title }}</h2>
+                         <p class="text-xs text-gray-500 uppercase tracking-widest">{{ item.author }}</p>
+                       </div>
+                     }
                   </div>
                </div>
 
@@ -246,7 +255,7 @@ import pinyin from 'pinyin';
                   </div>
 
                   <div class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-[#18181b] border-t border-white/10 z-10 shrink-0 flex gap-4">
-                    <a [href]="getSearchUrl(item)" target="_blank" class="flex-1 bg-white text-black hover:bg-gray-200 transition-colors py-3 rounded-lg font-bold flex items-center justify-center gap-2">
+                    <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="cursor-pointer flex-1 bg-white text-black hover:bg-gray-200 transition-colors py-3 rounded-lg font-bold flex items-center justify-center gap-2">
                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                        <span>在线搜索</span>
                     </a>
@@ -444,6 +453,17 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   selectedTag = signal('all');
   selectedReading = signal<Reading | null>(null);
   isClosing = signal(false);
+
+  failedImages = signal<Set<string>>(new Set());
+
+  handleImageError(id: string | undefined) {
+    if (!id) return;
+    this.failedImages.update(s => {
+      const newSet = new Set(s);
+      newSet.add(id);
+      return newSet;
+    });
+  }
 
   // E-Resource Flow State
   eResourceFlowStep = signal<'closed' | 'verification' | 'declaration' | 'resources'>('closed');

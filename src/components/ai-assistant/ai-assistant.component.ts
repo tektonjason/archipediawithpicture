@@ -171,7 +171,7 @@ export class AiAssistantComponent {
     const tool = this.selectedTool();
     if (tool) {
       navigator.clipboard.writeText(this.fullPrompt).then(() => {
-        window.open(tool.url, '_blank');
+        this.dataService.openExternalModal(tool.url);
         this.closeModal();
       }).catch(err => {
         console.error('Failed to copy text: ', err);

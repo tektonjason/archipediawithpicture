@@ -7,6 +7,7 @@ import { ResourcesComponent } from './components/resources/resources.component';
 import { UserDashboardComponent } from './components/user/user-dashboard.component';
 import { ContactComponent } from './components/contact/contact.component';
 import { ReadingsComponent } from './components/readings/readings.component';
+import { CompetitionsComponent } from './components/competitions/competitions.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'encyclopedia', pathMatch: 'full' },
@@ -15,6 +16,7 @@ export const routes: Routes = [
   { path: 'ai', component: AiAssistantComponent },
   { path: 'resources', component: ResourcesComponent },
   { path: 'readings', component: ReadingsComponent },
+  { path: 'competitions', component: CompetitionsComponent },
   { path: 'user', component: UserDashboardComponent }, // Handles History & Favorites
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: ContactComponent },

@@ -50,7 +50,7 @@ interface DownloadLink {
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           @for (link of onlineLinks; track link.name) {
-            <a [href]="link.url" target="_blank" class="group bg-[#18181b] border border-white/5 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-white/5 hover:border-white/10 transition-all">
+            <div (click)="dataService.openExternalModal(link.url)" class="cursor-pointer group bg-[#18181b] border border-white/5 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-white/5 hover:border-white/10 transition-all">
               <h4 class="text-base font-bold mb-2 text-white">{{ link.name }}</h4>
               <p class="text-xs text-gray-400 mb-4 min-h-[2rem]">{{ link.description }}</p>
               <div class="w-full">
@@ -58,7 +58,7 @@ interface DownloadLink {
                   {{ link.buttonText }}
                 </div>
               </div>
-            </a>
+            </div>
           }
         </div>
       </section>

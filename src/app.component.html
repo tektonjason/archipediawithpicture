@@ -64,6 +64,13 @@
           </svg>
           <span>建筑读物</span>
         </a>
+        <a routerLink="/competitions" routerLinkActive #rlaComp="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rlaComp.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9H18V21H6V9Z" />
+            <path d="M6 9L12 3L18 9" />
+          </svg>
+          <span>竞赛合集</span>
+        </a>
         <a routerLink="/user" [queryParams]="{tab: 'favorites'}" routerLinkActive #rla5="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla5.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
@@ -186,6 +193,30 @@
         <div class="flex gap-3 mt-4">
           <button (click)="dataService.showLogoutModal.set(false)" class="flex-1 py-2.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">取消</button>
           <button (click)="dataService.confirmLogout()" class="flex-1 py-2.5 rounded-lg font-bold bg-red-600 text-white hover:bg-red-500 transition-colors">确认退出</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- External Link Warning Modal -->
+  @if (dataService.showExternalModal()) {
+    <div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" (click)="dataService.closeExternalModal()"></div>
+      <div class="bg-[#18181b] border border-white/20 rounded-xl p-6 max-w-md w-full shadow-2xl relative z-10 animate-[fadeIn_0.2s_ease-out]">
+        <h3 class="text-lg font-bold text-white mb-3">外部网站跳转提示</h3>
+        <p class="text-gray-400 mb-6 text-sm leading-relaxed">您即将跳转到外部网站，请注意您的账号和财产安全。</p>
+        <div class="flex flex-col gap-3">
+          <div class="flex gap-3">
+            <button (click)="dataService.closeExternalModal()" class="flex-1 bg-white/5 border border-white/10 rounded-lg py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium">
+              取消
+            </button>
+            <button (click)="dataService.confirmExternalNavigation()" class="flex-1 bg-blue-600/20 border border-blue-500/30 rounded-lg py-2.5 text-blue-400 hover:bg-blue-600/30 hover:text-blue-300 transition-all text-sm font-medium">
+              继续访问
+            </button>
+          </div>
+          <button (click)="dataService.confirmExternalNavigation(true)" class="w-full bg-transparent border border-white/5 rounded-lg py-2 text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all text-xs">
+            本次使用不再提醒
+          </button>
         </div>
       </div>
     </div>

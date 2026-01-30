@@ -36,6 +36,18 @@ export interface Reading {
   identifier: string | null;
   url?: string;
   detailContent?: string;
+  imageUrl?: string;
+}
+
+export interface Competition {
+  level: string;     // 级别
+  type: string;      // 种类
+  name: string;      // 竞赛名称
+  organizer: string; // 主办单位
+  note: string;      // 备注
+  url: string;       // 网址
+  deadline: string;  // 报名截至时间
+  month?: number;    // 1-12, derived from deadline
 }
 
 export interface ChatMessage {
@@ -62,12 +74,48 @@ export class DataService {
   loginPass = signal('');
   loginError = signal('');
 
+  // --- External Link Modal State ---
+  showExternalModal = signal(false);
+  externalUrl = signal('');
+  externalModalSuppressed = signal(false); // New state to suppress modal for current session
+
+  openExternalModal(url: string) {
+    if (!url) return;
+    
+    // Check if suppressed
+    if (this.externalModalSuppressed()) {
+      window.open(url, '_blank');
+      return;
+    }
+
+    this.externalUrl.set(url);
+    this.showExternalModal.set(true);
+  }
+
+  closeExternalModal() {
+    this.showExternalModal.set(false);
+  }
+
+  confirmExternalNavigation(suppress: boolean = false) {
+    const url = this.externalUrl();
+    if (url) {
+      window.open(url, '_blank');
+    }
+    
+    if (suppress) {
+      this.externalModalSuppressed.set(true);
+    }
+    
+    this.showExternalModal.set(false);
+  }
+
   // --- Data Stores ---
   entries = signal<Entry[]>([]);
   favorites = signal<string[]>([]);
   history = signal<string[]>([]);
   webLinks = signal<Link[]>([]);
   readings = signal<Reading[]>([]);
+  competitions = signal<Competition[]>([]);
   chatHistory = signal<ChatMessage[]>([]);
 
   // --- Encyclopedia View State ---
@@ -85,6 +133,7 @@ export class DataService {
     
     this.syncResources();
     this.seedReadingsData();
+    this.seedCompetitionsData();
 
     effect(() => localStorage.setItem('arch_favorites', JSON.stringify(this.favorites())));
     effect(() => localStorage.setItem('arch_history', JSON.stringify(this.history())));
@@ -516,7 +565,107 @@ export class DataService {
       { title: '穿墙透壁: 剖视中国经典古建筑', author: '李乾朗', publisher: '广西师范大学出版社', description: '图文解析中国古代经典建筑。', tags: ['建筑史', '专业工具'], journalLevel: null, identifier: '9787563390939', detailContent: '李乾朗以剖面图形式展示中国传统经典古建筑（如庙宇、殿堂等）的内部结构。通过直观的剖视图解和简要说明，揭示中国木构建筑的结构特征和施工细节，是了解传统建造技术的图解手册。' },
       { title: '建筑设计资料集', author: '', publisher: '中国建筑工业出版社', description: '一套系统汇集建筑设计规范、技术参数与典型案例的综合性专业工具书。', tags: ['建筑设计', '专业工具', '建筑教育'], journalLevel: null, identifier: '9787112209392', detailContent: '《建筑设计资料集（第三版）》由中国建筑工业出版社与中国建筑学会组织编写，汇集40余家专业机构历时七年的研究成果，是中国建筑设计领域规模最大、体系最完整的综合性工具书。全书共八册，覆盖建筑总论、居住、公共建筑、工业、市政等主要方向，以标准化图表、精炼文字和重新绘制的专业图版呈现建筑设计的关键技术参数、规范要点与典型案例。 \n新版在继承1960年初版与1987年第二版体系的基础上全面升级，内容跨越建筑技术、工程、经济、人体工学、美学与环境心理等多学科领域，被视为当代中国建筑设计的“百科全书”。其模块化结构与动态更新机制提升了检索效率与实用性，为建筑师、规划师及相关专业提供系统、权威且可直接应用的设计依据。' }
     ];
-    this.readings.set(rawData.map((item, index) => ({ ...item, id: `r${index + 1}` })));
+    this.readings.set(rawData.map((item, index) => ({ ...item, id: `r${index + 1}`, imageUrl: `/images/book/s${index + 1}.webp` })));
+  }
+
+  private seedCompetitionsData() {
+    // Placeholder data - waiting for full user data
+    // Format: Level, Type, Name, Organizer, Note, URL, Deadline
+    const rawData = [
+      { level: '国家级', type: 'S类', name: '中国国际大学生创新大赛', organizer: '教育部', note: '上榜赛事', url: 'https://cy.ncss.cn/', deadline: '5月' },
+      { level: '国家级', type: 'S类', name: '“挑战杯”全国大学生课外学术科技作品竞赛', organizer: '共青团中央', note: '上榜赛事', url: 'http://www.tiaozhanbei.net/', deadline: '1月' },
+      { level: '国家级', type: 'A类', name: '全国大学生电子商务“创新、创意及创业”挑战赛', organizer: '高校电子商务类专业教学指导委员会', note: '上榜赛事', url: 'http://www.3chuang.net/', deadline: '9月' },
+      { level: '国家级', type: 'A类', name: '全国大学生创新创业训练计划年会展示', organizer: '教育部高等教育司', note: '上榜赛事', url: 'http://www.gjcxcy.cn/', deadline: '' },
+      { level: '国家级', type: 'A类', name: '中美青年创客大赛', organizer: '教育部', note: '上榜赛事', url: 'https://chinaus-maker.cscse.edu.cn/', deadline: '6月' },
+      { level: '国家级', type: 'A类', name: '“挑战杯”中国大学生创业计划大赛', organizer: '共青团中央', note: '上榜赛事', url: 'http://www.tiaozhanbei.net/', deadline: '1月' },
+      { level: '国家级', type: 'A类', name: '全国大学生广告艺术大赛', organizer: '教育部高等学校新闻传播学类专业教学指导委员会、中国高等教育学会广告教育专业委员会', note: '上榜赛事', url: 'https://www.sun-ada.net/', deadline: '6月' },
+      { level: '国家级', type: 'A类', name: '未来设计师·全国高校数字艺术设计大赛', organizer: '工业和信息化部人才交流中心', note: '上榜赛事', url: 'https://www.ncda.org.cn/', deadline: '6月' },
+      { level: '国家级', type: 'A类', name: '中国好创意暨全国数字艺术设计大赛', organizer: '全国高等院校计算机基础教育研究会', note: '上榜赛事', url: 'https://www.cdec.org.cn/', deadline: '6月' },
+      { level: '国家级', type: 'A类', name: '“学创杯”全国大学生创业综合模拟大赛', organizer: '高等学校国家级实验教学示范中心联席会经济与管理学科组', note: '上榜赛事', url: 'http://www.bster.cn/cyds/index', deadline: '3月' },
+      { level: '国家级', type: 'A类', name: '全国大学生先进成图技术与产品信息建模创新大赛', organizer: '教育部高等学校工程图学教学指导委员会、中国图学学会制图技术专业委员会、中国图学学会产品信息建模专业委员会', note: '上榜赛事', url: 'http://www.chengtudasai.com/', deadline: '4月' },
+      { level: '国家级', type: 'A类', name: '全国大学生结构设计竞赛', organizer: '住房和城乡建设部、中国土木工程学会', note: '上榜赛事', url: 'http://www.structurecontest.com/', deadline: '7月' },
+      { level: '国家级', type: 'A类', name: '全国高校 BIM 毕业设计创新大赛', organizer: '中国软件行业协会培训中心', note: '上榜赛事', url: 'https://gxbsxs.glodonedu.com/', deadline: '11月' },
+      { level: '国家级', type: 'A类', name: '两岸新锐设计竞赛·华灿奖', organizer: '中国高等教育学会、中华中山文化交流协会、北京歌华文化发展集团', note: '上榜赛事', url: 'http://www.huacanjiang.com/home', deadline: '9月' },
+      { level: '国家级', type: 'A类', name: '米兰设计周--中国高校设计学科师生优秀作品展', organizer: '中国教育国际交流协会、中国高等教育学会', note: '上榜赛事', url: 'http://www.dandad.cn/', deadline: '1月' },
+      { level: '国家级', type: 'A类', name: '全国三维数字化创新设计大赛', organizer: '国家制造业信息化培训中心、全国三维数字化技术推广服务与教育培训联盟（3D动力）、光华设计发展基金会', note: '上榜赛事', url: 'https://3dds.3ddl.net/', deadline: '6月' },
+      { level: '国家级', type: 'B类', name: '全国大学生GIS应用技能大赛', organizer: '中国地理信息产业协会、教育部高等学校地理科学类教学指导委员会', note: '教指委赛事', url: 'http://contest.gisera.com/', deadline: '9月' },
+      { level: '国家级', type: 'B类', name: '全国大学生农业水利工程及相关专业创新设计大赛', organizer: '教育部高等学校农业工程类专业教学指导委员会', note: '教指委赛事', url: 'http://csae.org.cn/scdsxkjs/slgcjxgzy/', deadline: '7月' },
+      { level: '国家级', type: 'B类', name: '全国大学生农业建筑环境与能源工程相关专业创新创业竞赛', organizer: '教育部高等学校农业工程类专业教学指导委员会', note: '教指委赛事', url: 'http://csae.org.cn/scdsxkjs/jzhjynygc/', deadline: '7月' },
+      { level: '国家级', type: 'B类', name: 'WUPENiCity城市可持续调研报告国际竞赛', organizer: '世界规划教育组织WUPEN', note: '', url: 'http://www.wupen.org/competitions/67', deadline: '3月' },
+      { level: '国家级', type: 'B类', name: 'WUPENiCity城市设计学生作业国际竞赛', organizer: '世界规划教育组织WUPEN', note: '', url: 'http://wupen.net/competitions/128', deadline: '3月' },
+      { level: '国家级', type: 'B类', name: '全国大学生环境设计大赛', organizer: '中国建筑装饰协会', note: '', url: 'https://www.shejijingsai.com/2025/02/1281185.html', deadline: '6月' },
+      { level: '省部级', type: 'C类', name: '全国大学生乡村振兴创意大赛研学旅行赛', organizer: '中国城市科学研究会', note: '', url: 'https://www.cteweb.cn/index.php/work/317.html', deadline: '6月' },
+      { level: '省部级', type: 'C类', name: '“园冶杯”风景园林（毕业设计、论文）国际竞赛', organizer: '国际绿色建筑与住宅景观协会、亚洲园林协会', note: '', url: 'http://www.yuanyebei.com/', deadline: '7月' },
+      { level: '省部级', type: 'C类', name: '艾景奖•国际园林景观规划设计大赛', organizer: '国际园林景观规划设计行业协会（ILIA）', note: '', url: 'https://www.idea-king.org.cn/', deadline: '8月' },
+      { level: '省部级', type: 'C类', name: '中国风景园林教育大会学生设计竞赛', organizer: '中国风景园林学会教育工作委员会', note: '', url: 'https://www.chsla.org.cn/', deadline: '8月' },
+      { level: '省部级', type: 'C类', name: '全国大学生植物保护专业能力大赛', organizer: '教育部高等学校植物生产类专业教学指导委员会农艺（含农学、植物保护）类教学指导分委员会', note: '', url: '暂无', deadline: '6月' },
+      { level: '省部级', type: 'C类', name: '全国数字建筑创新应用大赛', organizer: '中国建设教育协会', note: '', url: 'http://bisai.ccen.com.cn/', deadline: '8月' },
+      { level: '省部级', type: 'C类', name: '台达杯国际太阳能建筑设计竞赛', organizer: '国际太阳能学会、中国建设科技集团中央研究院、中国建筑设计研究院有限公司', note: '', url: 'https://isbdc.cn/', deadline: '8月' },
+      { level: '省部级', type: 'C类', name: '全国高等院校大学生乡村规划方案竞赛', organizer: '中国城市规划学会乡村规划与建设学术委员会', note: '', url: 'https://www.planning.org.cn/', deadline: '12月' },
+      { level: '省部级', type: 'C类', name: '全国大学生乡村振兴创意大赛', organizer: '中国城市科学研究会、河南省文化和旅游厅、浙江省文旅厅', note: '', url: 'https://gsxczx.moocollege.com/home/homepage', deadline: '7月' },
+      { level: '省部级', type: 'C类', name: 'CIID中国手绘艺术设计大赛', organizer: '中国建筑学会室内设计分会', note: '', url: 'https://www.ciid.com.cn/prize/prize_list?pt_id=9', deadline: '6月' },
+      { level: '省部级', type: 'C类', name: '“新人杯”全国大学生室内设计竞赛', organizer: '中国建筑学会室内设计分会', note: '', url: 'https://www.ciid.com.cn/', deadline: '7月' },
+      { level: '省部级', type: 'D类', name: '中国古村落活化利用建设规划设计大赛', organizer: '中景恒基投资集团、江西省抚州市金溪县人民政府', note: '省级学会', url: 'http://www.naioc.org.cn/', deadline: '3月' },
+      { level: '校级', type: 'E级', name: '全国环境友好科技竞赛', organizer: '清华大学、同济大学及西安建筑科技大学', note: '', url: 'https://lab.env.tsinghua.edu.cn/info/1581/2963.htm', deadline: '6月' },
+      { level: '国家级', type: 'A类', name: '全国大学生花园设计建造竞赛', organizer: '中国风景园林学会', note: '上榜赛事', url: 'http://www.lalavision.com/', deadline: '2月' },
+      { level: '国家级', type: 'A类', name: '全国大学生数字媒体科技作品及创意竞赛', organizer: '中国人工智能学会等', note: '上榜赛事', url: 'http://cmit.cn/', deadline: '9月' },
+      { level: '国家级', type: 'A类', name: '中国国际大学生创新大赛', organizer: '教育部等', note: '上榜赛事', url: 'https://cy.ncss.cn/', deadline: '5月' },
+      { level: '国家级', type: 'A类', name: '“挑战杯” 全国大学生课外学术科技作品竞赛', organizer: '共青团中央等', note: '上榜赛事', url: 'http://www.tiaozhanbei.net/', deadline: '1月' },
+      { level: '国家级', type: 'A类', name: '“挑战杯” 中国大学生创业计划竞赛', organizer: '共青团中央等', note: '上榜赛事', url: 'http://www.tiaozhanbei.net/', deadline: '1月' },
+      { level: '国家级', type: 'A类', name: '全国大学生电子商务 “创新、创意及创业” 挑战赛', organizer: '教育部高等学校电子商务类专业教学指导委员会', note: '上榜赛事', url: 'http://www.3chuang.net/', deadline: '9月' },
+      { level: '国家级', type: '无（忽略级别）', name: '东南·中国建筑新人赛', organizer: '东南大学', note: '大一至大三可参加', url: 'http://archirookies.com/', deadline: '7月' },
+      { level: '国际级', type: '无（忽略级别）', name: '霍普杯2025国际大学生建筑设计竞赛', organizer: '国际建筑师协会（UIA）', note: '', url: 'https://hypcup.uedmagazine.net/', deadline: '9月' },
+      { level: '国际级', type: '无（忽略级别）', name: '《建筑师》杂志 · 「天作奖」国际大学生建筑设计竞赛', organizer: '中国建筑出版传媒有限公司《建筑师》杂志社、广州市天作建筑规划设计有限公司、新加坡天作国际设计公司、天津大学建筑学院', note: '', url: 'https://mp.weixin.qq.com/s/y8H-ScAhv5coszV0OnanHg', deadline: '12月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'eVolo 摩天楼设计竞赛', organizer: 'eVolo Magazine', note: '', url: 'https://www.evolo.us/category/competition/', deadline: '11月' },
+      { level: '国家级', type: '无（忽略级别）', name: '谷雨杯-全国大学生可持续建筑设计竞赛', organizer: '全国高等学校建筑学学科专业指导', note: '已停办', url: 'http://www.guyu.cnkibim.cn/col.jsp?id=117', deadline: '' },
+      { level: '国际级', type: '无（忽略级别）', name: '国际威卢克斯（Velux）大奖赛', organizer: 'VELUX（威卢克斯）', note: '两年一次', url: 'https://www.daylightandarchitecture.com/award-brief/', deadline: '4月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'Houzee Awards', organizer: 'Architecture Collection', note: '', url: 'https://architecture-collection.com/', deadline: '6月' },
+      { level: '国际级', type: '无（忽略级别）', name: '“生动废墟”（ LIVING RUINS II ）建筑设计竞赛', organizer: 'Terraviva', note: '', url: 'http://www.terravivacompetitions.com/', deadline: '1月' },
+      { level: '国际级', type: '无（忽略级别）', name: '发展中国家建筑设计大展&2025国际学生设计竞赛', organizer: '国际建筑学会、亚洲太平洋地区人居环境学会', note: '', url: 'HTTP://WWW.ARCHIAWARD.NET', deadline: '2月' },
+      { level: '国际级', type: '无（忽略级别）', name: '圣戈班（Saint Gobain）学生建筑竞赛 / 贝尔格莱德', organizer: 'Saint-Gobain', note: '', url: 'https://architecture-student-contest.saint-gobain.com/', deadline: '5月' },
+      { level: '国际级', type: '无（忽略级别）', name: '情感博物馆设计竞赛', organizer: 'Buildner', note: '', url: 'https://architecturecompetitions.com/museumofemotions8/', deadline: '6月' },
+      { level: '国际级', type: '无（忽略级别）', name: '西海市"极小住宅“设计竞赛', organizer: '西海市', note: '', url: 'https://yadokari.net/saikai/', deadline: '1月' },
+      { level: '国际级', type: '无（忽略级别）', name: '《建筑金属》杂志设计挑战赛', organizer: '《建筑金属》杂志', note: '', url: 'https://metalsinconstruction.org/2026-design-brief/', deadline: '3月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'International Excellence Awards', organizer: 'Architecture & Design Community', note: '', url: 'https://designskill.org/iea-registration/', deadline: '5月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'KAIRA LOORO 建筑竞赛', organizer: 'Balouo Salo', note: '', url: 'https://www.kairalooro.com/', deadline: '5月' },
+      { level: '国际级', type: '无（忽略级别）', name: '微型住宅（MICROHOME）设计竞赛', organizer: 'Buildner', note: '', url: 'https://architecturecompetitions.com/microhome2026/', deadline: '9月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'International Architecture & Design Awards', organizer: 'Architecture & Design Community', note: '', url: 'https://ad-c.org', deadline: '4月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'IDEASxWOOD 设计竞赛', organizer: 'TABU Spa', note: '', url: 'https://i4w.it/en/', deadline: '6月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'ADF 设计大奖赛', organizer: 'Aoyama Design Forum (ADF)', note: '', url: 'https://www.adfwebmagazine.jp/en/design/', deadline: '12月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'DiscoverArch Student Project Awards', organizer: 'DiscoverArch', note: '', url: 'https://www.discoverarch.org/competitions/', deadline: '1月' },
+      { level: '国际级', type: '无（忽略级别）', name: '“阴影之家”设计竞赛', organizer: 'Buildner', note: '', url: 'https://architecturecompetitions.com/homeofshadows4/', deadline: '3月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'NOT A HOTEL 设计竞赛', organizer: 'NOT A HOTEL', note: '', url: 'https://notahotel.com/design-competition/2026', deadline: '1月' },
+      { level: '国际级', type: '无（忽略级别）', name: '街头小贩创新家具设计国际公开竞赛', organizer: 'Ketham\'s Atelier', note: '', url: 'https://kethamsatelier.com/2025/08/28/open-international-competition-to-design-innovative-furniture-for-street-vendors-2025-26/', deadline: '2月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'WAF 建筑制图大奖赛', organizer: 'Make Architects, Sir John Soane\'s Museum, World Architecture Festival', note: '', url: 'https://worldarchitecturefestival.com/WorldArchitectureFestival2025/en/page/the-architecture-drawing-prize', deadline: '5月' },
+      { level: '国际级', type: '无（忽略级别）', name: '可持续发展目标国际设计奖', organizer: '东西大学亚洲未来设计中心（韩国）、九州大学可持续发展目标设计部（日本）、同济大学（中国）', note: '', url: 'https://uni.dongseo.ac.kr/adcf/index.php?pCode=MN8000043&mode=view&idx=983', deadline: '10月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'UIA 国际学生竞赛', organizer: 'UIA - International Union of Architects', note: '', url: 'https://uia2026bcn.org/international-student-competition/', deadline: '11月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'Kinderspace — 儿童发展建筑竞赛', organizer: 'Buildner', note: '', url: 'https://architecturecompetitions.com/kinderspace3/', deadline: '11月' },
+      { level: '国际级', type: '无（忽略级别）', name: '临终关怀——临终者之家设计竞赛', organizer: 'Buildner', note: '', url: 'https://architecturecompetitions.com/hospice5/', deadline: '11月' },
+      { level: '国际级', type: '无（忽略级别）', name: '疗愈空间——国际设计大赛', organizer: 'Claymire', note: '', url: 'https://www.claymire.site/a-healing-space', deadline: '8月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'YADOKARI 微型住宅设计竞赛', organizer: 'YADOKARI 株式会社', note: '', url: 'https://yadokari.net/tinyhousecontest/', deadline: '7月' },
+      { level: '国际级', type: '无（忽略级别）', name: '微型住宅（MICROHOME）设计竞赛', organizer: 'Buildner', note: '', url: 'https://architecturecompetitions.com/microhome10/', deadline: '9月' },
+      { level: '国际级', type: '无（忽略级别）', name: '微建筑节木制装置作品征集竞赛', organizer: 'Associazione Culturale Fe.M', note: '团队成员可以包括学生，但前提是至少有一名成员是已毕业的建筑师或工程师。', url: 'https://www.festivalmicroarchitettura.com/call-2025', deadline: '5月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'ARCASIA 学生建筑设计竞赛', organizer: '亚洲建筑师协会（ARCASIA）', note: '', url: 'https://arcasia.org/awards/arcasia-students-design-competition-2025/', deadline: '7月' },
+      { level: '国际级', type: '无（忽略级别）', name: '“微型图书馆”建筑竞赛', organizer: 'Volume Zero', note: '', url: 'https://volumezerocompetitions.com/tinylibrary-2025', deadline: '6月' },
+      { level: '国际级', type: '无（忽略级别）', name: '垂直农场设计竞赛', organizer: 'YAC-Young Architects Competitions, Manni Group', note: '', url: 'https://www.youngarchitectscompetitions.com/open-competitions/vertical-farms', deadline: '5月' },
+      { level: '国际级', type: '无（忽略级别）', name: 'Shift 地标建筑设计大赛', organizer: 'Shift', note: '', url: 'https://competition.shift.world/', deadline: '3月' },
+    ];
+
+    const competitions: Competition[] = rawData.map(d => {
+      let month: number | undefined;
+      // Try to extract month from deadline (e.g. "2024年2月..." or "...May...")
+      // Simple regex for Chinese format "X月"
+      const mMatch = d.deadline.match(/(\d{1,2})月/);
+      if (mMatch) {
+        month = parseInt(mMatch[1], 10);
+      }
+      return {
+        ...d,
+        month
+      };
+    });
+    
+    this.competitions.set(competitions);
   }
 
   private seedArchipediaData() {

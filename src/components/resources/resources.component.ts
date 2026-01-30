@@ -118,7 +118,7 @@ import { NgStyle, CommonModule } from '@angular/common';
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   @for (link of group.links; track link.id) {
                     <!-- Link Card -->
-                    <a [href]="link.url" target="_blank" class="group/card flex items-start gap-4 p-4 rounded-lg bg-[#18181b] border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all">
+                    <div (click)="dataService.openExternalModal(link.url)" class="group/card flex items-start gap-4 p-4 rounded-lg bg-[#18181b] border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer">
                       <div class="w-10 h-10 rounded bg-white/5 flex items-center justify-center shrink-0 group-hover/card:bg-white/10 transition-colors">
                          <span class="text-xs font-bold text-gray-400 group-hover/card:text-white">{{ link.title.charAt(0).toUpperCase() }}</span>
                       </div>
@@ -127,7 +127,7 @@ import { NgStyle, CommonModule } from '@angular/common';
                          <div class="flex justify-between items-start">
                             <h4 class="text-sm font-bold text-white group-hover/card:text-blue-400 transition-colors truncate">{{ link.title }}</h4>
                             @if (dataService.isAdmin()) {
-                              <button (click)="$event.preventDefault(); deleteLink(link.id)" class="text-red-500/50 hover:text-red-500 transition-colors ml-2">
+                              <button (click)="$event.stopPropagation(); deleteLink(link.id)" class="text-red-500/50 hover:text-red-500 transition-colors ml-2">
                                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                               </button>
                             }
@@ -147,7 +147,7 @@ import { NgStyle, CommonModule } from '@angular/common';
                       <div class="opacity-0 group-hover/card:opacity-100 transition-opacity self-center">
                          <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                       </div>
-                    </a>
+                    </div>
                   }
                 </div>
               </div>
