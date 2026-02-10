@@ -18,7 +18,7 @@ export class GeminiService {
     try {
       // Construct context
       const systemPrompt = `
-        你是一位专业的建筑学导师，服务于"Bauhaus Archipedia"应用。
+        你是一位专业的建筑学导师，服务于"Architecture Learning OS"应用。
         你的目标是帮助用户学习建筑知识，制定学习计划，并解释专业术语。
         请用中文回答，语言专业、精确、简洁。
         

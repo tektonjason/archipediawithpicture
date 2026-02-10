@@ -2,6 +2,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-essentials',
@@ -45,7 +46,7 @@ import { CommonModule } from '@angular/common';
         </a>
 
         <!-- Section 2: Q&A -->
-        <a routerLink="/essentials/qna" class="block bg-[#18181b] border border-white/5 rounded-xl overflow-hidden transition-all duration-300 hover:bg-white/5 hover:border-white/10 group">
+        <a (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cj0zVG0UXxsa')" class="block bg-[#18181b] border border-white/5 rounded-xl overflow-hidden transition-all duration-300 hover:bg-white/5 hover:border-white/10 group cursor-pointer">
           <div class="w-full text-left p-5 md:p-6 flex justify-between items-center">
             <div class="flex items-center gap-5">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
@@ -120,4 +121,6 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class EssentialsComponent {}
+export class EssentialsComponent {
+  dataService = inject(DataService);
+}
