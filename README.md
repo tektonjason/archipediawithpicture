@@ -1,7 +1,7 @@
 <div align="center">
   <img width="120" height="120" src="/public/icon/archipediaicon.webp" alt="Archipedia Logo" />
   <h1>Archipedia</h1>
-  <p><strong>Architecture Learning OS</strong></p>
+  <p><strong>Architecture Learning Planet</strong></p>
   <p>
     A lightweight architecture learning platform for beginners<br>
     轻量且面向初学者的建筑学习平台
