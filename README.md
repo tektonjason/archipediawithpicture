@@ -13,10 +13,10 @@
 ## 📖 Introduction / 简介
 
 **English**  
-Archipedia is a lightweight architecture learning platform designed for beginners. By combining traditional architectural knowledge, design methodologies, toolchains, and AI assistance, it helps you avoid detours, bridge information gaps, and streamline your learning journey. Think of it as your "Architecture Learning Operating System."
+Archipedia is a lightweight architecture learning platform designed for beginners. By combining traditional architectural knowledge, design methodologies, toolchains, and AI assistance, it helps you avoid detours, bridge information gaps, and streamline your learning journey. Think of it as your "Architecture Learning Planet."
 
 **中文**  
-Archipedia 是一个轻量且面向初学者的建筑学习平台。它把传统建筑知识、设计方法、工具链与 AI 辅助结合起来，致力于帮你少走弯路、跨越信息差，是你的专属“建筑学习操作系统”。
+Archipedia 是一个轻量且面向初学者的建筑学习平台。它把传统建筑知识、设计方法、工具链与 AI 辅助结合起来，致力于帮你少走弯路、跨越信息差，是你的专属“建筑学习星球”。
 
 ---
 
