@@ -1,6 +1,6 @@
 
-import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 
@@ -121,6 +121,18 @@ import { DataService } from '../../services/data.service';
     }
   `]
 })
-export class EssentialsComponent {
+export class EssentialsComponent implements OnInit {
   dataService = inject(DataService);
+  route = inject(ActivatedRoute);
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['openQna'] === 'true') {
+        // Small delay to ensure smooth transition and data service readiness
+        setTimeout(() => {
+          this.dataService.openExternalModal('https://www.kdocs.cn/l/cj0zVG0UXxsa');
+        }, 100);
+      }
+    });
+  }
 }
