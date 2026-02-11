@@ -1,7 +1,15 @@
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { DataService } from '../../services/data.service';
+
+interface MethodColumn {
+  title: string;
+  url: string;
+  description?: string;
+  icon?: string;
+}
 
 @Component({
   selector: 'app-methodology',
@@ -23,16 +31,89 @@ import { RouterLink } from '@angular/router';
       </div>
 
       <!-- Content -->
-      <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500">
-        <div class="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-6">
-          <svg class="w-10 h-10 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-          </svg>
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+          @for (col of methodologyColumns; track col.title) {
+            <a 
+              (click)="openLink(col.url)"
+              class="group cursor-pointer bg-[#18181b] border border-white/5 rounded-xl p-5 hover:bg-white/5 hover:border-white/10 transition-all duration-300 flex flex-col gap-4 relative overflow-hidden"
+            >
+              <!-- Hover Glow Effect -->
+              <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+
+              <div class="flex items-start justify-between relative z-10">
+                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                
+                <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:border-blue-500/50 group-hover:text-blue-400 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+
+              <div class="relative z-10">
+                <h3 class="text-lg font-bold text-gray-200 group-hover:text-white transition-colors">{{ col.title }}</h3>
+                <p class="text-xs text-gray-500 mt-1 group-hover:text-gray-400 transition-colors line-clamp-2">
+                  {{ col.description || '点击查看详细内容与方法论' }}
+                </p>
+              </div>
+            </a>
+          }
+          
+          <!-- Add New Placeholder (Visual cue for extensibility) -->
+          <div class="border border-dashed border-white/10 rounded-xl p-5 flex flex-col items-center justify-center text-gray-600 gap-2 min-h-[140px] opacity-50 hover:opacity-100 hover:border-white/20 transition-all cursor-default">
+             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+             </svg>
+             <span class="text-xs">更多栏目建设中...</span>
+          </div>
         </div>
-        <h3 class="text-lg font-bold text-gray-400 mb-2">内容建设中</h3>
-        <p class="max-w-md">本板块正在筹备中，将为您带来系统化的设计思维与方法论总结，敬请期待。</p>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  `]
 })
-export class MethodologyComponent {}
+export class MethodologyComponent {
+  private dataService = inject(DataService);
+
+  // Define columns here for easy extensibility
+  methodologyColumns: MethodColumn[] = [
+    { title: '设计开题方法', url: 'https://www.kdocs.cn/l/coV0BsAPZ001', description: '包含选题背景、意义、目标及框架构建方法' },
+    { title: '调研方法', url: 'https://example1', description: '场地调研、用户访谈与案例分析技巧' },
+    { title: '建筑立面', url: 'https://example2', description: '立面材质、构成与形式语言探索' },
+    { title: '建筑结构', url: 'https://example3', description: '结构选型、力学原理与构造细节' },
+    { title: '空间设计', url: 'https://example4', description: '空间序列、尺度感与氛围营造' },
+    { title: '楼梯设计', url: 'https://example5', description: '规范要求、形式选择与细部设计' },
+    { title: '色彩应用', url: 'https://example6', description: '色彩心理学、材质搭配与环境色分析' },
+    // 您可以在此处添加新栏目，格式如下：
+    // { title: '栏目名称', url: 'https://链接地址', description: '栏目描述' },
+  ];
+
+  openLink(url: string) {
+    // Check if it's a valid URL before trying to open
+    if (url && url.startsWith('http')) {
+      this.dataService.openExternalModal(url);
+    } else {
+      console.warn('Invalid URL:', url);
+    }
+  }
+}
