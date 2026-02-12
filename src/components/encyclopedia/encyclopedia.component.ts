@@ -264,6 +264,9 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
   private categoryOrder = [
+    // 如果您添加了新的分类（例如“未来建筑”），默认它会出现在列表末尾。
+    // 若要调整其显示顺序，请将其名称添加到此数组中的期望位置。
+    // 未在此数组中列出的分类将按字母顺序排在这些指定分类之后。
     "中国古代建筑", "西方古代建筑", "现代构造与系统", "建筑风格与设计思潮", 
     "结构与构造理论", "建筑材料与施工工艺", "可持续与绿色建筑", 
     "城市规划与公共空间", "室内设计与景观设计", "建筑法规、标准与项目管理", 

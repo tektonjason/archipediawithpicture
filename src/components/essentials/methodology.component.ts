@@ -104,7 +104,7 @@ export class MethodologyComponent {
     { title: '空间设计', url: 'https://example4', description: '空间序列、尺度感与氛围营造' },
     { title: '楼梯设计', url: 'https://example5', description: '规范要求、形式选择与细部设计' },
     { title: '色彩应用', url: 'https://example6', description: '色彩心理学、材质搭配与环境色分析' },
-    // 您可以在此处添加新栏目，格式如下：
+    // 在此处添加新栏目，格式如下：
     // { title: '栏目名称', url: 'https://链接地址', description: '栏目描述' },
   ];
 
