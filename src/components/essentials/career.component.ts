@@ -194,7 +194,9 @@ export class CareerComponent implements OnInit {
     '互动媒体艺术家', '创意总监', '文化体验开发者', '工程造价师', 'BIM 管理', '能耗模拟师', 
     '绿色建筑认证顾问', '幕墙工程师', '照明设计师', '声学顾问', '建筑材料研发', '数字制造', 
     '室内设计师', '舞台/影视布景', '城市数据分析师', '文物/古建保护', '媒体从业者', 
-    '建筑软件开发', 'AR/VR', '交互设计', '城市规划', '城市设计', '应急设计', '建成环境'
+    '建筑软件开发', 'AR/VR', '交互设计', '城市规划', '城市设计', '应急设计', '建成环境',
+    // 您可以在此处添加新职业，直接追加字符串即可：
+    // '新职业名称',
   ];
 
   ngOnInit() {
@@ -254,6 +256,8 @@ export class CareerComponent implements OnInit {
   }
 
   determineCategory(name: string): CareerNode['category'] {
+    // 如果您添加了新职业，请确保它能被以下逻辑正确分类。
+    // 如果现有关键词无法覆盖，请在此处添加新的关键词判断。
     if (name.includes('工程师') || name.includes('开发') || name.includes('数据') || name.includes('BIM') || name.includes('计算')) return 'tech';
     if (name.includes('艺术') || name.includes('动画') || name.includes('游戏') || name.includes('美术') || name.includes('布景')) return 'art';
     if (name.includes('管理') || name.includes('总监') || name.includes('策略') || name.includes('造价')) return 'management';

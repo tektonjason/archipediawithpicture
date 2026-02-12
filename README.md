@@ -87,6 +87,45 @@ npm start
 
 ---
 
+## 📝 Content Management / 内容管理指南
+
+This project is designed for easy extensibility. Most content can be added by modifying specific array lists in the code.  
+本项目设计了便捷的扩展性，大部分内容可以通过修改代码中的数组列表直接添加。
+
+### 1. Encyclopedia (建筑百科)
+- **File / 文件**: [`src/services/data.service.ts`](src/services/data.service.ts)
+- **Method / 位置**: `seedArchipediaData()`
+- **Add Entries / 添加条目**: Scroll to the bottom of the desired category list (e.g., "China Ancient Architecture") and add a new array entry following the commented example.  
+  找到对应分类列表（如“中国古代建筑”）的末尾，按照注释示例添加新的数组条目。
+- **Add Category / 新增分类**: Simply use a new category name in your data entry. The tab will appear automatically.  
+  直接在数据条目中使用新的分类名称，标签栏会自动显示该分类。
+- **Tab Order / 分类顺序**: Edit `categoryOrder` in [`src/components/encyclopedia/encyclopedia.component.ts`](src/components/encyclopedia/encyclopedia.component.ts) to change tab order.  
+  编辑 `encyclopedia.component.ts` 中的 `categoryOrder` 数组来调整标签顺序。
+- **Images / 图片配置**: Configure new category image paths in `categoryImageConfig` in `data.service.ts`.  
+  在 `data.service.ts` 的 `categoryImageConfig` 中配置新分类的图片路径规则。
+
+### 2. Resources, Readings & Competitions (资源、读物与竞赛)
+- **File / 文件**: [`src/services/data.service.ts`](src/services/data.service.ts)
+- **Resources / 资源库**: Locate `getSeedResources()` and add to the list end.  
+  找到 `getSeedResources()` 方法，在列表末尾添加对象。
+- **Readings / 建筑读物**: Locate `seedReadingsData()` and add to the list end.  
+  找到 `seedReadingsData()` 方法，在列表末尾添加对象。
+- **Competitions / 竞赛**: Locate `seedCompetitionsData()` and add to the list end.  
+  找到 `seedCompetitionsData()` 方法，在列表末尾添加对象。
+
+### 3. Essentials (建筑干货)
+- **Design Methodology / 设计方法**:  
+  Edit `methodologyColumns` in [`src/components/essentials/methodology.component.ts`](src/components/essentials/methodology.component.ts).  
+  编辑 `methodology.component.ts` 中的 `methodologyColumns` 数组。
+- **Career Universe / 职业导览**:  
+  Edit `rawCareers` in [`src/components/essentials/career.component.ts`](src/components/essentials/career.component.ts). (Ensure new careers match keywords in `determineCategory` for correct coloring).  
+  编辑 `career.component.ts` 中的 `rawCareers` 数组。（确保新职业能被 `determineCategory` 中的关键词识别，以获得正确的颜色分类）。
+- **Q&A / 问答**:  
+  Edit `qaItems` in [`src/components/essentials/qna.component.ts`](src/components/essentials/qna.component.ts).  
+  编辑 `qna.component.ts` 中的 `qaItems` 数组。
+
+---
+
 ## 🤝 Contributing / 参与贡献
 
 **English**  

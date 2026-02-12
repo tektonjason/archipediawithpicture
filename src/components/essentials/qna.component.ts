@@ -23,16 +23,36 @@ import { RouterLink } from '@angular/router';
       </div>
 
       <!-- Content -->
-      <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500">
-        <div class="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-6">
-           <svg class="w-10 h-10 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-           </svg>
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <div class="flex flex-col items-center justify-center py-20 text-center text-gray-500">
+              <div class="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-6">
+                 <svg class="w-10 h-10 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                 </svg>
+              </div>
+              <h3 class="text-lg font-bold text-gray-400 mb-2">内容建设中</h3>
+              <p class="max-w-md">本板块正在筹备中，将为您带来常见问题解答与经验分享，敬请期待。</p>
+            </div>
         </div>
-        <h3 class="text-lg font-bold text-gray-400 mb-2">内容建设中</h3>
-        <p class="max-w-md">本板块正在筹备中，将为您带来常见问题解答与经验分享，敬请期待。</p>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  `]
 })
 export class QnaComponent {}

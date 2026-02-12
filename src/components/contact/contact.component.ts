@@ -21,24 +21,51 @@ interface DownloadLink {
         <p class="text-gray-400 font-medium">About & Contact</p>
       </div>
 
+      <!-- User Tutorial Section -->
+      <section class="mb-10">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+          <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+          使用教程
+        </h3>
+        <div (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cpjHpTZQ60RV')" class="cursor-pointer group bg-[#18181b] border border-white/5 rounded-xl p-6 flex items-center gap-6 hover:bg-white/5 hover:border-white/10 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0 text-orange-400 group-hover:bg-orange-500/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-300 group-hover:text-white transition-colors">
+               查看详细的操作指南与功能介绍，快速上手应用。
+            </p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-all">
+             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+             </svg>
+          </div>
+        </div>
+      </section>
+
       <!-- Contact Info -->
       <section class="mb-10">
         <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
           <span class="w-2 h-2 rounded-full bg-blue-500"></span>
           交流邮箱
         </h3>
-        <div class="bg-[#18181b] border border-white/5 rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-          <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-400">
+        <div class="group bg-[#18181b] border border-white/5 rounded-xl p-6 flex items-center gap-6 hover:bg-white/5 hover:border-white/10 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <p class="text-sm text-gray-300">
-            如果您有任何建议、问题或合作意向，请发送邮件至：
-            <a href="mailto:tektonjason@163.com" class="font-bold text-blue-400 hover:text-blue-300 transition-colors">
-              tektonjason@163.com
-            </a>
-          </p>
+          <div class="flex-1 text-left">
+            <p class="text-sm text-gray-300 group-hover:text-white transition-colors">
+              如果您有任何建议、问题或合作意向，请发送邮件至：
+              <a href="mailto:tektonjason@163.com" class="block mt-1 font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                tektonjason@163.com
+              </a>
+            </p>
+          </div>
         </div>
       </section>
 
