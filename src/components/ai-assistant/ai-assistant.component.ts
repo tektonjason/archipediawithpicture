@@ -149,7 +149,7 @@ export class AiAssistantComponent {
   selectedTool = signal<AiTool | null>(null);
 
   promptParts = {
-    prefix: '你是一位专业的建筑学导师，服务于"Architecture Learning OS"应用。 \n你的目标是帮助用户学习建筑知识，制定学习计划，并解释专业术语。 \n请用中文回答，语言专业、精确、简洁。',
+    prefix: '你是一位专业的建筑学导师，服务于"Architecture Learning Planet"应用。 \n你的目标是帮助用户学习建筑知识，制定学习计划，并解释专业术语。 \n请用中文回答，语言专业、精确、简洁。',
     suffix: '重要规则：\n如果你的回复中提到了任何特定的建筑术语，请尽量使用标准术语，并提供可访问的可靠资料的访问链接。 \n不要使用Markdown链接语法，直接输出文本即可。 \n保持语气鼓励和学术性。'
   };
 

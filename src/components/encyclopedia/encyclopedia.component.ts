@@ -416,6 +416,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   selectCategory(category: string) {
     if (this.selectedCategory() !== category) {
       this.selectedCategory.set(category);
+      this.searchQuery.set(''); // Clear search when switching categories
       this.displayLimit.set(50);
       this.dataService.encyclopediaScrollPosition.set(0);
       if (this.scrollContainer?.nativeElement) {

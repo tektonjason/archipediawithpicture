@@ -54,7 +54,7 @@ import pinyin from 'pinyin';
                @for (entry of favEntries(); track entry.id) {
                  <div class="bg-[#18181b] border border-white/5 rounded-xl p-4 flex justify-between items-center transition-all duration-200 hover:border-white/20 hover:bg-white/5">
                    <div>
-                      <h3 class="font-bold text-lg text-white">{{ entry.term }}</h3>
+                      <h3 class="font-bold text-base text-white">{{ entry.term }}</h3>
                       <p class="text-sm text-gray-500">{{ entry.category }}</p>
                    </div>
                    <div class="flex items-center gap-3">
@@ -89,8 +89,8 @@ import pinyin from 'pinyin';
                      {{ entry.firstPinyinLetter }}
                    </div>
                    <div>
-                     <h4 class="font-bold text-white group-hover:text-blue-400 transition-colors">{{ entry.term }}</h4>
-                     <p class="text-sm text-gray-500 font-mono">{{ entry.category }}</p>
+                     <h4 class="font-bold text-base text-white group-hover:text-blue-400 transition-colors">{{ entry.term }}</h4>
+                     <p class="text-sm text-gray-500">{{ entry.category }}</p>
                    </div>
                    <div class="ml-auto text-gray-600 group-hover:text-white transition-colors">
                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

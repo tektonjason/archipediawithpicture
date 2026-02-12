@@ -547,6 +547,9 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   selectTag(tag: string) {
+    if (this.selectedTag() !== tag) {
+      this.searchQuery.set('');
+    }
     this.selectedTag.set(tag);
     // Allow the view to update and computed signals (like filteredReadings and availableLetters) to re-evaluate
     setTimeout(() => {
