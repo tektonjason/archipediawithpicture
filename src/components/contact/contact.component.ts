@@ -1,5 +1,6 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 
 interface DownloadLink {
@@ -12,6 +13,8 @@ interface DownloadLink {
 
 @Component({
   selector: 'app-contact',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="h-full flex flex-col p-6 md:p-8 bg-[#0f0f11] text-white overflow-y-auto custom-scrollbar">
       
@@ -19,6 +22,21 @@ interface DownloadLink {
       <div class="flex flex-col items-center mb-8 shrink-0 space-y-2 text-center">
         <h2 class="text-3xl md:text-4xl font-bold tracking-wide">关于应用</h2>
         <p class="text-gray-400 font-medium">About & Contact</p>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="mb-8 space-y-4 max-w-5xl mx-auto">
+          <div *ngIf="showDisclaimer()" class="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex gap-3 items-center text-sm text-amber-200/80 pr-2 group transition-all">
+            <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p class="flex-1">由于本应用没有后端服务，应用的不定期更新会发布在网盘中，请您自行下载安装。</p>
+            <button (click)="showDisclaimer.set(false)" class="text-amber-500/50 hover:text-amber-500 transition-colors p-1 rounded hover:bg-amber-500/10 shrink-0 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
       </div>
 
       <!-- User Tutorial Section -->
@@ -179,6 +197,7 @@ interface DownloadLink {
   `]
 })
 export class ContactComponent {
+  showDisclaimer = signal(true);
   dataService = inject(DataService);
 
   onlineLinks: DownloadLink[] = [

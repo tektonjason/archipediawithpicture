@@ -98,12 +98,12 @@ export class MethodologyComponent {
   // Define columns here for easy extensibility
   methodologyColumns: MethodColumn[] = [
     { title: '设计开题方法', url: 'https://www.kdocs.cn/l/coV0BsAPZ001', description: '包含选题背景、意义、目标及框架构建方法' },
-    { title: '调研方法', url: 'https://example1', description: '场地调研、用户访谈与案例分析技巧' },
-    { title: '建筑立面', url: 'https://example2', description: '立面材质、构成与形式语言探索' },
-    { title: '建筑结构', url: 'https://example3', description: '结构选型、力学原理与构造细节' },
-    { title: '空间设计', url: 'https://example4', description: '空间序列、尺度感与氛围营造' },
-    { title: '楼梯设计', url: 'https://example5', description: '规范要求、形式选择与细部设计' },
-    { title: '色彩应用', url: 'https://example6', description: '色彩心理学、材质搭配与环境色分析' },
+    { title: '调研方法', url: 'https://www.kdocs.cn/l/ceaSWaVLumOh', description: '场地调研、用户访谈与案例分析技巧' },
+    { title: '建筑立面', url: 'https://www.kdocs.cn/l/cu0mWlNMf5bG', description: '立面材质、构成与形式语言探索' },
+    { title: '建筑结构', url: 'https://www.kdocs.cn/l/cbDrUaQ0N7cc', description: '结构选型、力学原理与构造细节' },
+    { title: '空间设计', url: 'https://www.kdocs.cn/l/crp3GmFAiAXh', description: '空间序列、尺度感与氛围营造' },
+    { title: '楼梯设计', url: 'https://www.kdocs.cn/l/cvm1E0MGujmB', description: '规范要求、形式选择与细部设计' },
+    { title: '色彩应用', url: 'https://www.kdocs.cn/l/cgKttRrwFHsH', description: '色彩心理学、材质搭配与环境色分析' },
     // 在此处添加新栏目，格式如下：
     // { title: '栏目名称', url: 'https://链接地址', description: '栏目描述' },
   ];
