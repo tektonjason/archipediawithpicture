@@ -1,5 +1,15 @@
 
 
+// =================================================================
+//
+//  ARCHIPEDIA - Knowledge Base
+//  Built by 曾若宽 (Zeng Ruokuan)
+//
+//  This content is for educational purposes only.
+//  Unauthorized commercial use is strictly prohibited.
+//
+// =================================================================
+
 import { Injectable, signal, computed, effect } from '@angular/core';
 
 export interface Entry {
@@ -66,6 +76,10 @@ export class DataService {
 
   // --- Admin State ---
   isAdmin = signal<boolean>(false);
+
+  // --- Toast Notification State ---
+  toastMessage = signal('');
+  showToast = signal(false);
   
   // --- Global Modal States ---
   showLoginModal = signal(false);
@@ -202,6 +216,15 @@ export class DataService {
 
   logout() {
     this.isAdmin.set(false);
+  }
+
+  displayToast(message: string, duration: number = 3000) {
+    this.toastMessage.set(message);
+    this.showToast.set(true);
+    
+    setTimeout(() => {
+      this.showToast.set(false);
+    }, duration);
   }
 
   // --- Entry Management ---
@@ -1340,8 +1363,6 @@ export class DataService {
         const prefix = cfg.prefix ?? '';
         const filename = prefix ? `${prefix}${nextIndex}.webp` : `${nextIndex}.webp`;
 
-        // 中国古代建筑已整体迁移图片位置，必须强制使用新的路径；
-        // 其他分类仅在原先没有自定义图片时才按规则生成路径
         if (category === '中国古代建筑' || !imageUrl) {
           imageUrl = `${cfg.basePath}/${filename}`;
         }

@@ -252,4 +252,11 @@
       </div>
     </div>
   }
+
+  <!-- Toast Notification -->
+  @if (dataService.showToast()) {
+    <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-black/80 backdrop-blur-sm text-white px-5 py-2.5 rounded-lg shadow-2xl border border-white/10 animate-fade-in-up">
+      {{ dataService.toastMessage() }}
+    </div>
+  }
 </div>

@@ -1,4 +1,13 @@
 
+// =================================================================
+//
+//  ARCHIPEDIA - Knowledge Base
+//  Built by 曾若宽 (Zeng Ruokuan)
+//
+//  This content is for educational purposes only.
+//  Unauthorized commercial use is strictly prohibited.
+//
+// =================================================================
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { DataService } from './services/data.service';

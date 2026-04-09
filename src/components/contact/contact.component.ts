@@ -1,6 +1,5 @@
 
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { DataService } from '../../services/data.service';
 
 interface DownloadLink {
@@ -13,8 +12,6 @@ interface DownloadLink {
 
 @Component({
   selector: 'app-contact',
-  standalone: true,
-  imports: [CommonModule],
   template: `
     <div class="h-full flex flex-col p-6 md:p-8 bg-[#0f0f11] text-white overflow-y-auto custom-scrollbar">
       
@@ -22,21 +19,6 @@ interface DownloadLink {
       <div class="flex flex-col items-center mb-8 shrink-0 space-y-2 text-center">
         <h2 class="text-3xl md:text-4xl font-bold tracking-wide">关于应用</h2>
         <p class="text-gray-400 font-medium">About & Contact</p>
-      </div>
-
-      <!-- Disclaimer -->
-      <div class="mb-8 space-y-4 max-w-5xl mx-auto">
-          <div *ngIf="showDisclaimer()" class="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex gap-3 items-center text-sm text-amber-200/80 pr-2 group transition-all">
-            <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <p class="flex-1">由于本应用没有后端服务，应用的不定期更新会发布在网盘中，请您自行下载安装。</p>
-            <button (click)="showDisclaimer.set(false)" class="text-amber-500/50 hover:text-amber-500 transition-colors p-1 rounded hover:bg-amber-500/10 shrink-0 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
       </div>
 
       <!-- User Tutorial Section -->
@@ -93,19 +75,29 @@ interface DownloadLink {
           <span class="w-2 h-2 rounded-full bg-green-500"></span>
           在线使用
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          @for (link of onlineLinks; track link.name) {
-            <div (click)="dataService.openExternalModal(link.url)" class="cursor-pointer group bg-[#18181b] border border-white/5 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-white/5 hover:border-white/10 transition-all">
-              <h4 class="text-base font-bold mb-2 text-white">{{ link.name }}</h4>
-              <p class="text-xs text-gray-400 mb-4 min-h-[2rem]">{{ link.description }}</p>
-              <div class="w-full">
-                <div class="w-full py-2 rounded-lg bg-white/10 text-white text-xs font-bold group-hover:bg-white group-hover:text-black transition-colors">
-                  {{ link.buttonText }}
-                </div>
+        @for (link of onlineLinks; track link.name) {
+          <div class="group bg-[#18181b] border border-white/5 rounded-xl p-6 flex items-center gap-6 hover:bg-white/5 hover:border-white/10 transition-all">
+            <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0 text-green-400 group-hover:bg-green-500/20 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </div>
+            <div class="flex-1 text-left">
+              <p class="text-sm font-medium text-white">{{ link.name }}</p>
+              <p class="text-xs text-gray-400">{{ link.description }}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div (click)="dataService.openExternalModal(link.url)" class="cursor-pointer px-4 py-2 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white hover:text-black transition-colors">
+                {{ link.buttonText }}
+              </div>
+              <div (click)="shareLink(link.url)" class="cursor-pointer w-10 h-10 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors flex items-center justify-center">
+                <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                  <path d='M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z' />
+                </svg>
               </div>
             </div>
-          }
-        </div>
+          </div>
+        }
       </section>
 
       <!-- Software Updates Section -->
@@ -197,32 +189,27 @@ interface DownloadLink {
   `]
 })
 export class ContactComponent {
-  showDisclaimer = signal(true);
   dataService = inject(DataService);
 
   onlineLinks: DownloadLink[] = [
     {
-      name: '主入口',
-      url: 'https://archipedia.netlify.app/',
+      name: '在线使用',
+      url: 'https://www.archipedia.top',
       icon: '🚀',
-      description: 'Archipedia Online (Main)',
-      buttonText: '访问主站'
-    },
-    {
-      name: '备用入口 1',
-      url: 'https://archipedia2.netlify.app/',
-      icon: '🔗',
-      description: 'Archipedia Online (Mirror 1)',
-      buttonText: '访问备用 1'
-    },
-    {
-      name: '备用入口 2',
-      url: 'https://archipedia3.netlify.app/',
-      icon: '🔗',
-      description: 'Archipedia Online (Mirror 2)',
-      buttonText: '访问备用 2'
+      description: 'Archipedia Online',
+      buttonText: '访问站点'
     }
   ];
+
+  shareLink(url: string) {
+    const textToCopy = `${url}   Archipedia---你的建筑知识生态系统`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      this.dataService.displayToast('分享内容已复制');
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+      this.dataService.displayToast('复制失败');
+    });
+  }
 
   downloadLinks: DownloadLink[] = [
     {

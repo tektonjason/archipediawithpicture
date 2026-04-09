@@ -12,17 +12,18 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
-      },
-      devOptions: {
-        enabled: true
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Architecture Learning Planet',
+        name: 'Archipedia',
         short_name: 'Archipedia',
-        description: 'Architecture Learning Planet PWA',
-        theme_color: '#ffffff',
+        description: 'A comprehensive, Bauhaus-style architectural encyclopedia and AI learning assistant.',
+        theme_color: '#18181b',
+        background_color: '#0f0f11',
+        display: 'standalone',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
             src: '/icon/archipediaicon.webp',
@@ -33,6 +34,12 @@ export default defineConfig({
             src: '/icon/archipediaicon.webp',
             sizes: '512x512',
             type: 'image/webp'
+          },
+          {
+            src: '/icon/archipediaicon.webp',
+            sizes: '512x512',
+            type: 'image/webp',
+            purpose: 'any maskable'
           }
         ]
       }
