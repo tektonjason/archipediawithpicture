@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 interface MethodColumn {
   title: string;
@@ -14,7 +15,7 @@ interface MethodColumn {
 
 @Component({
   selector: 'app-methodology',
-  imports: [CommonModule, RouterLink, ...APP_UI_ICONS],
+  imports: [CommonModule, RouterLink, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page text-white">
       <!-- Header -->
@@ -36,6 +37,7 @@ interface MethodColumn {
             <a 
               (click)="openLink(col.url)"
               class="group cursor-pointer ui-card ui-card-hover p-5 flex flex-col gap-4 relative overflow-hidden"
+              appGsapCardHover
             >
               <!-- Hover Glow Effect -->
               <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>

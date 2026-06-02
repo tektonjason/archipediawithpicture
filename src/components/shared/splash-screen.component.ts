@@ -57,25 +57,39 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
   private pointerMoveHandler!: (e: PointerEvent) => void;
   private pointerLeaveHandler!: (e: PointerEvent) => void;
   private isEntering = false;
+  private enterTl?: gsap.core.Timeline;
+  private introTweens: gsap.core.Tween[] = [];
+  private enterFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+  private hasEmittedEnter = false;
 
   ngAfterViewInit() {
     if (typeof window === 'undefined') return;
 
     this.mm = gsap.matchMedia();
 
-    this.mm.add("all", () => {
+    this.mm.add(
+      {
+        canAnimate: "(prefers-reduced-motion: no-preference)",
+        finePointer: "(pointer: fine)"
+      },
+      (context) => {
       const container = this.splashContainer.nativeElement;
       const outer = this.logoOuter.nativeElement;
       const inner = this.logoInner.nativeElement;
+      const { canAnimate, finePointer } = context.conditions as { canAnimate: boolean; finePointer: boolean };
 
       gsap.set(container, { perspective: 1000 });
       gsap.set(outer, { transformStyle: "preserve-3d" });
       gsap.set(inner, { transformStyle: "preserve-3d", z: 50 });
 
-      const outerRX = gsap.quickTo(outer, "rotationX", { ease: "power3" });
-      const outerRY = gsap.quickTo(outer, "rotationY", { ease: "power3" });
-      const innerX = gsap.quickTo(inner, "x", { ease: "power3" });
-      const innerY = gsap.quickTo(inner, "y", { ease: "power3" });
+      if (!canAnimate || !finePointer) {
+        return;
+      }
+
+      const outerRX = gsap.quickTo(outer, "rotationX", { duration: 0.28, ease: "power3.out" });
+      const outerRY = gsap.quickTo(outer, "rotationY", { duration: 0.28, ease: "power3.out" });
+      const innerX = gsap.quickTo(inner, "x", { duration: 0.28, ease: "power3.out" });
+      const innerY = gsap.quickTo(inner, "y", { duration: 0.28, ease: "power3.out" });
 
       this.pointerMoveHandler = (e: PointerEvent) => {
         if (this.isEntering) return;
@@ -104,66 +118,86 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
         container.removeEventListener("pointerleave", this.pointerLeaveHandler);
       };
     });
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      gsap.set(this.logoOuter.nativeElement, { opacity: 1, y: 0, scale: 1 });
+      gsap.set(this.logoInner.nativeElement.children, { opacity: 1, y: 0 });
+      return;
+    }
     
     // Initial entrance animation
-    gsap.from(this.logoOuter.nativeElement, {
+    this.introTweens.push(gsap.from(this.logoOuter.nativeElement, {
       y: 50,
       scale: 0.9,
       opacity: 0,
-      duration: 1.2,
-      ease: "power4.out"
-    });
+      duration: 0.7,
+      ease: "power3.out"
+    }));
     
-    gsap.from(this.logoInner.nativeElement.children, {
+    this.introTweens.push(gsap.from(this.logoInner.nativeElement.children, {
       y: 20,
       opacity: 0,
-      duration: 0.8,
-      stagger: 0.15,
-      ease: "back.out(1.5)",
-      delay: 0.3
-    });
+      duration: 0.45,
+      stagger: 0.08,
+      ease: "power2.out",
+      delay: 0.15
+    }));
   }
 
   ngOnDestroy() {
     if (this.mm) this.mm.revert();
+    this.introTweens.forEach(tween => tween.kill());
+    this.enterTl?.kill();
+    if (this.enterFallbackTimer) clearTimeout(this.enterFallbackTimer);
   }
 
   enterApp() {
     if (this.isEntering) return;
     this.isEntering = true;
+    this.enterFallbackTimer = setTimeout(() => this.completeEnter(), 900);
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        this.enter.emit();
-      }
+    this.enterTl = gsap.timeline({
+      onComplete: () => this.completeEnter()
     });
     
     // Reset rotations first
-    tl.to(this.logoOuter.nativeElement, {
+    this.enterTl.to(this.logoOuter.nativeElement, {
       rotationX: 0,
       rotationY: 0,
-      duration: 0.3,
+      duration: 0.18,
       ease: "power2.inOut"
     }, 0);
     
-    tl.to(this.logoInner.nativeElement, {
+    this.enterTl.to(this.logoInner.nativeElement, {
       x: 0,
       y: 0,
       z: 0,
-      duration: 0.3,
+      duration: 0.18,
       ease: "power2.inOut"
     }, 0);
 
     // Zoom and fade out
-    tl.to(this.logoOuter.nativeElement, {
+    this.enterTl.to(this.logoOuter.nativeElement, {
       scale: 1.2,
       opacity: 0,
-      duration: 0.5,
+      duration: 0.32,
       ease: "power2.in"
-    }, 0.2).to(this.splashContainer.nativeElement, {
+    }, 0.12).to(this.splashContainer.nativeElement, {
       opacity: 0,
-      duration: 0.4,
+      duration: 0.24,
       ease: "power2.inOut"
-    }, 0.3);
+    }, 0.18);
+  }
+
+  private completeEnter() {
+    if (this.hasEmittedEnter) return;
+
+    this.hasEmittedEnter = true;
+    if (this.enterFallbackTimer) {
+      clearTimeout(this.enterFallbackTimer);
+      this.enterFallbackTimer = null;
+    }
+    this.enter.emit();
   }
 }

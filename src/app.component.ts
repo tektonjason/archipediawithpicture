@@ -8,20 +8,21 @@
 //  Unauthorized commercial use is strictly prohibited.
 //
 // =================================================================
-import { Component, inject, signal, computed, OnInit, OnDestroy, effect, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, effect, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { DataService } from './services/data.service';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { gsap } from 'gsap';
 import { GsapHoverTooltipDirective } from './components/shared/gsap-hover-tooltip.directive';
+import { GsapCardHoverDirective } from './components/shared/gsap-card-hover.directive';
 
 import { SplashScreenComponent } from './components/shared/splash-screen.component';
 import { APP_UI_ICONS } from './components/shared/ui-icons';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GsapHoverTooltipDirective, SplashScreenComponent, ...APP_UI_ICONS],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GsapHoverTooltipDirective, GsapCardHoverDirective, SplashScreenComponent, ...APP_UI_ICONS],
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -61,6 +62,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private sidebarTl!: gsap.core.Timeline;
   private mm!: gsap.MatchMedia;
   private isFirstRun = true;
+  private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private handleVisibilityChange = () => {
+    if (document.hidden) {
+      this.stopCarousel();
+    } else {
+      this.startCarousel();
+    }
+  };
 
   constructor() {
     // Check local storage for footer visibility state and apply it
@@ -91,7 +100,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     if (typeof window !== 'undefined') {
-      this.startCarousel();
+      if (!document.hidden) {
+        this.startCarousel();
+      }
+      document.addEventListener('visibilitychange', this.handleVisibilityChange);
     }
   }
 
@@ -131,6 +143,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopCarousel();
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    if (this.sidebarTl) this.sidebarTl.kill();
     if (this.mm) this.mm.revert();
   }
 
@@ -139,8 +153,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sidebarTl.kill();
     }
     this.sidebarTl = gsap.timeline();
+    this.notifyLayoutShift();
     
     const isDesktop = window.innerWidth >= 768;
+    const openDuration = this.prefersReducedMotion ? 0.01 : 0.34;
+    const closeDuration = this.prefersReducedMotion ? 0.01 : 0.24;
+    const itemDuration = this.prefersReducedMotion ? 0.01 : 0.24;
 
     if (isOpen) {
       // Open Menu
@@ -149,63 +167,73 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         .to("#sidebar-panel", {
           width: isDesktop ? "16rem" : "16rem",
           xPercent: isDesktop ? 0 : 0,
-          duration: 0.6,
-          ease: "back.out(1.2)"
+          duration: openDuration,
+          ease: "power3.out"
         }, 0)
         // 2. Nav Items Stagger In
         .fromTo(".nav-item", 
-          { opacity: 0, x: -20 },
-          { opacity: 1, x: 0, duration: 0.8, ease: "expo.out", stagger: 0.05 },
-          0.1
+          { opacity: 0, x: -12 },
+          { opacity: 1, x: 0, duration: itemDuration, ease: "power2.out", stagger: 0.025, overwrite: "auto" },
+          0.06
         )
         // 3. Hamburger Morph to X
         .to(".bar-top", {
           attr: { x1: 5, y1: 5, x2: 15, y2: 15 },
-          duration: 0.35,
-          ease: "back.out(1.4)"
+          duration: itemDuration,
+          ease: "power2.out"
         }, 0)
         .to(".bar-bot", {
           attr: { x1: 15, y1: 5, x2: 5, y2: 15 },
-          duration: 0.35,
-          ease: "back.out(1.4)"
-        }, 0);
+          duration: itemDuration,
+          ease: "power2.out"
+        }, 0)
+        .call(() => this.notifyLayoutShift());
         
     } else {
       // Close Menu
       this.sidebarTl
         // 1. Nav Items Fall Out
         .to(".nav-item", {
-          y: "10vh",
-          rotation: "random(-15, 15)",
+          x: -12,
           opacity: 0,
-          duration: 0.4,
-          ease: "power3.in",
-          stagger: { from: "end", each: 0.02 }
+          duration: closeDuration,
+          ease: "power2.in",
+          stagger: { from: "end", each: 0.012 },
+          overwrite: "auto"
         }, 0)
         // 2. Sidebar Panel Animation
         .to("#sidebar-panel", {
           width: isDesktop ? "0rem" : "16rem",
           xPercent: isDesktop ? 0 : -100,
-          duration: 0.4,
-          ease: "power3.in"
-        }, 0.2)
+          duration: closeDuration,
+          ease: "power2.inOut"
+        }, 0.12)
         // 3. X Morph to Hamburger
         .to(".bar-top", {
           attr: { x1: 3, y1: 6, x2: 17, y2: 6 },
-          duration: 0.2,
-          ease: "power3.in"
+          duration: closeDuration,
+          ease: "power2.inOut"
         }, 0)
         .to(".bar-bot", {
           attr: { x1: 3, y1: 14, x2: 17, y2: 14 },
-          duration: 0.2,
-          ease: "power3.in"
+          duration: closeDuration,
+          ease: "power2.inOut"
         }, 0)
         // Reset nav-item transforms so they are ready for the next open
-        .set(".nav-item", { clearProps: "y,rotation" });
+        .set(".nav-item", { clearProps: "x" })
+        .call(() => this.notifyLayoutShift());
+    }
+  }
+
+  private notifyLayoutShift() {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('archipedia:layout-shift'));
     }
   }
 
   startCarousel() {
+    if (this.carouselInterval) return;
+
     this.carouselInterval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * this.qaQuestions.length);
       this.currentQuestionIndex.set(randomIndex);
@@ -215,6 +243,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   stopCarousel() {
     if (this.carouselInterval) {
       clearInterval(this.carouselInterval);
+      this.carouselInterval = null;
     }
   }
 
@@ -240,6 +269,28 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleSidebar() {
     this.dataService.toggleSidebar();
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape() {
+    if (this.dataService.showExternalModal()) {
+      this.dataService.closeExternalModal();
+      return;
+    }
+
+    if (this.dataService.showLoginModal()) {
+      this.dataService.closeLoginModal();
+      return;
+    }
+
+    if (this.dataService.showLogoutModal()) {
+      this.dataService.showLogoutModal.set(false);
+      return;
+    }
+
+    if (typeof window !== 'undefined' && window.innerWidth < 768 && this.dataService.isSidebarOpen()) {
+      this.dataService.setSidebarState(false);
+    }
   }
 
   onSplashEnter() {

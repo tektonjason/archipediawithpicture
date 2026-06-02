@@ -1,8 +1,9 @@
 
-import { Component, signal, inject } from '@angular/core';
+import { Component, HostListener, signal, inject } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { NgStyle, CommonModule } from '@angular/common';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 interface AiTool {
   id: string;
@@ -14,7 +15,7 @@ interface AiTool {
 
 @Component({
   selector: 'app-ai-assistant',
-  imports: [NgStyle, CommonModule, ...APP_UI_ICONS],
+  imports: [NgStyle, CommonModule, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page-scroll ui-page-pad text-white relative">
       
@@ -30,6 +31,7 @@ interface AiTool {
           <div 
             (click)="openModal(tool)"
             class="group relative ui-card ui-card-hover p-6 cursor-pointer overflow-hidden"
+            appGsapCardHover
           >
             <!-- Hover Gradient -->
             <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
@@ -166,6 +168,13 @@ export class AiAssistantComponent {
 
   closeModal() {
     this.selectedTool.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape() {
+    if (this.selectedTool()) {
+      this.closeModal();
+    }
   }
 
   copyAndGo() {

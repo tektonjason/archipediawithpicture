@@ -126,7 +126,7 @@ gsap.registerPlugin(Flip);
               <!-- Image Section -->
               <div class="overflow-hidden relative bg-gray-800 entry-image" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
                 @if (entry.imageUrl) {
-                   <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term" data-flip-id="image-{{entry.id}}">
+                   <img [src]="entry.imageUrl" class="w-full h-full object-cover" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term" data-flip-id="image-{{entry.id}}">
                 } @else {
                    <!-- Fallback Pattern -->
                    <div class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative" data-flip-id="image-{{entry.id}}">
@@ -198,23 +198,22 @@ gsap.registerPlugin(Flip);
       mask-image: linear-gradient(to right, black 95%, transparent 100%);
     }
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(14px) scale(0.985); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in-up {
-      animation: fadeInUp 0.5s ease-out backwards;
+      animation: fadeInUp 0.48s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
     .entries-grid {
     }
     .entry-card {
-      will-change: transform, box-shadow;
       transition: border-color 300ms ease, background-color 300ms ease;
     }
     .entry-image {
       transition: border-radius 300ms ease;
     }
     .entry-image img {
-      transition: opacity 300ms ease, transform 500ms cubic-bezier(0.2, 0, 0, 1);
+      transition: opacity 300ms ease;
     }
     .entry-content {
       transition: opacity 300ms ease;
@@ -248,6 +247,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   private charIndex = 0;
   private isDeleting = false;
   private timer: any;
+  private scrollFrame = 0;
+  private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('entriesContainer') entriesContainer!: ElementRef<HTMLDivElement>;
@@ -271,6 +272,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.timer) clearTimeout(this.timer);
+    if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);
+    gsap.killTweensOf('.entry-card');
   }
 
   ngAfterViewInit(): void {
@@ -280,8 +283,11 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       }
     }, 0);
     
-    // Start typewriter
-    this.typewriterEffect();
+    if (this.prefersReducedMotion) {
+      this.currentTitle.set('建筑百科');
+    } else {
+      this.typewriterEffect();
+    }
   }
 
   private typewriterEffect() {
@@ -314,6 +320,11 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    if (this.prefersReducedMotion) {
+      this.viewMode.set(mode);
+      return;
+    }
+
     const container = this.entriesContainer.nativeElement;
     const currentCards = Array.from(container.querySelectorAll('.entry-card'));
 
@@ -335,8 +346,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       const newCards = Array.from(container.querySelectorAll('.entry-card'));
       Flip.from(state, {
         elements: newCards,
-        duration: 0.7,
-        ease: "expo.inOut",
+        duration: 0.42,
+        ease: "power3.inOut",
         nested: true,
         onComplete: () => {
           // Remove no-transition class after animation completes
@@ -347,6 +358,15 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   }
 
   onScroll() {
+    if (this.scrollFrame) return;
+
+    this.scrollFrame = requestAnimationFrame(() => {
+      this.scrollFrame = 0;
+      this.extendListNearEnd();
+    });
+  }
+
+  private extendListNearEnd() {
     const element = this.scrollContainer.nativeElement;
     // Buffer of 200px
     if (element.scrollHeight - element.scrollTop - element.clientHeight < 200) {
@@ -359,9 +379,9 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
           const container = this.entriesContainer.nativeElement;
           const newCards = Array.from(container.querySelectorAll('.entry-card')).slice(oldLimit);
           if (newCards.length > 0) {
-            gsap.fromTo(newCards,
+            gsap.fromTo(newCards.slice(0, 32),
               { opacity: 0, y: 20 },
-              { opacity: 1, y: 0, duration: 0.6, ease: "power1.out", stagger: 0.03 }
+              { opacity: 1, y: 0, duration: 0.28, ease: "power2.out", stagger: 0.012, overwrite: "auto" }
             );
           }
         });
@@ -441,13 +461,25 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     const container = this.entriesContainer.nativeElement;
     const currentCards = Array.from(container.querySelectorAll('.entry-card'));
 
+    if (this.prefersReducedMotion || currentCards.length === 0) {
+      this.selectedCategory.set(category);
+      this.searchQuery.set('');
+      this.displayLimit.set(50);
+      this.dataService.encyclopediaScrollPosition.set(0);
+      if (this.scrollContainer?.nativeElement) {
+        this.scrollContainer.nativeElement.scrollTop = 0;
+      }
+      return;
+    }
+
     // Exit animation for current cards
-    gsap.to(currentCards, {
-      duration: 0.3,
+    gsap.to(currentCards.slice(0, 36), {
+      duration: 0.18,
       opacity: 0,
-      scale: 0.9,
-      stagger: 0.02,
-      ease: "power1.in",
+      y: 8,
+      stagger: 0.008,
+      ease: "power2.in",
+      overwrite: "auto",
       onComplete: () => {
         // Update category and reset scroll/search after exit animation
         this.selectedCategory.set(category);
@@ -461,15 +493,15 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
         // Enter animation for new cards
         requestAnimationFrame(() => {
           const newCards = Array.from(container.querySelectorAll('.entry-card'));
-          gsap.fromTo(newCards,
-            { opacity: 0, scale: 0.9, y: 20 }, // FROM these values
+          gsap.fromTo(newCards.slice(0, 36),
+            { opacity: 0, y: 12 }, // FROM these values
             { // TO these values (their natural CSS state)
-              duration: 0.5,
+              duration: 0.28,
               opacity: 1,
-              scale: 1,
               y: 0,
-              stagger: 0.05,
-              ease: "power1.out",
+              stagger: 0.012,
+              ease: "power2.out",
+              overwrite: "auto",
             }
           );
         });

@@ -1,5 +1,5 @@
 
-import { Component, OnInit, signal, computed, ElementRef, ViewChild, HostListener, AfterViewInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data.service';
@@ -46,8 +46,10 @@ interface CareerNode {
            (wheel)="onWheel($event)">
         
         <!-- Pan/Zoom Content Layer -->
-        <div class="absolute inset-0 origin-center transition-transform duration-100 ease-out will-change-transform"
-             [style.transform]="'translate(' + panX() + 'px, ' + panY() + 'px) scale(' + scale() + ')'">
+        <div class="absolute inset-0 origin-center ease-out will-change-transform"
+             [class.transition-transform]="!isDraggingView()"
+             [class.duration-100]="!isDraggingView()"
+              [style.transform]="'translate(' + panX() + 'px, ' + panY() + 'px) scale(' + scale() + ')'">
           
           <!-- Central Hub (Fixed Center, No Floating) -->
           <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center justify-center">
@@ -69,7 +71,7 @@ interface CareerNode {
 
           <!-- Career Nodes -->
           @for (node of nodes(); track node.id) {
-            <div class="absolute flex items-center gap-3 group will-change-transform cursor-pointer transition-[left,top] duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+            <div class="absolute flex items-center gap-3 group cursor-pointer transition-[left,top] duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
                  (click)="openSearch(node.name)"
                  [style.left.%]="isExpanded() ? node.x : 50"
                  [style.top.%]="isExpanded() ? node.y : 50"
@@ -156,9 +158,19 @@ interface CareerNode {
     .animate-pulse-slow {
       animation: pulse-slow 8s ease-in-out infinite;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-float-1,
+      .animate-float-2,
+      .animate-float-3,
+      .animate-float-4,
+      .animate-pulse-slow {
+        animation: none !important;
+      }
+    }
   `]
 })
-export class CareerComponent implements OnInit {
+export class CareerComponent implements OnInit, OnDestroy {
   nodes = signal<CareerNode[]>([]);
   
   // Viewport State
@@ -166,11 +178,16 @@ export class CareerComponent implements OnInit {
   panX = signal(0);
   panY = signal(0);
   isExpanded = signal(false); // Controls the burst animation
+  isDraggingView = signal(false);
   isDesktop = window.innerWidth >= 768;
   
   private isDragging = false;
   private lastMouseX = 0;
   private lastMouseY = 0;
+  private pendingPanX = 0;
+  private pendingPanY = 0;
+  private dragFrame = 0;
+  private expandTimer: ReturnType<typeof setTimeout> | null = null;
 
   dataService = inject(DataService);
 
@@ -190,9 +207,14 @@ export class CareerComponent implements OnInit {
   ngOnInit() {
     this.initNodes();
     // Trigger burst animation after a short delay
-    setTimeout(() => {
+    this.expandTimer = setTimeout(() => {
       this.isExpanded.set(true);
     }, 100);
+  }
+
+  ngOnDestroy() {
+    if (this.expandTimer) clearTimeout(this.expandTimer);
+    if (this.dragFrame) cancelAnimationFrame(this.dragFrame);
   }
 
   initNodes() {
@@ -267,6 +289,7 @@ export class CareerComponent implements OnInit {
 
   startDrag(event: MouseEvent | TouchEvent) {
     this.isDragging = true;
+    this.isDraggingView.set(true);
     if (event instanceof MouseEvent) {
       this.lastMouseX = event.clientX;
       this.lastMouseY = event.clientY;
@@ -299,17 +322,36 @@ export class CareerComponent implements OnInit {
     const deltaX = clientX - this.lastMouseX;
     const deltaY = clientY - this.lastMouseY;
 
-    this.panX.update(v => v + deltaX);
-    this.panY.update(v => v + deltaY);
+    this.pendingPanX += deltaX;
+    this.pendingPanY += deltaY;
+    this.schedulePanFlush();
 
     this.lastMouseX = clientX;
     this.lastMouseY = clientY;
+  }
+
+  private schedulePanFlush() {
+    if (this.dragFrame) return;
+
+    this.dragFrame = requestAnimationFrame(() => {
+      this.dragFrame = 0;
+      const deltaX = this.pendingPanX;
+      const deltaY = this.pendingPanY;
+      this.pendingPanX = 0;
+      this.pendingPanY = 0;
+
+      if (!deltaX && !deltaY) return;
+
+      this.panX.update(v => v + deltaX);
+      this.panY.update(v => v + deltaY);
+    });
   }
 
   @HostListener('window:mouseup')
   @HostListener('window:touchend')
   stopDrag() {
     this.isDragging = false;
+    this.isDraggingView.set(false);
   }
 
   onWheel(event: WheelEvent) {

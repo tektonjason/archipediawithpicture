@@ -270,8 +270,10 @@ export class EntryDetailComponent implements OnDestroy {
 
   private resizeObserver: ResizeObserver | null = null;
   private activeImageElement: HTMLImageElement | null = null;
+  private imageModalCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnDestroy() {
+    if (this.imageModalCloseTimer) clearTimeout(this.imageModalCloseTimer);
     this.disconnectResizeObserver();
   }
 
@@ -393,16 +395,36 @@ export class EntryDetailComponent implements OnDestroy {
 
   openImageModal() {
     if (this.entry()?.imageUrl) {
+      if (this.imageModalCloseTimer) {
+        clearTimeout(this.imageModalCloseTimer);
+        this.imageModalCloseTimer = null;
+      }
+      this.isImageModalAnimatingOut.set(false);
       this.showImageModal.set(true);
     }
   }
 
   closeImageModal() {
+    if (!this.showImageModal() || this.isImageModalAnimatingOut()) return;
     this.isImageModalAnimatingOut.set(true);
-    setTimeout(() => {
+    if (this.imageModalCloseTimer) clearTimeout(this.imageModalCloseTimer);
+    this.imageModalCloseTimer = setTimeout(() => {
+      this.imageModalCloseTimer = null;
       this.showImageModal.set(false);
       this.isImageModalAnimatingOut.set(false);
     }, 250); // Matches the new 0.25s animation duration
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape() {
+    if (this.showImageModal()) {
+      this.closeImageModal();
+      return;
+    }
+
+    if (this.showDeleteModal()) {
+      this.showDeleteModal.set(false);
+    }
   }
 
   downloadImage() {

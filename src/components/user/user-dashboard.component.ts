@@ -5,10 +5,11 @@ import { DataService, Entry } from '../../services/data.service';
 import { NgClass } from '@angular/common';
 import pinyin from 'pinyin';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 @Component({
   selector: 'app-user-dashboard',
-  imports: [RouterLink, ...APP_UI_ICONS],
+  imports: [RouterLink, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page text-white">
       
@@ -51,7 +52,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
            } @else {
              <div class="grid gap-4">
                @for (entry of favEntries(); track entry.id) {
-                 <div class="ui-card ui-card-hover p-4 flex justify-between items-center">
+                 <div class="ui-card ui-card-hover p-4 flex justify-between items-center" appGsapCardHover>
                    <div>
                       <h3 class="font-bold text-base text-white">{{ entry.term }}</h3>
                       <p class="text-sm text-gray-500">{{ entry.category }}</p>
@@ -79,7 +80,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
           } @else {
              <div class="flex flex-col gap-4">
                @for (entry of historyEntries(); track entry.id) {
-                 <a [routerLink]="['/entry', entry.id]" class="group ui-card ui-card-hover p-4 flex items-center gap-4 hover:translate-x-1">
+                 <a [routerLink]="['/entry', entry.id]" class="group ui-card ui-card-hover p-4 flex items-center gap-4" appGsapCardHover>
                    <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-black text-lg text-gray-500 group-hover:text-white group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors shrink-0">
                      {{ entry.firstPinyinLetter }}
                    </div>

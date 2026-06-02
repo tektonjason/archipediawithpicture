@@ -7,15 +7,18 @@ import { gsap } from 'gsap';
 })
 export class GsapHoverTooltipDirective implements AfterViewInit, OnDestroy {
   @Input('appGsapTooltip') tooltipText: string = '';
-  @Input() hoverScale: number = 1.15; // default scale for button
+  @Input() hoverScale: number = 1.06;
   @Input() tooltipPos: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
-  private tl!: gsap.core.Timeline;
-  private tooltipEl!: HTMLDivElement;
+  private tl?: gsap.core.Timeline;
+  private tooltipEl?: HTMLDivElement;
+  private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   constructor(private el: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit() {
+    if (!this.tooltipText.trim()) return;
+
     // 1. Create Tooltip Element
     this.tooltipEl = document.createElement('div');
     this.tooltipEl.className = 'fixed pointer-events-none z-[100] px-3.5 py-2 bg-surface/95 backdrop-blur-md border border-line text-gray-200 text-xs rounded-control shadow-panel font-medium tracking-wide whitespace-nowrap';
@@ -60,45 +63,47 @@ export class GsapHoverTooltipDirective implements AfterViewInit, OnDestroy {
     }
 
     // 3. Create Timeline
-    // Using easeReverse feature from GSAP 3.12+
     this.tl = gsap.timeline({ paused: true })
       // Button scale
       .to(this.el.nativeElement, {
-        scale: this.hoverScale,
-        duration: 0.8,
-        ease: 'elastic.out(1.2, 0.3)',
-        easeReverse: 'power2.out'
+        scale: this.prefersReducedMotion ? 1 : this.hoverScale,
+        duration: 0.16,
+        ease: 'power2.out'
       }, 0)
       // Tooltip pop
       .to(this.tooltipEl, {
         autoAlpha: 1,
         y: 0,
         scale: 1,
-        duration: 0.6,
-        ease: 'elastic.out(1.2, 0.3)',
-        easeReverse: 'power3.in'
+        duration: 0.16,
+        ease: 'power2.out'
       }, 0);
   }
 
   @HostListener('mouseenter')
   onMouseEnter() {
+    if (!this.tl) return;
     this.updatePosition();
     this.tl.timeScale(1).play();
   }
 
   @HostListener('mouseleave')
   onMouseLeave() {
+    if (!this.tl) return;
     // Reverse with an accelerated timescale for snappy exit
-    this.tl.timeScale(2.5).reverse();
+    this.tl.timeScale(1.6).reverse();
   }
 
   @HostListener('click')
   onClick() {
+    if (!this.tl) return;
     // Hide tooltip immediately on click (especially useful for mobile tap)
-    this.tl.timeScale(2.5).reverse();
+    this.tl.timeScale(1.8).reverse();
   }
 
   private updatePosition() {
+    if (!this.tooltipEl) return;
+
     const rect = this.el.nativeElement.getBoundingClientRect();
     const tooltipRect = this.tooltipEl.getBoundingClientRect();
     
@@ -123,6 +128,12 @@ export class GsapHoverTooltipDirective implements AfterViewInit, OnDestroy {
     // Safe boundaries
     if (left < 8) left = 8;
     if (top < 8) top = 8;
+    if (left + tooltipRect.width > window.innerWidth - 8) {
+      left = window.innerWidth - tooltipRect.width - 8;
+    }
+    if (top + tooltipRect.height > window.innerHeight - 8) {
+      top = window.innerHeight - tooltipRect.height - 8;
+    }
 
     gsap.set(this.tooltipEl, {
       top: top,

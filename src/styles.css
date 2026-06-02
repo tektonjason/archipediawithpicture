@@ -50,7 +50,9 @@
   }
 
   .ui-card-hover {
-    @apply transition-all duration-300 hover:bg-white/5 hover:border-line hover:shadow-card;
+    @apply duration-300 hover:bg-white/5 hover:border-line hover:shadow-card;
+    transition-property: background-color, border-color, box-shadow, color, opacity;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .ui-media-card {
@@ -282,4 +284,15 @@
 
 .animate-backdrop-out {
   animation: backdrop-fade-out 0.22s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -2,6 +2,7 @@
 import { Component, inject } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 interface DownloadLink {
   name: string;
@@ -13,7 +14,7 @@ interface DownloadLink {
 
 @Component({
   selector: 'app-contact',
-  imports: [...APP_UI_ICONS],
+  imports: [GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page-scroll ui-page-pad text-white">
       
@@ -29,7 +30,7 @@ interface DownloadLink {
           <span class="w-2 h-2 rounded-full bg-orange-500"></span>
           使用教程
         </h3>
-        <div (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cpjHpTZQ60RV')" class="cursor-pointer group ui-card ui-card-hover p-6 flex items-center gap-6">
+        <div (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cpjHpTZQ60RV')" class="cursor-pointer group ui-card ui-card-hover p-6 flex items-center gap-6" appGsapCardHover>
           <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0 text-orange-400 group-hover:bg-orange-500/20 transition-colors">
             <svg lucideBookOpen class="w-6 h-6" [strokeWidth]="2"></svg>
           </div>
@@ -50,7 +51,7 @@ interface DownloadLink {
           <span class="w-2 h-2 rounded-full bg-blue-500"></span>
           交流邮箱
         </h3>
-        <div class="group ui-card ui-card-hover p-6 flex items-center gap-6">
+          <div class="group ui-card ui-card-hover p-6 flex items-center gap-6" appGsapCardHover>
           <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
             <svg lucideMail class="w-6 h-6" [strokeWidth]="2"></svg>
           </div>
@@ -72,7 +73,7 @@ interface DownloadLink {
           在线使用
         </h3>
         @for (link of onlineLinks; track link.name) {
-          <div class="group ui-card ui-card-hover p-6 flex items-center gap-6">
+          <div class="group ui-card ui-card-hover p-6 flex items-center gap-6" appGsapCardHover>
             <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0 text-green-400 group-hover:bg-green-500/20 transition-colors">
               <svg lucideExternalLink class="h-6 w-6" [strokeWidth]="2"></svg>
             </div>
@@ -100,7 +101,7 @@ interface DownloadLink {
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           @for (link of downloadLinks; track link.name) {
-            <a [href]="link.url" target="_blank" class="group ui-card ui-card-hover p-6 flex flex-col items-center justify-center text-center">
+            <a [href]="link.url" target="_blank" class="group ui-card ui-card-hover p-6 flex flex-col items-center justify-center text-center" appGsapCardHover>
               <h4 class="text-base font-bold mb-6 text-white">{{ link.name }}</h4>
               <div class="w-full">
                 <div class="ui-btn-secondary w-full text-xs group-hover:bg-white group-hover:text-black">
@@ -139,6 +140,7 @@ interface DownloadLink {
         <button 
           (click)="dataService.handleAdminAction()" 
           class="w-full ui-card ui-card-hover p-4 flex items-center justify-between group"
+          appGsapCardHover
         >
           <div class="flex items-center gap-4">
              <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-gray-700 transition-colors">

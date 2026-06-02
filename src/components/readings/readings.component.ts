@@ -95,7 +95,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                        appGsapCardHover
                      >
                       <!-- Book Cover -->
-                      <div class="aspect-[2/3] bg-surface rounded-control border border-line-soft overflow-hidden relative shadow-lg">
+                      <div class="entry-image aspect-[2/3] bg-surface rounded-control border border-line-soft overflow-hidden relative shadow-lg">
                         @if (item.imageUrl && !failedImages().has(item.id)) {
                           <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                         } @else {
@@ -112,7 +112,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                         }
                       </div>
                       
-                      <div>
+                      <div class="entry-content">
                         <h3 class="font-medium text-sm text-gray-200 line-clamp-1 group-hover:text-blue-400 transition-colors">{{ item.title }}</h3>
                         <p class="text-xs text-gray-500 truncate">{{ item.author || item.publisher }}</p>
                       </div>
@@ -431,10 +431,10 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
       mask-image: linear-gradient(to right, black 85%, transparent 100%);
     }
     .animate-fade-in-up {
-      animation: fadeInUp 0.4s ease-out backwards;
+      animation: fadeInUp 0.44s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px) scale(0.985); }
       to { opacity: 1; transform: translateY(0); }
     }
   `]
@@ -465,6 +465,14 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   declarationCountdown = signal(0);
   copyButtonText = signal('复制链接');
   private countdownInterval: any;
+  private scrollFrame = 0;
+  private tagResetFrame = 0;
+  private modalCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private verificationTimer: ReturnType<typeof setTimeout> | null = null;
+  private declarationTimer: ReturnType<typeof setTimeout> | null = null;
+  private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+  private shareResetTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastScrubScrollTarget = '';
 
   // Scrubber State
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
@@ -535,7 +543,23 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.clearDeferredTimers();
     if (this.countdownInterval) clearInterval(this.countdownInterval);
+    if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);
+    if (this.tagResetFrame) cancelAnimationFrame(this.tagResetFrame);
+  }
+
+  private clearDeferredTimers() {
+    if (this.modalCloseTimer) clearTimeout(this.modalCloseTimer);
+    if (this.verificationTimer) clearTimeout(this.verificationTimer);
+    if (this.declarationTimer) clearTimeout(this.declarationTimer);
+    if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
+    if (this.shareResetTimer) clearTimeout(this.shareResetTimer);
+    this.modalCloseTimer = null;
+    this.verificationTimer = null;
+    this.declarationTimer = null;
+    this.copyResetTimer = null;
+    this.shareResetTimer = null;
   }
 
   selectTag(tag: string) {
@@ -543,8 +567,11 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.searchQuery.set('');
     }
     this.selectedTag.set(tag);
-    // Allow the view to update and computed signals (like filteredReadings and availableLetters) to re-evaluate
-    setTimeout(() => {
+    if (this.tagResetFrame) {
+      cancelAnimationFrame(this.tagResetFrame);
+    }
+    this.tagResetFrame = requestAnimationFrame(() => {
+      this.tagResetFrame = 0;
       if (this.scrollContainer) {
         this.scrollContainer.nativeElement.scrollTo({ top: 0, behavior: 'auto' });
         
@@ -561,21 +588,45 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
           this.currentLetter.set('#');
         }
       }
-    }, 0);
+    });
   }
 
   openModal(item: Reading) {
+    if (this.modalCloseTimer) {
+      clearTimeout(this.modalCloseTimer);
+      this.modalCloseTimer = null;
+    }
     this.isClosing.set(false);
     this.selectedReading.set(item);
   }
 
   closeModal() {
+    if (!this.selectedReading() || this.isClosing()) return;
     this.isClosing.set(true);
     this.showShareMenu.set(false);
-    setTimeout(() => {
+    if (this.modalCloseTimer) clearTimeout(this.modalCloseTimer);
+    this.modalCloseTimer = setTimeout(() => {
+      this.modalCloseTimer = null;
       this.selectedReading.set(null);
       this.isClosing.set(false);
     }, 300);
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape() {
+    if (this.showShareMenu()) {
+      this.showShareMenu.set(false);
+      return;
+    }
+
+    if (this.eResourceFlowStep() !== 'closed') {
+      this.closeEResourceFlow();
+      return;
+    }
+
+    if (this.selectedReading()) {
+      this.closeModal();
+    }
   }
 
   getJournalClass(level: string) {
@@ -602,7 +653,15 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   // --- Scrubber Logic ---
   onScroll() {
     if (this.isScrubbing()) return;
+    if (this.scrollFrame) return;
 
+    this.scrollFrame = requestAnimationFrame(() => {
+      this.scrollFrame = 0;
+      this.updateCurrentLetterFromScroll();
+    });
+  }
+
+  private updateCurrentLetterFromScroll() {
     const container = this.scrollContainer.nativeElement;
     const containerRect = container.getBoundingClientRect();
     const anchors = container.querySelectorAll('.letter-anchor');
@@ -655,6 +714,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   onScrubStart(event: MouseEvent | TouchEvent) {
     this.isScrubbing.set(true);
+    this.lastScrubScrollTarget = '';
     this.handleScrub(event);
     event.preventDefault(); // Prevent text selection/scroll
   }
@@ -668,6 +728,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   onScrubEnd() {
     this.isScrubbing.set(false);
+    this.lastScrubScrollTarget = '';
     // Final snap to the letter we ended on
     if (this.availableLetters().has(this.scrubbingLetter())) {
         this.scrollToLetter(this.scrubbingLetter(), 'smooth');
@@ -693,7 +754,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
     // Try to find exact match first
     if (this.availableLetters().has(letter)) {
-       this.scrollToLetter(letter, 'auto');
+       this.scrollToScrubTarget(letter);
     } else {
        // If exact match not found, find nearest previous letter
        const available = Array.from(this.availableLetters());
@@ -716,8 +777,15 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
              break;
           }
        }
-       this.scrollToLetter(target, 'auto');
+       this.scrollToScrubTarget(target);
     }
+  }
+
+  private scrollToScrubTarget(letter: string) {
+    if (this.lastScrubScrollTarget === letter) return;
+
+    this.lastScrubScrollTarget = letter;
+    this.scrollToLetter(letter, 'auto');
   }
 
   private compareLetters(a: string, b: string): number {
@@ -729,6 +797,11 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   // --- E-Resource Flow ---
   startEResourceFlow() {
+    if (this.verificationTimer) clearTimeout(this.verificationTimer);
+    if (this.declarationTimer) clearTimeout(this.declarationTimer);
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    this.verificationTimer = null;
+    this.declarationTimer = null;
     this.eResourceFlowStep.set('verification');
     this.verificationStatus.set('idle');
     this.verificationMessage.set('');
@@ -737,6 +810,10 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   closeEResourceFlow() {
     this.eResourceFlowStep.set('closed');
+    if (this.verificationTimer) clearTimeout(this.verificationTimer);
+    if (this.declarationTimer) clearTimeout(this.declarationTimer);
+    this.verificationTimer = null;
+    this.declarationTimer = null;
     if (this.countdownInterval) clearInterval(this.countdownInterval);
   }
 
@@ -806,10 +883,17 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     });
 
     this.verificationStatus.set('verifying');
-    setTimeout(() => {
+    if (this.verificationTimer) clearTimeout(this.verificationTimer);
+    if (this.declarationTimer) clearTimeout(this.declarationTimer);
+    this.verificationTimer = setTimeout(() => {
+      this.verificationTimer = null;
+      if (this.eResourceFlowStep() !== 'verification') return;
       this.verificationStatus.set('success');
       this.verificationMessage.set('验证成功！');
-      setTimeout(() => {
+      this.declarationTimer = setTimeout(() => {
+        this.declarationTimer = null;
+        if (this.eResourceFlowStep() !== 'verification') return;
+
         this.eResourceFlowStep.set('declaration');
         this.startDeclarationCountdown();
       }, 800);
@@ -817,6 +901,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   startDeclarationCountdown() {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
     this.declarationCountdown.set(5);
     this.countdownInterval = setInterval(() => {
       const current = this.declarationCountdown();
@@ -846,7 +931,11 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   copyResourceInfo() {
     navigator.clipboard.writeText(this.resourceLinkText()).then(() => {
       this.copyButtonText.set('已复制');
-      setTimeout(() => this.copyButtonText.set('复制链接'), 2000);
+      if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
+      this.copyResetTimer = setTimeout(() => {
+        this.copyResetTimer = null;
+        this.copyButtonText.set('复制链接');
+      }, 2000);
     });
   }
 
@@ -872,7 +961,11 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     // 2. Copy to clipboard
     navigator.clipboard.writeText(text).then(() => {
       this.shareMenuCopied.set(true);
-      setTimeout(() => this.shareMenuCopied.set(false), 2000);
+      if (this.shareResetTimer) clearTimeout(this.shareResetTimer);
+      this.shareResetTimer = setTimeout(() => {
+        this.shareResetTimer = null;
+        this.shareMenuCopied.set(false);
+      }, 2000);
     });
 
     // 3. Toggle Menu

@@ -4,10 +4,11 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 @Component({
   selector: 'app-essentials',
-  imports: [CommonModule, RouterLink, ...APP_UI_ICONS],
+  imports: [CommonModule, RouterLink, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page-scroll ui-page-pad text-white">
       
@@ -19,7 +20,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
       
       <div class="space-y-4 max-w-4xl mx-auto w-full">
         <!-- Section 1: Methodology -->
-        <a routerLink="/essentials/methodology" class="block ui-card ui-card-hover overflow-hidden group">
+        <a routerLink="/essentials/methodology" class="block ui-card ui-card-hover overflow-hidden group" appGsapCardHover>
           <div class="w-full text-left p-5 md:p-6 flex justify-between items-center">
             <div class="flex items-center gap-5">
               <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0 group-hover:bg-blue-500/20 transition-colors">
@@ -43,7 +44,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
         </a>
 
         <!-- Section 2: Q&A -->
-        <a (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cj0zVG0UXxsa')" class="block ui-card ui-card-hover overflow-hidden group cursor-pointer">
+        <a (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cj0zVG0UXxsa')" class="block ui-card ui-card-hover overflow-hidden group cursor-pointer" appGsapCardHover>
           <div class="w-full text-left p-5 md:p-6 flex justify-between items-center">
             <div class="flex items-center gap-5">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
@@ -67,7 +68,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
         </a>
 
         <!-- Section 3: Career -->
-        <a routerLink="/essentials/career" class="block ui-card ui-card-hover overflow-hidden group">
+        <a routerLink="/essentials/career" class="block ui-card ui-card-hover overflow-hidden group" appGsapCardHover>
           <div class="w-full text-left p-5 md:p-6 flex justify-between items-center">
             <div class="flex items-center gap-5">
               <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">

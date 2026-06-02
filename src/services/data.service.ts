@@ -80,6 +80,7 @@ export class DataService {
   // --- Toast Notification State ---
   toastMessage = signal('');
   showToast = signal(false);
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
   
   // --- Global Modal States ---
   showLoginModal = signal(false);
@@ -219,11 +220,17 @@ export class DataService {
   }
 
   displayToast(message: string, duration: number = 3000) {
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+
     this.toastMessage.set(message);
     this.showToast.set(true);
-    
-    setTimeout(() => {
+
+    this.toastTimer = setTimeout(() => {
       this.showToast.set(false);
+      this.toastTimer = null;
     }, duration);
   }
 

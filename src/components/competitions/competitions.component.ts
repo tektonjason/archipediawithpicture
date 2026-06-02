@@ -1,14 +1,15 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DataService, Competition } from '../../services/data.service';
 import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 
 @Component({
   selector: 'app-competitions',
   standalone: true,
-  imports: [CommonModule, RouterModule, GsapHoverTooltipDirective, ...APP_UI_ICONS],
+  imports: [CommonModule, RouterModule, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page ui-page-pad text-white">
       
@@ -101,7 +102,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
 
           <!-- Grid View -->
           <div *ngIf="viewMode() === 'grid' && sortedCompetitions().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
-            <div *ngFor="let comp of sortedCompetitions()" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover p-3 md:p-5 group flex flex-col h-full relative cursor-pointer">
+            <div *ngFor="let comp of sortedCompetitions()" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover p-3 md:p-5 group flex flex-col h-full relative cursor-pointer" appGsapCardHover>
               <div class="flex items-start justify-between mb-2 md:mb-3">
                 <span [class]="getLevelClass(comp.level)">
                   {{ comp.level || '未知级别' }}
@@ -142,6 +143,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               <div *ngFor="let m of months" 
                 class="aspect-[3/4] md:aspect-square bg-surface border rounded-card p-3 md:p-5 relative cursor-pointer transition-all hover:border-line-strong group flex flex-col overflow-hidden"
+                appGsapCardHover
                 [class.border-white_20]="selectedMonth() === m"
                 [class.bg-white_5]="selectedMonth() === m"
                 [class.border-white_5]="selectedMonth() !== m"
@@ -194,7 +196,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
               </h2>
               
               <div class="grid grid-cols-1 gap-3">
-                 <div *ngFor="let comp of getCompetitionsByMonth(sm)" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover rounded-control p-4 flex flex-col md:flex-row gap-4 items-start md:items-center group cursor-pointer">
+                 <div *ngFor="let comp of getCompetitionsByMonth(sm)" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover rounded-control p-4 flex flex-col md:flex-row gap-4 items-start md:items-center group cursor-pointer" appGsapCardHover>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-3 mb-1">
                         <span [class]="getLevelClass(comp.level)">
@@ -244,23 +246,32 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
     
     /* View Switching Animation */
     .view-transition-wrapper {
-      transition: opacity 200ms ease, transform 200ms ease;
+      transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1), transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
       opacity: 1;
       transform: scale(1);
       transform-origin: top center;
     }
     .view-transition-wrapper.switching {
       opacity: 0;
-      transform: scale(0.98);
+      transform: translateY(4px) scale(0.985);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .view-transition-wrapper {
+        transition-duration: 0.01ms;
+      }
     }
   `]
 })
-export class CompetitionsComponent {
+export class CompetitionsComponent implements OnDestroy {
   dataService = inject(DataService);
   viewMode = signal<'grid' | 'calendar'>('grid');
   isSwitching = signal(false);
   showDisclaimer = signal(true);
   selectedMonth = signal<number | null>(null);
+  private switchTimer: ReturnType<typeof setTimeout> | null = null;
+  private switchSettleTimer: ReturnType<typeof setTimeout> | null = null;
+  private monthScrollFrame = 0;
+  private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
   months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   
@@ -287,35 +298,64 @@ export class CompetitionsComponent {
     });
   });
 
+  ngOnDestroy() {
+    this.clearSwitchTimers();
+    if (this.monthScrollFrame) {
+      cancelAnimationFrame(this.monthScrollFrame);
+    }
+  }
+
+  private clearSwitchTimers() {
+    if (this.switchTimer) {
+      clearTimeout(this.switchTimer);
+      this.switchTimer = null;
+    }
+    if (this.switchSettleTimer) {
+      clearTimeout(this.switchSettleTimer);
+      this.switchSettleTimer = null;
+    }
+  }
+
   switchView(mode: 'grid' | 'calendar') {
     if (this.viewMode() === mode) {
       return;
     }
-    // 1. Start exit animation (fade out + scale down)
+
+    this.clearSwitchTimers();
+
+    if (this.prefersReducedMotion) {
+      this.viewMode.set(mode);
+      this.isSwitching.set(false);
+      return;
+    }
+
     this.isSwitching.set(true);
     
-    // 2. Wait for exit animation to complete (200ms matches CSS)
-    setTimeout(() => {
-      // 3. Change layout (invisible)
+    this.switchTimer = setTimeout(() => {
+      this.switchTimer = null;
       this.viewMode.set(mode);
       
-      // 4. Slight delay to let DOM update layout
-      setTimeout(() => {
-         // 5. Start enter animation (fade in + scale up)
-         this.isSwitching.set(false);
-      }, 50);
-    }, 200);
+      this.switchSettleTimer = setTimeout(() => {
+        this.switchSettleTimer = null;
+        this.isSwitching.set(false);
+      }, 32);
+    }, 180);
   }
 
   selectMonth(m: number) {
     this.selectedMonth.set(m);
-    // Auto scroll to details
-    setTimeout(() => {
+
+    if (this.monthScrollFrame) {
+      cancelAnimationFrame(this.monthScrollFrame);
+    }
+
+    this.monthScrollFrame = requestAnimationFrame(() => {
+      this.monthScrollFrame = 0;
       const el = document.getElementById('month-detail');
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.scrollIntoView({ behavior: this.prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
       }
-    }, 100);
+    });
   }
 
   getMonthName(m: number): string {

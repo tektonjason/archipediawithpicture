@@ -1,15 +1,16 @@
 
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, HostListener, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DataService, Link } from '../../services/data.service';
 import { FormsModule } from '@angular/forms';
 import { NgStyle, CommonModule } from '@angular/common';
 import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 @Component({
   selector: 'app-resources',
-  imports: [FormsModule, NgStyle, CommonModule, RouterLink, AnimatedSearchBarComponent, ...APP_UI_ICONS],
+  imports: [FormsModule, NgStyle, CommonModule, RouterLink, AnimatedSearchBarComponent, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page-scroll ui-page-pad text-white">
       
@@ -111,7 +112,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   @for (link of group.links; track link.id) {
                     <!-- Link Card -->
-                    <div (click)="dataService.openExternalModal(link.url)" class="group/card flex items-start gap-4 p-4 ui-card ui-card-hover cursor-pointer">
+                    <div (click)="dataService.openExternalModal(link.url)" class="group/card flex items-start gap-4 p-4 ui-card ui-card-hover cursor-pointer" appGsapCardHover>
                       <div class="w-10 h-10 rounded-control bg-white/5 border border-white/5 flex items-center justify-center shrink-0 text-gray-300 group-hover/card:bg-white/10 group-hover/card:text-white transition-colors">
                          <span class="text-sm font-bold leading-none tracking-wide">{{ getResourceMark(link.title) }}</span>
                       </div>
@@ -279,63 +280,25 @@ export class ResourcesComponent {
         return;
       }
 
-      // 1. 计算当前的相对位置 (Start Point)
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      const startRelativeTop = elementRect.top - containerRect.top;
-
-      // 2. 切换状态，触发布局变化
       this.expandedCategory.set(category);
 
-      // 3. 启动自定义动画插值补偿 (Dynamic Interpolation Compensation)
-      this.animateScroll(element, container, startRelativeTop);
+      this.scrollCategoryIntoView(element, container);
 
     } else {
        this.expandedCategory.set(category);
     }
   }
 
-  private animateScroll(element: HTMLElement, container: HTMLElement, startRelativeTop: number) {
-      const startTime = Date.now();
-      const duration = 500; // 动画时长，覆盖 CSS transition
-      const targetOffset = 24; // 目标：距离顶部 24px (scroll-mt-6)
+  private scrollCategoryIntoView(element: HTMLElement, container: HTMLElement) {
+    requestAnimationFrame(() => {
+      const targetOffset = 24;
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const top = elementRect.top - containerRect.top + container.scrollTop - targetOffset;
+      const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
-      // 缓动函数: Quartic Ease-Out (开始快，结束慢)
-      const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
-
-      const step = () => {
-          const elapsed = Date.now() - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          
-          if (progress < 1) {
-              const easedT = easeOutQuart(progress);
-
-              // 1. 计算当前时刻的“理想相对位置”
-              // 从 startRelativeTop 逐渐过渡到 targetOffset (24px)
-              const idealRelativeTop = startRelativeTop + (targetOffset - startRelativeTop) * easedT;
-
-              // 2. 获取当前的“实际相对位置”
-              const currentElementRect = element.getBoundingClientRect();
-              const currentContainerRect = container.getBoundingClientRect();
-              const actualRelativeTop = currentElementRect.top - currentContainerRect.top;
-
-              // 3. 计算误差并修正
-              // 如果 actual > ideal，说明元素在理想位置下方，需要往下滚 (scrollTop += positive)
-              // 如果 actual < ideal，说明元素在理想位置上方，需要往上滚 (scrollTop += negative)
-              const correction = actualRelativeTop - idealRelativeTop;
-
-              if (Math.abs(correction) > 0.5) {
-                  container.scrollTop += correction;
-              }
-
-              requestAnimationFrame(step);
-          } else {
-              // 动画结束，做最后一次校准确保精确到位
-              // 此时应该完全到位
-          }
-      };
-
-      requestAnimationFrame(step);
+      container.scrollTo({ top, behavior });
+    });
   }
 
   addLink() {
@@ -359,6 +322,13 @@ export class ResourcesComponent {
 
   cancelDeleteLink() {
     this.pendingDeleteLinkId.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape() {
+    if (this.pendingDeleteLink()) {
+      this.cancelDeleteLink();
+    }
   }
 
   confirmDeleteLink() {
