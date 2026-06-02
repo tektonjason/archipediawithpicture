@@ -1,113 +1,80 @@
-<div class="flex h-screen w-screen bg-[#0f0f11] overflow-hidden relative text-gray-300 font-sans">
+@if (showSplash()) {
+  <app-splash-screen (enter)="onSplashEnter()"></app-splash-screen>
+}
+
+<div class="flex h-screen w-screen bg-app overflow-hidden relative text-gray-300 font-sans">
   
   <!-- Sidebar -->
   <aside 
-    class="bg-[#18181b] flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden
-           fixed inset-y-0 left-0 z-50 border-r border-white/5
-           md:relative md:z-auto md:translate-x-0"
-    [class.w-64]="true"
-    [class.-translate-x-full]="!dataService.isSidebarOpen()"
-    [class.translate-x-0]="dataService.isSidebarOpen()"
-    [class.md:w-64]="dataService.isSidebarOpen()"
-    [class.md:w-0]="!dataService.isSidebarOpen()"
+    id="sidebar-panel"
+    class="bg-surface flex flex-col h-full overflow-hidden fixed inset-y-0 left-0 z-50 border-r border-line-soft md:relative md:z-auto"
   >
     <!-- Fixed Width Inner Container -->
     <div class="w-64 flex flex-col h-full min-w-[16rem]">
       
       <!-- Logo Area -->
       <div class="p-6 flex items-center gap-4 shrink-0">
-         <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+         <div class="w-10 h-10 bg-white/10 rounded-control flex items-center justify-center shrink-0 overflow-hidden">
             <img src="/icon/archipediaicon.webp" alt="Archipedia Logo" class="w-full h-full object-cover">
          </div>
          <div class="flex flex-col">
-            <h1 class="text-lg font-bold text-white tracking-wide leading-none">ARCHIPEDIA</h1>
+            <h1 class="text-lg font-bold text-white tracking-wide leading-none font-brand">ARCHIPEDIA</h1>
             <span class="text-xs text-gray-500 font-medium">Knowledge Base</span>
          </div>
          <!-- Close Button (Mobile Only) -->
-         <button (click)="dataService.toggleSidebar()" class="md:hidden ml-auto text-gray-400 hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+         <button (click)="toggleSidebar()" class="ui-icon-btn md:hidden ml-auto">
+            <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
          </button>
       </div>
 
       <!-- Nav Links -->
       <nav class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1 text-sm font-medium">
-        <a routerLink="/encyclopedia" routerLinkActive #rla1="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla1.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-             <rect x="3" y="3" width="7" height="7" rx="1" />
-             <rect x="14" y="3" width="7" height="7" rx="1" />
-             <rect x="14" y="14" width="7" height="7" rx="1" />
-             <rect x="3" y="14" width="7" height="7" rx="1" />
-          </svg>
+        <a routerLink="/encyclopedia" routerLinkActive #rla1="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla1.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideLibrary class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>百科全书</span>
         </a>
-        <a routerLink="/ai" routerLinkActive #rla2="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla2.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-            <path d="M12 8v8"/>
-            <path d="M8 12h8"/>
-          </svg>
+        <a routerLink="/ai" routerLinkActive #rla2="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla2.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideBot class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>AI 导师</span>
         </a>
-        <a routerLink="/resources" routerLinkActive #rla3="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla3.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
+        <a routerLink="/resources" routerLinkActive #rla3="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla3.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideFolder class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>资源库</span>
         </a>
-        <a routerLink="/readings" routerLinkActive #rla4="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla4.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-          </svg>
+        <a routerLink="/readings" routerLinkActive #rla4="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla4.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideBookOpen class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>建筑读物</span>
         </a>
-        <a routerLink="/competitions" routerLinkActive #rlaComp="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rlaComp.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 9H18V21H6V9Z" />
-            <path d="M6 9L12 3L18 9" />
-          </svg>
+        <a routerLink="/competitions" routerLinkActive #rlaComp="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaComp.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideTrophy class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>竞赛合集</span>
         </a>
-        <a routerLink="/essentials" routerLinkActive #rlaEssentials="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rlaEssentials.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
+        <a routerLink="/essentials" routerLinkActive #rlaEssentials="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaEssentials.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideLayers class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>建筑干货</span>
         </a>
-        <a routerLink="/user" [queryParams]="{tab: 'favorites'}" routerLinkActive #rla5="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla5.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-          </svg>
+        <a routerLink="/user" [queryParams]="{tab: 'favorites'}" routerLinkActive #rla5="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla5.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideBookmark class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>我的收藏</span>
         </a>
-        <a routerLink="/user" [queryParams]="{tab: 'history'}" routerLinkActive #rla6="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla6.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-             <circle cx="12" cy="12" r="10"/>
-             <path d="M12 6v6l4 2"/>
-           </svg>
+        <a routerLink="/user" [queryParams]="{tab: 'history'}" routerLinkActive #rla6="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla6.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+           <svg lucideHistory class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>浏览历史</span>
         </a>
-        <a routerLink="/contact" routerLinkActive #rla7="routerLinkActive" [class]="'px-3 py-2.5 rounded-lg flex items-center gap-3 transition-all ' + (rla7.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-             <circle cx="12" cy="12" r="10"/>
-             <path d="M12 16v-4"/>
-             <path d="M12 8h.01"/>
-           </svg>
+        <a routerLink="/contact" routerLinkActive #rla7="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla7.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+           <svg lucideInfo class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>关于应用</span>
         </a>
       </nav>
 
       <!-- Sidebar Footer (Disclaimer & Copyright) -->
-      <div class="bg-[#18181b] relative z-20">
+      <div class="bg-surface relative z-20">
         <!-- Q&A Carousel -->
         <div 
           (click)="handleCarouselClick()"
           class="px-4 pb-3 cursor-pointer group relative z-30"
         >
-          <div class="bg-[#18181b] border border-white/5 rounded-lg p-3 relative overflow-hidden group-hover:bg-white/5 transition-all">
+          <div class="ui-card ui-card-hover p-3 relative overflow-hidden">
             <div class="flex items-center gap-2 mb-1.5">
               <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></div>
               <span class="text-[10px] text-emerald-500 font-bold tracking-wider uppercase">Q&A</span>
@@ -118,9 +85,7 @@
             
             <!-- Decorative arrow -->
             <div class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity -mr-1 group-hover:mr-0 duration-300">
-               <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-               </svg>
+               <svg lucideChevronRight class="w-4 h-4 text-gray-400" [strokeWidth]="2"></svg>
             </div>
           </div>
         </div>
@@ -131,13 +96,7 @@
             class="w-full flex items-center justify-between p-4 text-xs text-gray-500 hover:text-gray-300 transition-colors"
           >
             <span class="font-medium">© 2026 曾若宽 版权所有</span>
-          <svg 
-            class="w-4 h-4 transition-transform duration-300" 
-            [class.rotate-180]="!isSidebarFooterCollapsed()"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          <svg lucideChevronDown class="w-4 h-4 transition-transform duration-300" [class.rotate-180]="!isSidebarFooterCollapsed()" [strokeWidth]="2"></svg>
         </button>
         
         <div 
@@ -164,11 +123,16 @@
     <!-- Global Nav Toggle -->
     <div class="absolute top-4 left-4 z-40">
        <button 
-         (click)="dataService.toggleSidebar()"
-         class="p-2 bg-[#18181b] rounded-md text-gray-300 hover:text-white border border-white/10 shadow-lg"
+         id="menuToggle"
+         (click)="toggleSidebar()"
+         appGsapTooltip="菜单"
+         [tooltipPos]="'right'"
+         [hoverScale]="1.15"
+         class="ui-icon-btn shadow-lg"
        >
-         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           <line class="bar-top" x1="3" y1="6" x2="17" y2="6" />
+           <line class="bar-bot" x1="3" y1="14" x2="17" y2="14" />
          </svg>
        </button>
     </div>
@@ -183,47 +147,47 @@
     }
 
     <!-- Router Content -->
-    <main class="flex-1 overflow-hidden relative bg-[#0f0f11] text-gray-300">
+    <main class="flex-1 overflow-hidden relative bg-app text-gray-300">
       <router-outlet></router-outlet>
     </main>
   </div>
 
   <!-- Modals (Login/Logout) -->
   @if (dataService.showLoginModal()) {
-    <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="dataService.closeLoginModal()"></div>
-      <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm p-6 relative z-10 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
+    <div class="ui-modal-shell">
+      <div class="ui-modal-backdrop" (click)="dataService.closeLoginModal()"></div>
+      <div class="ui-modal-panel max-w-sm p-6 flex flex-col gap-4 animate-modal-pop-in">
         <h2 class="text-xl font-bold text-white mb-2">管理员登录</h2>
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-medium text-gray-400 uppercase tracking-wider">邮箱账号</label>
-          <input [(ngModel)]="dataService.loginEmail" type="email" placeholder="admin@example.com" class="bg-[#27272a] border border-white/10 rounded-lg p-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full transition-all">
+          <label class="ui-label">邮箱账号</label>
+          <input [(ngModel)]="dataService.loginEmail" type="email" placeholder="admin@example.com" class="ui-field">
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-medium text-gray-400 uppercase tracking-wider">密码</label>
-          <input [(ngModel)]="dataService.loginPass" type="password" placeholder="••••••" class="bg-[#27272a] border border-white/10 rounded-lg p-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full transition-all">
+          <label class="ui-label">密码</label>
+          <input [(ngModel)]="dataService.loginPass" type="password" placeholder="••••••" class="ui-field">
         </div>
         @if (dataService.loginError()) {
-          <div class="bg-red-500/10 text-red-400 text-sm p-3 rounded-lg border border-red-500/20 text-center">
+          <div class="ui-alert-danger text-center">
             {{ dataService.loginError() }}
           </div>
         }
         <div class="flex gap-3 mt-4">
-          <button (click)="dataService.closeLoginModal()" class="flex-1 py-2.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">取消</button>
-          <button (click)="dataService.performLogin()" class="flex-1 py-2.5 rounded-lg font-bold bg-white text-black hover:bg-gray-200 transition-colors">登录</button>
+          <button (click)="dataService.closeLoginModal()" class="ui-btn-ghost flex-1">取消</button>
+          <button (click)="dataService.performLogin()" class="ui-btn-primary flex-1">登录</button>
         </div>
       </div>
     </div>
   }
 
   @if (dataService.showLogoutModal()) {
-    <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="dataService.showLogoutModal.set(false)"></div>
-      <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm p-6 relative z-10 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
+    <div class="ui-modal-shell">
+      <div class="ui-modal-backdrop" (click)="dataService.showLogoutModal.set(false)"></div>
+      <div class="ui-modal-panel max-w-sm p-6 flex flex-col gap-4 animate-modal-pop-in">
         <h2 class="text-xl font-bold text-white mb-1">管理员登出</h2>
         <p class="text-gray-400 text-sm">确定要退出管理员模式吗？<br>您的所有修改已自动保存。</p>
         <div class="flex gap-3 mt-4">
-          <button (click)="dataService.showLogoutModal.set(false)" class="flex-1 py-2.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">取消</button>
-          <button (click)="dataService.confirmLogout()" class="flex-1 py-2.5 rounded-lg font-bold bg-red-600 text-white hover:bg-red-500 transition-colors">确认退出</button>
+          <button (click)="dataService.showLogoutModal.set(false)" class="ui-btn-ghost flex-1">取消</button>
+          <button (click)="dataService.confirmLogout()" class="ui-btn-danger flex-1">确认退出</button>
         </div>
       </div>
     </div>
@@ -232,20 +196,20 @@
   <!-- External Link Warning Modal -->
   @if (dataService.showExternalModal()) {
     <div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" (click)="dataService.closeExternalModal()"></div>
-      <div class="bg-[#18181b] border border-white/20 rounded-xl p-6 max-w-md w-full shadow-2xl relative z-10 animate-[fadeIn_0.2s_ease-out]">
-        <h3 class="text-lg font-bold text-white mb-3">外部网站跳转提示</h3>
+      <div class="ui-modal-backdrop bg-black/70" (click)="dataService.closeExternalModal()"></div>
+      <div class="ui-modal-panel p-6 max-w-md animate-modal-pop-in">
+        <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><svg lucideExternalLink class="w-5 h-5 text-blue-400" [strokeWidth]="2"></svg>外部网站跳转提示</h3>
         <p class="text-gray-400 mb-6 text-sm leading-relaxed">您即将跳转到外部网站，请注意您的账号和财产安全。</p>
         <div class="flex flex-col gap-3">
           <div class="flex gap-3">
-            <button (click)="dataService.closeExternalModal()" class="flex-1 bg-white/5 border border-white/10 rounded-lg py-2.5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium">
+            <button (click)="dataService.closeExternalModal()" class="ui-btn-secondary flex-1">
               取消
             </button>
-            <button (click)="dataService.confirmExternalNavigation()" class="flex-1 bg-blue-600/20 border border-blue-500/30 rounded-lg py-2.5 text-blue-400 hover:bg-blue-600/30 hover:text-blue-300 transition-all text-sm font-medium">
+            <button (click)="dataService.confirmExternalNavigation()" class="ui-btn-accent flex-1">
               继续访问
             </button>
           </div>
-          <button (click)="dataService.confirmExternalNavigation(true)" class="w-full bg-transparent border border-white/5 rounded-lg py-2 text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all text-xs">
+          <button (click)="dataService.confirmExternalNavigation(true)" class="w-full rounded-control border border-line-soft py-2 text-xs text-gray-500 transition-all hover:bg-white/5 hover:text-gray-300">
             本次使用不再提醒
           </button>
         </div>
@@ -255,7 +219,7 @@
 
   <!-- Toast Notification -->
   @if (dataService.showToast()) {
-    <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-black/80 backdrop-blur-sm text-white px-5 py-2.5 rounded-lg shadow-2xl border border-white/10 animate-fade-in-up">
+    <div class="ui-toast animate-fade-in-up">
       {{ dataService.toastMessage() }}
     </div>
   }

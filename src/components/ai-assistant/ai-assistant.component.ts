@@ -2,6 +2,7 @@
 import { Component, signal, inject } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { NgStyle, CommonModule } from '@angular/common';
+import { APP_UI_ICONS } from '../shared/ui-icons';
 
 interface AiTool {
   id: string;
@@ -13,14 +14,14 @@ interface AiTool {
 
 @Component({
   selector: 'app-ai-assistant',
-  imports: [NgStyle, CommonModule],
+  imports: [NgStyle, CommonModule, ...APP_UI_ICONS],
   template: `
-    <div class="h-full flex flex-col bg-[#0f0f11] text-white overflow-y-auto p-6 md:p-8 relative custom-scrollbar">
+    <div class="ui-page-scroll ui-page-pad text-white relative">
       
       <!-- Top Header -->
-      <div class="flex flex-col items-center mb-8 shrink-0 space-y-2">
-        <h2 class="text-3xl md:text-4xl font-bold tracking-wide">AI 导师导航</h2>
-        <p class="text-gray-400 text-sm md:text-base text-center max-w-2xl">请选择一个 AI 模型，复制专属提示词进行提问。</p>
+      <div class="ui-page-header">
+        <h2 class="ui-title">AI 导师导航</h2>
+        <p class="ui-subtitle">请选择一个 AI 模型，复制专属提示词进行提问。</p>
       </div>
 
       <!-- Tools Grid -->
@@ -28,14 +29,14 @@ interface AiTool {
         @for (tool of aiTools; track tool.id) {
           <div 
             (click)="openModal(tool)"
-            class="group relative bg-[#18181b] border border-white/5 rounded-xl p-6 cursor-pointer overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl hover:border-white/10"
+            class="group relative ui-card ui-card-hover p-6 cursor-pointer overflow-hidden"
           >
             <!-- Hover Gradient -->
             <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
             <div class="flex items-center gap-4 mb-4 relative z-10">
               <!-- Icons Container -->
-              <div class="w-12 h-12 shrink-0 flex items-center justify-center rounded-lg bg-black border border-white/10 group-hover:bg-black/80 transition-colors">
+              <div class="w-12 h-12 shrink-0 flex items-center justify-center rounded-control bg-black border border-line group-hover:bg-black/80 transition-colors">
                 @switch (tool.id) {
                   @case ('deepseek') {
                     <span class="font-bold text-lg text-blue-500">DS</span>
@@ -62,9 +63,9 @@ interface AiTool {
             
             <p class="text-gray-400 text-sm leading-relaxed mb-6 min-h-[4rem] relative z-10">{{ tool.desc }}</p>
             
-            <button class="w-full py-2.5 rounded-lg bg-white/5 text-sm font-bold text-gray-300 border border-white/5 hover:bg-white hover:text-black hover:border-transparent transition-all flex items-center justify-center gap-2 relative z-10">
+            <button class="ui-btn-secondary w-full relative z-10">
               <span>获取提示词</span>
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <svg lucideArrowRight class="w-4 h-4" [strokeWidth]="2"></svg>
             </button>
           </div>
         }
@@ -73,23 +74,23 @@ interface AiTool {
       <!-- Prompt Modal -->
       @if (selectedTool()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div (click)="closeModal()" class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"></div>
-          <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative z-10 animate-fade-in-up overflow-hidden">
+          <div (click)="closeModal()" class="ui-modal-backdrop transition-opacity"></div>
+          <div class="ui-modal-panel w-full max-w-2xl max-h-[90vh] flex flex-col animate-modal-pop-in overflow-hidden">
             
-            <div class="p-5 border-b border-white/10 flex justify-between items-center bg-[#202024]">
+            <div class="ui-modal-header">
               <h3 class="text-lg font-bold text-white flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                 前往: {{ selectedTool()?.name }}
               </h3>
-              <button (click)="closeModal()" class="text-gray-400 hover:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              <button (click)="closeModal()" class="ui-icon-btn">
+                <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
               </button>
             </div>
 
-            <div class="p-6 overflow-y-auto custom-scrollbar">
+            <div class="ui-modal-body overflow-y-auto custom-scrollbar">
               <p class="font-medium mb-4 text-gray-400 text-sm">已为您准备好建筑学专用提示词 (Prompt):</p>
               
-              <div class="bg-[#0f0f11] border border-white/10 rounded-lg p-5 font-mono text-sm leading-loose whitespace-pre-wrap text-gray-300 relative group">
+              <div class="bg-app border border-line rounded-control p-5 font-mono text-sm leading-loose whitespace-pre-wrap text-gray-300 relative group">
                 <span class="text-gray-500 select-none">{{ promptParts.prefix }}</span>
                 <span class="text-gray-500 select-none">{{ promptParts.suffix }}</span>
                 
@@ -99,10 +100,10 @@ interface AiTool {
               </div>
               
               <div class="mt-6 flex justify-end gap-3">
-                <button (click)="closeModal()" class="px-5 py-2.5 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium text-sm">取消</button>
-                <button (click)="copyAndGo()" class="px-5 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors font-bold text-sm shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                <button (click)="closeModal()" class="ui-btn-secondary">取消</button>
+                <button (click)="copyAndGo()" class="ui-btn-accent">
                   <span>复制并前往</span>
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  <svg lucideExternalLink class="w-4 h-4" [strokeWidth]="2"></svg>
                 </button>
               </div>
             </div>

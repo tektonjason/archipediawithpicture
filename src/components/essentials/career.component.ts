@@ -3,6 +3,7 @@ import { Component, OnInit, signal, computed, ElementRef, ViewChild, HostListene
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data.service';
+import { APP_UI_ICONS } from '../shared/ui-icons';
 
 interface CareerNode {
   id: number;
@@ -18,9 +19,9 @@ interface CareerNode {
 
 @Component({
   selector: 'app-career',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ...APP_UI_ICONS],
   template: `
-    <div class="h-full flex flex-col bg-[#0f0f11] text-gray-300 overflow-hidden relative font-sans">
+    <div class="ui-page relative font-sans">
       <!-- Background Grid (Dark Mode) -->
       <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" 
            style="background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px); background-size: 50px 50px;">
@@ -28,10 +29,8 @@ interface CareerNode {
 
       <!-- Header -->
       <div class="absolute top-0 left-0 right-0 z-20 px-4 pt-4 md:pl-24 flex items-center gap-4 pointer-events-none">
-        <a routerLink="/essentials" class="pointer-events-auto ml-12 md:ml-0 px-4 py-2 rounded-lg bg-[#18181b]/80 backdrop-blur-md border border-white/10 hover:bg-white/10 text-sm font-medium transition-colors text-gray-300 hover:text-white flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
+        <a routerLink="/essentials" class="pointer-events-auto ml-12 md:ml-0 ui-btn-secondary bg-surface/80 backdrop-blur-md">
+          <svg lucideArrowLeft class="w-4 h-4" [strokeWidth]="2"></svg>
           返回
         </a>
         <div class="pointer-events-auto">
@@ -56,19 +55,14 @@ interface CareerNode {
             <div class="absolute inset-0 -m-16 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
             
             <!-- Central Circle -->
-            <div class="w-28 h-28 md:w-40 md:h-40 rounded-full bg-[#18181b] border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)] flex flex-col items-center justify-center text-center p-4 relative z-10">
+            <div class="w-28 h-28 md:w-40 md:h-40 rounded-full bg-surface border border-line shadow-[0_0_50px_rgba(255,255,255,0.05)] flex flex-col items-center justify-center text-center p-4 relative z-10">
                <div class="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Start Here</div>
                <h1 class="text-base md:text-xl font-bold text-white leading-tight">Architecture<br><span class="text-xs md:text-sm font-normal text-gray-400">建筑学</span></h1>
                
                <!-- Icons row -->
                <div class="flex gap-2 md:gap-3 mt-2 md:mt-3 text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.499 5.24 50.552 50.552 0 00-2.658.814m-15.482 0A50.55 50.55 0 0112 13.489a50.551 50.551 0 0112-3.342" />
-                  </svg>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                  <svg lucideSchool class="w-4 h-4 md:w-5 md:h-5" [strokeWidth]="1.6"></svg>
+                  <svg lucideSettings class="w-4 h-4 md:w-5 md:h-5" [strokeWidth]="1.6"></svg>
                </div>
             </div>
           </div>
@@ -104,24 +98,18 @@ interface CareerNode {
       <!-- Controls -->
       <div class="absolute bottom-8 right-8 flex flex-col items-end gap-2 z-20">
         <div class="flex flex-col gap-2">
-          <button (click)="zoomIn()" class="p-3 bg-[#18181b]/80 backdrop-blur-md border border-white/10 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-colors shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
+          <button (click)="zoomIn()" class="ui-icon-btn bg-surface/80 backdrop-blur-md shadow-lg">
+            <svg lucideZoomIn class="w-5 h-5" [strokeWidth]="2"></svg>
           </button>
-          <button (click)="zoomOut()" class="p-3 bg-[#18181b]/80 backdrop-blur-md border border-white/10 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-colors shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-            </svg>
+          <button (click)="zoomOut()" class="ui-icon-btn bg-surface/80 backdrop-blur-md shadow-lg">
+            <svg lucideZoomOut class="w-5 h-5" [strokeWidth]="2"></svg>
           </button>
-          <button (click)="resetView()" class="p-3 bg-[#18181b]/80 backdrop-blur-md border border-white/10 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-colors shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
+          <button (click)="resetView()" class="ui-icon-btn bg-surface/80 backdrop-blur-md shadow-lg">
+            <svg lucideRefreshCcw class="w-5 h-5" [strokeWidth]="2"></svg>
           </button>
         </div>
 
-        <div class="bg-[#18181b]/80 backdrop-blur-md border border-white/10 rounded-xl p-2 flex flex-col gap-1.5 shadow-xl">
+        <div class="bg-surface/80 backdrop-blur-md border border-line rounded-card p-2 flex flex-col gap-1.5 shadow-panel">
            <div class="flex items-center gap-2 text-[10px] font-medium text-gray-400 tracking-wider mb-0.5 px-1">
              <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span> 设计</div>
              <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> 技术</div>

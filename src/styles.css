@@ -2,140 +2,284 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html,
+  body {
+    @apply bg-app text-gray-300 antialiased;
+  }
+
+  button,
+  a,
+  input,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .ui-page {
+    @apply h-full flex flex-col bg-app text-gray-300 overflow-hidden;
+  }
+
+  .ui-page-scroll {
+    @apply h-full flex flex-col bg-app text-gray-300 overflow-y-auto custom-scrollbar;
+  }
+
+  .ui-page-pad {
+    @apply p-6 md:p-8;
+  }
+
+  .ui-page-header {
+    @apply flex flex-col items-center mb-8 shrink-0 space-y-2 text-center;
+  }
+
+  .ui-title {
+    @apply text-3xl md:text-4xl font-bold tracking-normal text-white leading-tight;
+  }
+
+  .ui-subtitle {
+    @apply text-sm md:text-base text-gray-400 leading-relaxed max-w-2xl;
+  }
+
+  .ui-topbar {
+    @apply p-4 pl-24 border-b border-line-soft flex items-center gap-4 bg-surface shrink-0;
+  }
+
+  .ui-card {
+    @apply bg-surface border border-line-soft rounded-card;
+  }
+
+  .ui-card-hover {
+    @apply transition-all duration-300 hover:bg-white/5 hover:border-line hover:shadow-card;
+  }
+
+  .ui-media-card {
+    @apply ui-card ui-card-hover overflow-hidden;
+  }
+
+  .ui-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-control px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .ui-btn-primary {
+    @apply ui-btn bg-white text-black hover:bg-gray-200;
+  }
+
+  .ui-btn-accent {
+    @apply ui-btn bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/15;
+  }
+
+  .ui-btn-secondary {
+    @apply ui-btn bg-white/5 border border-line text-gray-300 hover:bg-white/10 hover:text-white;
+  }
+
+  .ui-btn-danger {
+    @apply ui-btn bg-red-600 text-white hover:bg-red-500;
+  }
+
+  .ui-btn-ghost {
+    @apply ui-btn text-gray-400 hover:bg-white/5 hover:text-white;
+  }
+
+  .ui-icon-btn {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-control border border-line bg-surface text-gray-300 transition-all duration-200 hover:bg-white/10 hover:text-white focus:outline-none;
+  }
+
+  .ui-field {
+    @apply w-full rounded-control border border-line bg-field px-3 py-3 text-sm text-white placeholder-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/40;
+  }
+
+  .ui-label {
+    @apply mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500;
+  }
+
+  .ui-chip {
+    @apply inline-flex items-center rounded-full border border-transparent px-4 py-1.5 text-sm font-medium transition-all;
+  }
+
+  .ui-chip-active {
+    @apply bg-white text-black;
+  }
+
+  .ui-chip-muted {
+    @apply bg-white/5 text-gray-300 hover:bg-white/10;
+  }
+
+  .ui-badge {
+    @apply inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border backdrop-blur-sm;
+  }
+
+  .ui-badge-blue {
+    @apply ui-badge bg-blue-500/10 text-blue-400 border-blue-500/20;
+  }
+
+  .ui-badge-emerald {
+    @apply ui-badge bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+  }
+
+  .ui-badge-amber {
+    @apply ui-badge bg-amber-500/10 text-amber-400 border-amber-500/20;
+  }
+
+  .ui-badge-red {
+    @apply ui-badge bg-red-500/15 text-red-300 border-red-500/30;
+  }
+
+  .ui-modal-shell {
+    @apply fixed inset-0 z-[60] flex items-center justify-center p-4;
+  }
+
+  .ui-modal-backdrop {
+    @apply absolute inset-0 bg-black/80 backdrop-blur-md;
+  }
+
+  .ui-modal-panel {
+    @apply relative z-10 w-full rounded-card border border-line bg-surface shadow-panel;
+  }
+
+  .ui-modal-header {
+    @apply flex items-center justify-between border-b border-line p-5 bg-surface-raised;
+  }
+
+  .ui-modal-body {
+    @apply p-6;
+  }
+
+  .ui-modal-footer {
+    @apply flex justify-end gap-3 border-t border-line bg-surface-raised p-5;
+  }
+
+  .ui-empty-state {
+    @apply flex flex-col items-center justify-center text-center text-gray-500;
+  }
+
+  .ui-empty-icon {
+    @apply mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-line-soft bg-white/5 text-gray-500;
+  }
+
+  .ui-alert {
+    @apply rounded-control border p-3 text-sm leading-relaxed;
+  }
+
+  .ui-alert-info {
+    @apply ui-alert border-blue-500/25 bg-blue-500/10 text-blue-200/90;
+  }
+
+  .ui-alert-warning {
+    @apply ui-alert border-amber-500/25 bg-amber-500/10 text-amber-200/90;
+  }
+
+  .ui-alert-danger {
+    @apply ui-alert border-red-500/25 bg-red-500/10 text-red-300;
+  }
+
+  .ui-toast {
+    @apply fixed bottom-10 left-1/2 z-[100] -translate-x-1/2 rounded-control border border-line bg-black/80 px-5 py-2.5 text-sm font-medium text-white shadow-panel backdrop-blur-md;
+  }
+
+  .ui-scrollbar,
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 @layer utilities {
   .font-serif {
     font-family: 'Lora', serif;
   }
+
+  .font-brand {
+    font-family: 'Poppins', 'Inter', sans-serif;
+  }
 }
 
-/* Bauhaus Utility Classes */
-.bauhaus-card {
-  background-color: white;
-  border: 3px solid black;
-  box-shadow: 6px 6px 0px 0px black;
-  transition: all 0.2s ease;
-}
-.bauhaus-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px 0px black;
-}
-.bauhaus-btn {
-  font-weight: bold;
-  border: 2px solid black;
-  box-shadow: 4px 4px 0px 0px black;
-  transition: all 0.1s;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transform: translateY(0);
-}
-.bauhaus-btn:hover {
-  transform: translateY(-1px);
-}
-.bauhaus-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px 0px black;
-}
-.bauhaus-btn-primary {
-  background-color: #1C39BB; /* Klein Blue */
-  color: white;
-}
-.bauhaus-btn-danger {
-  background-color: #E32636; /* Alizarin Crimson */
-  color: white;
-}
-.bauhaus-btn-accent {
-  background-color: #FFD700; /* Gold */
-  color: black;
-}
-/* Scrollbar */
-::-webkit-scrollbar {
+::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+.ui-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
+
+::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track,
+.ui-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+
+::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.ui-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+
+::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.ui-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.34);
 }
-/* Entry Animation */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes item-pop-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
 .animate-pop-in {
   animation: item-pop-in 0.3s ease-out forwards;
-  opacity: 0; /* Start hidden */
+  opacity: 0;
 }
-/* Custom Prose Styles */
-.prose h3 {
-  font-family: 'Poppins', sans-serif !important;
-}
-.prose p, .prose li { 
-  font-family: 'Lora', serif !important;
-  color: #333 !important;
-}
-/* Modal & Backdrop Animation - Enhanced UX */
+
 @keyframes modal-pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px) rotate(-1deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0) rotate(0deg);
-  }
+  0% { opacity: 0; transform: scale(0.96) translateY(14px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
+
 .animate-modal-pop-in {
-  animation: modal-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: modal-pop-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 @keyframes modal-pop-out {
-  0% {
-    opacity: 1;
-    transform: scale(1) translateY(0) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px) rotate(1deg);
-  }
+  0% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.97) translateY(8px); }
 }
+
 .animate-modal-pop-out {
-  animation: modal-pop-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: modal-pop-out 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
+
 @keyframes backdrop-fade-in {
-  from { 
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to { 
-    opacity: 1;
-    backdrop-filter: blur(8px);
-  }
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(8px); }
 }
+
 .animate-backdrop-in {
-  animation: backdrop-fade-in 0.4s ease-out forwards;
+  animation: backdrop-fade-in 0.3s ease-out forwards;
 }
+
 @keyframes backdrop-fade-out {
-  from { 
-    opacity: 1;
-    backdrop-filter: blur(8px);
-  }
-  to { 
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
+  from { opacity: 1; backdrop-filter: blur(8px); }
+  to { opacity: 0; backdrop-filter: blur(0); }
 }
+
 .animate-backdrop-out {
-  animation: backdrop-fade-out 0.25s ease-out forwards;
+  animation: backdrop-fade-out 0.22s ease-out forwards;
 }

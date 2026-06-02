@@ -8,20 +8,27 @@
 //  Unauthorized commercial use is strictly prohibited.
 //
 // =================================================================
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, effect, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { DataService } from './services/data.service';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { gsap } from 'gsap';
+import { GsapHoverTooltipDirective } from './components/shared/gsap-hover-tooltip.directive';
+
+import { SplashScreenComponent } from './components/shared/splash-screen.component';
+import { APP_UI_ICONS } from './components/shared/ui-icons';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GsapHoverTooltipDirective, SplashScreenComponent, ...APP_UI_ICONS],
   templateUrl: './app.component.html',
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   dataService = inject(DataService);
   private router = inject(Router);
+
+  showSplash = signal(true);
 
   // Q&A Carousel Data
   qaQuestions = [
@@ -51,6 +58,10 @@ export class AppComponent implements OnInit, OnDestroy {
   // Main Footer visibility (kept for backward compatibility if needed, but we are moving content to sidebar)
   isFooterVisible = signal(true);
 
+  private sidebarTl!: gsap.core.Timeline;
+  private mm!: gsap.MatchMedia;
+  private isFirstRun = true;
+
   constructor() {
     // Check local storage for footer visibility state and apply it
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
@@ -64,6 +75,18 @@ export class AppComponent implements OnInit, OnDestroy {
         this.isSidebarFooterCollapsed.set(true);
       }
     }
+
+    // Effect to react to sidebar state changes and trigger GSAP animations
+    effect(() => {
+      const isOpen = this.dataService.isSidebarOpen();
+      // Skip animation on initial load to avoid flash, just set state
+      if (this.isFirstRun) {
+        this.isFirstRun = false;
+        // The matchMedia setup will handle the initial state
+        return;
+      }
+      this.animateSidebar(isOpen);
+    });
   }
 
   ngOnInit() {
@@ -72,8 +95,114 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit() {
+    // Initialize GSAP matchMedia for responsive sidebar
+    this.mm = gsap.matchMedia();
+    const isOpen = this.dataService.isSidebarOpen();
+
+    this.mm.add("(min-width: 768px)", () => {
+      // Desktop: animate width
+      gsap.set("#sidebar-panel", { width: isOpen ? "16rem" : "0rem" });
+      if (isOpen) {
+        gsap.set(".nav-item", { opacity: 1, x: 0 });
+        gsap.set(".bar-top", { attr: { x1: 5, y1: 5, x2: 15, y2: 15 } });
+        gsap.set(".bar-bot", { attr: { x1: 15, y1: 5, x2: 5, y2: 15 } });
+      } else {
+        gsap.set(".nav-item", { opacity: 0, x: -20 });
+        gsap.set(".bar-top", { attr: { x1: 3, y1: 6, x2: 17, y2: 6 } });
+        gsap.set(".bar-bot", { attr: { x1: 3, y1: 14, x2: 17, y2: 14 } });
+      }
+    });
+
+    this.mm.add("(max-width: 767px)", () => {
+      // Mobile: animate xPercent
+      gsap.set("#sidebar-panel", { width: "16rem", xPercent: isOpen ? 0 : -100 });
+      if (isOpen) {
+        gsap.set(".nav-item", { opacity: 1, x: 0 });
+        gsap.set(".bar-top", { attr: { x1: 5, y1: 5, x2: 15, y2: 15 } });
+        gsap.set(".bar-bot", { attr: { x1: 15, y1: 5, x2: 5, y2: 15 } });
+      } else {
+        gsap.set(".nav-item", { opacity: 0, x: -20 });
+        gsap.set(".bar-top", { attr: { x1: 3, y1: 6, x2: 17, y2: 6 } });
+        gsap.set(".bar-bot", { attr: { x1: 3, y1: 14, x2: 17, y2: 14 } });
+      }
+    });
+  }
+
   ngOnDestroy() {
     this.stopCarousel();
+    if (this.mm) this.mm.revert();
+  }
+
+  animateSidebar(isOpen: boolean) {
+    if (this.sidebarTl) {
+      this.sidebarTl.kill();
+    }
+    this.sidebarTl = gsap.timeline();
+    
+    const isDesktop = window.innerWidth >= 768;
+
+    if (isOpen) {
+      // Open Menu
+      this.sidebarTl
+        // 1. Sidebar Panel Animation
+        .to("#sidebar-panel", {
+          width: isDesktop ? "16rem" : "16rem",
+          xPercent: isDesktop ? 0 : 0,
+          duration: 0.6,
+          ease: "back.out(1.2)"
+        }, 0)
+        // 2. Nav Items Stagger In
+        .fromTo(".nav-item", 
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.8, ease: "expo.out", stagger: 0.05 },
+          0.1
+        )
+        // 3. Hamburger Morph to X
+        .to(".bar-top", {
+          attr: { x1: 5, y1: 5, x2: 15, y2: 15 },
+          duration: 0.35,
+          ease: "back.out(1.4)"
+        }, 0)
+        .to(".bar-bot", {
+          attr: { x1: 15, y1: 5, x2: 5, y2: 15 },
+          duration: 0.35,
+          ease: "back.out(1.4)"
+        }, 0);
+        
+    } else {
+      // Close Menu
+      this.sidebarTl
+        // 1. Nav Items Fall Out
+        .to(".nav-item", {
+          y: "10vh",
+          rotation: "random(-15, 15)",
+          opacity: 0,
+          duration: 0.4,
+          ease: "power3.in",
+          stagger: { from: "end", each: 0.02 }
+        }, 0)
+        // 2. Sidebar Panel Animation
+        .to("#sidebar-panel", {
+          width: isDesktop ? "0rem" : "16rem",
+          xPercent: isDesktop ? 0 : -100,
+          duration: 0.4,
+          ease: "power3.in"
+        }, 0.2)
+        // 3. X Morph to Hamburger
+        .to(".bar-top", {
+          attr: { x1: 3, y1: 6, x2: 17, y2: 6 },
+          duration: 0.2,
+          ease: "power3.in"
+        }, 0)
+        .to(".bar-bot", {
+          attr: { x1: 3, y1: 14, x2: 17, y2: 14 },
+          duration: 0.2,
+          ease: "power3.in"
+        }, 0)
+        // Reset nav-item transforms so they are ready for the next open
+        .set(".nav-item", { clearProps: "y,rotation" });
+    }
   }
 
   startCarousel() {
@@ -111,5 +240,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   toggleSidebar() {
     this.dataService.toggleSidebar();
+  }
+
+  onSplashEnter() {
+    this.showSplash.set(false);
   }
 }

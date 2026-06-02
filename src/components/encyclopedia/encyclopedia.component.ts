@@ -1,66 +1,65 @@
-import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementRef, effect, OnDestroy } from '@angular/core';
+import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementRef, effect, OnDestroy, QueryList, ViewChildren } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
+import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
+import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
+import { APP_UI_ICONS } from '../shared/ui-icons';
+import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
+
+gsap.registerPlugin(Flip);
 
 @Component({
   selector: 'app-encyclopedia',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
-    <div class="h-full flex flex-col p-6 md:p-8 overflow-hidden bg-[#0f0f11] text-white">
+    <div class="ui-page ui-page-pad text-white">
       
       <!-- Header Section -->
-      <div class="flex flex-col items-center mb-8 shrink-0 space-y-2">
-        <h1 class="text-3xl md:text-4xl font-bold tracking-wide h-[48px] flex items-center">
+      <div class="ui-page-header">
+        <h1 class="ui-title h-[48px] flex items-center">
           {{ currentTitle() }}<span class="animate-pulse text-gray-400 font-thin">|</span>
         </h1>
-        <p class="text-gray-400 text-sm md:text-base max-w-2xl text-center">
+        <p class="ui-subtitle mb-4">
           探索全面的建筑知识库
         </p>
 
-        <!-- Search Input -->
-        <div class="relative w-full max-w-2xl mt-4 flex gap-3">
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              [ngModel]="searchQuery()"
-              (ngModelChange)="updateSearch($event)"
-              placeholder="搜索..." 
-              class="w-full bg-[#18181b] text-white text-base placeholder-gray-500 rounded-xl border border-white/10 py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all shadow-lg"
-            >
-          </div>
+        <!-- Animated Search Input & View Toggle -->
+        <div class="relative w-full max-w-2xl mt-4 flex justify-center items-center gap-4 h-12 z-20">
+          
+          <app-animated-search-bar 
+            [query]="searchQuery()" 
+            (queryChange)="updateSearch($event)" 
+            placeholder="搜索百科词条..."
+          ></app-animated-search-bar>
+          
           <!-- View Toggle Button -->
-          <div class="flex bg-[#18181b] rounded-xl border border-white/10 p-1 shrink-0">
+          <div class="flex bg-surface rounded-card border border-line p-1 shrink-0 z-20 shadow-lg h-12 items-center">
             <button 
               (click)="switchView('grid')"
-              class="p-2 rounded-lg transition-all"
+              class="p-2 rounded-lg transition-colors"
               [class.bg-white/10]="viewMode() === 'grid'"
               [class.text-white]="viewMode() === 'grid'"
               [class.text-gray-500]="viewMode() !== 'grid'"
               [class.hover:text-gray-300]="viewMode() !== 'grid'"
-              title="网格视图"
+              appGsapTooltip="网格视图"
+              [hoverScale]="1.15"
             >
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
+              <svg lucideLayoutGrid class="w-5 h-5" [strokeWidth]="2"></svg>
             </button>
             <button 
               (click)="switchView('list')"
-              class="p-2 rounded-lg transition-all"
+              class="p-2 rounded-lg transition-colors"
               [class.bg-white/10]="viewMode() === 'list'"
               [class.text-white]="viewMode() === 'list'"
               [class.text-gray-500]="viewMode() !== 'list'"
               [class.hover:text-gray-300]="viewMode() !== 'list'"
-              title="列表视图"
+              appGsapTooltip="列表视图"
+              [hoverScale]="1.15"
             >
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <svg lucideLayoutList class="w-5 h-5" [strokeWidth]="2"></svg>
             </button>
           </div>
         </div>
@@ -70,7 +69,7 @@ import { DataService } from '../../services/data.service';
       <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient">
         <button 
           (click)="selectCategory('all')"
-          class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
+          class="ui-chip flex-shrink-0 whitespace-nowrap"
           [class.bg-white]="selectedCategory() === 'all'"
           [class.text-black]="selectedCategory() === 'all'"
           [class.bg-white/5]="selectedCategory() !== 'all'"
@@ -80,7 +79,7 @@ import { DataService } from '../../services/data.service';
         @for (cat of categories(); track cat) {
           <button 
             (click)="selectCategory(cat)"
-             class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
+             class="ui-chip flex-shrink-0 whitespace-nowrap"
             [class.bg-white]="selectedCategory() === cat"
             [class.text-black]="selectedCategory() === cat"
             [class.bg-white/5]="selectedCategory() !== cat"
@@ -95,25 +94,25 @@ import { DataService } from '../../services/data.service';
       <!-- Content Grid -->
       <div id="encyclopedia-scroll-container" #scrollContainer (scroll)="onScroll()" class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2">
         @if (filteredEntries().length === 0) {
-          <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
-            <div class="text-4xl mb-4 grayscale">🏛️</div>
+          <div class="ui-empty-state h-60 opacity-80">
+            <div class="ui-empty-icon"><svg lucideBuilding2 class="w-8 h-8" [strokeWidth]="1.8"></svg></div>
             <p class="font-medium text-lg">未找到相关条目</p>
             <p class="text-gray-500 text-sm mt-1">请尝试更换关键词或进入对应分类查找</p>
             <button 
               [routerLink]="['/about']"
-              class="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors border border-white/5"
+              class="ui-btn-secondary mt-4"
             >
               向我们反馈
             </button>
           </div>
         }
 
-        <div class="grid gap-6 pb-20 entries-grid" [class.grid-cols-1]="viewMode() === 'list'" [class.md:grid-cols-2]="viewMode() === 'grid'" [class.lg:grid-cols-3]="viewMode() === 'grid'" [class.xl:grid-cols-4]="viewMode() === 'grid'" [class.entries-grid-list]="viewMode() === 'list'" [class.entries-grid-grid]="viewMode() === 'grid'" [class.switching]="isSwitching()">
+        <div #entriesContainer class="grid gap-6 pb-20 entries-grid" [class.grid-cols-1]="viewMode() === 'list'" [class.md:grid-cols-2]="viewMode() === 'grid'" [class.lg:grid-cols-3]="viewMode() === 'grid'" [class.xl:grid-cols-4]="viewMode() === 'grid'" [class.entries-grid-list]="viewMode() === 'list'" [class.entries-grid-grid]="viewMode() === 'grid'">
           @for (entry of filteredEntries(); track entry.id; let i = $index) {
             <a 
               [routerLink]="['/entry', entry.id]" 
               (click)="saveState(scrollContainer.scrollTop)" 
-              class="group bg-[#18181b] rounded-xl overflow-hidden border border-white/5 hover:border-white/20 transition-all hover:translate-y-[-2px] hover:shadow-xl animate-fade-in-up entry-card"
+              class="group ui-media-card animate-fade-in-up entry-card" appGsapCardHover
               [class.flex]="viewMode() === 'list'"
               [class.flex-col]="viewMode() === 'grid'"
               [class.h-full]="viewMode() === 'grid'"
@@ -122,14 +121,15 @@ import { DataService } from '../../services/data.service';
               [class.entry-card-list]="viewMode() === 'list'"
               [class.entry-card-grid]="viewMode() === 'grid'"
               [style.animation-delay]="i < 12 ? (i * 50) + 'ms' : '0ms'"
+              [attr.data-flip-id]="entry.id"
             >
               <!-- Image Section -->
               <div class="overflow-hidden relative bg-gray-800 entry-image" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
                 @if (entry.imageUrl) {
-                   <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term">
+                   <img [src]="entry.imageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term" data-flip-id="image-{{entry.id}}">
                 } @else {
                    <!-- Fallback Pattern -->
-                   <div class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative">
+                   <div class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative" data-flip-id="image-{{entry.id}}">
                       <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 20px 20px;"></div>
                       <span class="text-4xl opacity-30 select-none">Aa</span>
                    </div>
@@ -158,9 +158,7 @@ import { DataService } from '../../services/data.service';
                    <span class="text-xs text-gray-600 font-medium truncate max-w-[70%]">{{ entry.category }}</span>
                    <div class="flex items-center text-xs font-medium text-gray-500 group-hover:text-white transition-colors">
                      阅读更多 
-                     <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                     </svg>
+                     <svg lucideChevronRight class="w-3 h-3 ml-1" [strokeWidth]="2"></svg>
                    </div>
                 </div>
               </div>
@@ -172,9 +170,7 @@ import { DataService } from '../../services/data.service';
       <!-- Admin Add Button -->
       @if (dataService.isAdmin()) {
         <button (click)="createNew()" title="添加新词条" class="absolute bottom-8 right-8 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-500 hover:scale-105 transition-all z-20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+          <svg lucidePlus class="w-6 h-6" [strokeWidth]="2"></svg>
         </button>
       }
     </div>
@@ -209,19 +205,12 @@ import { DataService } from '../../services/data.service';
       animation: fadeInUp 0.5s ease-out backwards;
     }
     .entries-grid {
-      transition: grid-template-columns var(--view-dur) var(--view-ease), gap var(--view-dur) var(--view-ease);
-    }
-    .entries-grid.switching .entry-card {
-      opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 200ms ease, transform 200ms ease;
     }
     .entry-card {
-      transition: transform 300ms cubic-bezier(0.2, 0, 0, 1), box-shadow 300ms ease, border-color 300ms ease, background-color 300ms ease, opacity 300ms ease;
-      will-change: transform, opacity;
+      will-change: transform, box-shadow;
+      transition: border-color 300ms ease, background-color 300ms ease;
     }
     .entry-image {
-      /* Removed layout transitions to prevent jank */
       transition: border-radius 300ms ease;
     }
     .entry-image img {
@@ -230,9 +219,8 @@ import { DataService } from '../../services/data.service';
     .entry-content {
       transition: opacity 300ms ease;
     }
-    .entries-grid.switching .entry-image img,
-    .entries-grid.switching .entry-content {
-      opacity: 1; /* Keep internal opacity consistent during switch */
+    .no-transition {
+      transition-duration: 0ms !important;
     }
     @media (prefers-reduced-motion: reduce) {
       .entries-grid,
@@ -251,7 +239,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
   viewMode = this.dataService.encyclopediaViewMode;
   displayLimit = this.dataService.encyclopediaDisplayLimit;
-  isSwitching = signal(false);
+  private lastAnimatedIndex = 0;
 
   // Typewriter properties
   currentTitle = signal('');
@@ -262,6 +250,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   private timer: any;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('entriesContainer') entriesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChildren('.entry-card') entryCards!: QueryList<ElementRef>;
 
   private categoryOrder = [
     // 如果您添加了新的分类（例如“未来建筑”），默认它会出现在列表末尾。
@@ -323,20 +313,37 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     if (this.viewMode() === mode) {
       return;
     }
-    // 1. Start exit animation (fade out + scale down)
-    this.isSwitching.set(true);
-    
-    // 2. Wait for exit animation to complete (200ms matches CSS)
-    setTimeout(() => {
-      // 3. Change layout (invisible)
+
+    const container = this.entriesContainer.nativeElement;
+    const currentCards = Array.from(container.querySelectorAll('.entry-card'));
+
+    if (currentCards.length === 0) {
       this.viewMode.set(mode);
-      
-      // 4. Slight delay to let DOM update layout
-      setTimeout(() => {
-         // 5. Start enter animation (fade in + scale up)
-         this.isSwitching.set(false);
-      }, 50);
-    }, 200);
+      return;
+    }
+
+    // Add no-transition class to prevent CSS transitions from interfering
+    currentCards.forEach(card => card.classList.add('no-transition'));
+
+    const state = Flip.getState(currentCards, { props: "borderRadius,boxShadow" });
+
+    this.viewMode.set(mode);
+
+    requestAnimationFrame(() => {
+      // Force a reflow to ensure layout is settled
+      container.offsetHeight; 
+      const newCards = Array.from(container.querySelectorAll('.entry-card'));
+      Flip.from(state, {
+        elements: newCards,
+        duration: 0.7,
+        ease: "expo.inOut",
+        nested: true,
+        onComplete: () => {
+          // Remove no-transition class after animation completes
+          newCards.forEach(card => card.classList.remove('no-transition'));
+        }
+      });
+    });
   }
 
   onScroll() {
@@ -344,7 +351,20 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     // Buffer of 200px
     if (element.scrollHeight - element.scrollTop - element.clientHeight < 200) {
       if (this.displayLimit() < this._allFilteredEntries().length) {
+        const oldLimit = this.displayLimit();
         this.displayLimit.update(limit => limit + 100);
+        
+        // Animate newly added cards
+        requestAnimationFrame(() => {
+          const container = this.entriesContainer.nativeElement;
+          const newCards = Array.from(container.querySelectorAll('.entry-card')).slice(oldLimit);
+          if (newCards.length > 0) {
+            gsap.fromTo(newCards,
+              { opacity: 0, y: 20 },
+              { opacity: 1, y: 0, duration: 0.6, ease: "power1.out", stagger: 0.03 }
+            );
+          }
+        });
       }
     }
   }
@@ -414,15 +434,47 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   });
 
   selectCategory(category: string) {
-    if (this.selectedCategory() !== category) {
-      this.selectedCategory.set(category);
-      this.searchQuery.set(''); // Clear search when switching categories
-      this.displayLimit.set(50);
-      this.dataService.encyclopediaScrollPosition.set(0);
-      if (this.scrollContainer?.nativeElement) {
-        this.scrollContainer.nativeElement.scrollTop = 0;
-      }
+    if (this.selectedCategory() === category) {
+      return;
     }
+
+    const container = this.entriesContainer.nativeElement;
+    const currentCards = Array.from(container.querySelectorAll('.entry-card'));
+
+    // Exit animation for current cards
+    gsap.to(currentCards, {
+      duration: 0.3,
+      opacity: 0,
+      scale: 0.9,
+      stagger: 0.02,
+      ease: "power1.in",
+      onComplete: () => {
+        // Update category and reset scroll/search after exit animation
+        this.selectedCategory.set(category);
+        this.searchQuery.set('');
+        this.displayLimit.set(50);
+        this.dataService.encyclopediaScrollPosition.set(0);
+        if (this.scrollContainer?.nativeElement) {
+          this.scrollContainer.nativeElement.scrollTop = 0;
+        }
+
+        // Enter animation for new cards
+        requestAnimationFrame(() => {
+          const newCards = Array.from(container.querySelectorAll('.entry-card'));
+          gsap.fromTo(newCards,
+            { opacity: 0, scale: 0.9, y: 20 }, // FROM these values
+            { // TO these values (their natural CSS state)
+              duration: 0.5,
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              stagger: 0.05,
+              ease: "power1.out",
+            }
+          );
+        });
+      }
+    });
   }
 
   createNew() {

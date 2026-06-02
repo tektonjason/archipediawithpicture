@@ -4,43 +4,34 @@ import { FormsModule } from '@angular/forms';
 import { NgClass, CommonModule } from '@angular/common';
 import { DataService, Reading } from '../../services/data.service';
 import pinyin from 'pinyin';
+import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
+import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
+import { APP_UI_ICONS } from '../shared/ui-icons';
 
 @Component({
   selector: 'app-readings',
-  imports: [FormsModule, CommonModule, NgClass, RouterLink],
+  imports: [FormsModule, CommonModule, NgClass, RouterLink, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   standalone: true,
   template: `
-    <div class="h-full flex flex-col p-6 md:p-8 overflow-hidden bg-[#0f0f11] text-white">
+    <div class="ui-page ui-page-pad text-white">
       
       <!-- Header Section -->
-      <div class="flex flex-col items-center mb-8 shrink-0 space-y-2">
-        <h1 class="text-3xl md:text-4xl font-bold tracking-wide">建筑读物</h1>
-        <p class="text-gray-400 text-sm md:text-base max-w-2xl text-center">
+      <div class="ui-page-header">
+        <h1 class="ui-title">建筑读物</h1>
+        <p class="ui-subtitle mb-4">
           发现有价值的建筑书籍与期刊
         </p>
 
         <!-- Search Input -->
-        <div class="relative w-full max-w-2xl mt-4 flex gap-3">
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              [ngModel]="searchQuery()"
-              (ngModelChange)="searchQuery.set($event)"
-              placeholder="搜索书名、作者或出版社..." 
-              class="w-full bg-[#18181b] text-white text-base placeholder-gray-500 rounded-xl border border-white/10 py-3 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all shadow-lg"
-            >
-            @if (searchQuery()) {
-              <button (click)="searchQuery.set('')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            }
-          </div>
-          <button (click)="startEResourceFlow()" class="px-6 py-3 bg-[#18181b] border border-white/10 hover:bg-white/5 rounded-xl text-sm font-medium transition-all whitespace-nowrap">
+        <div class="relative w-full max-w-2xl mt-4 flex gap-4 items-center justify-center h-12 z-20">
+          <app-animated-search-bar 
+            [query]="searchQuery()" 
+            (queryChange)="searchQuery.set($event)" 
+            placeholder="搜索书名、作者或出版社..."
+          ></app-animated-search-bar>
+          
+          <button (click)="startEResourceFlow()" appGsapTooltip="获取受限电子资源" [hoverScale]="1.05" class="ui-btn-secondary h-12 whitespace-nowrap shadow-lg">
             电子资源
           </button>
         </div>
@@ -50,7 +41,7 @@ import pinyin from 'pinyin';
       <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-start px-1">
         <button 
           (click)="selectTag('all')"
-          class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
+          class="ui-chip flex-shrink-0 whitespace-nowrap"
           [class.bg-white]="selectedTag() === 'all'"
           [class.text-black]="selectedTag() === 'all'"
           [class.bg-white/5]="selectedTag() !== 'all'"
@@ -60,7 +51,7 @@ import pinyin from 'pinyin';
         @for (tag of allTags(); track tag) {
           <button 
             (click)="selectTag(tag)"
-            class="flex-shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-transparent"
+            class="ui-chip flex-shrink-0 whitespace-nowrap"
             [class.bg-white]="selectedTag() === tag"
             [class.text-black]="selectedTag() === tag"
             [class.bg-white/5]="selectedTag() !== tag"
@@ -76,13 +67,13 @@ import pinyin from 'pinyin';
       <div class="flex-1 relative overflow-hidden">
         <div #scrollContainer class="h-full overflow-y-auto pb-20 hide-scrollbar" [class.pr-10]="filteredReadings().length > 0" (scroll)="onScroll()">
           @if (filteredReadings().length === 0) {
-            <div class="flex flex-col items-center justify-center h-60 opacity-50 text-center">
-              <div class="text-4xl mb-4 grayscale">📚</div>
+            <div class="ui-empty-state h-60 opacity-80">
+              <div class="ui-empty-icon"><svg lucideBookOpen class="w-8 h-8" [strokeWidth]="1.8"></svg></div>
               <p class="font-medium text-lg">未找到相关读物</p>
               <p class="text-gray-500 text-sm mt-1">请尝试更换关键词或进入对应分类查找</p>
               <button 
                 [routerLink]="['/about']"
-                class="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors border border-white/5"
+                class="ui-btn-secondary mt-4"
               >
                 向我们反馈
               </button>
@@ -91,7 +82,7 @@ import pinyin from 'pinyin';
             @for (group of groupedReadings(); track group.letter) {
               <div class="relative mb-8">
                 <div [attr.data-letter]="group.letter" class="letter-anchor absolute -top-4"></div>
-                <h2 class="text-xl font-bold text-gray-500 mb-4 sticky top-0 bg-[#0f0f11]/90 backdrop-blur-sm z-10 py-2 border-b border-white/5">
+                <h2 class="text-xl font-bold text-gray-500 mb-4 sticky top-0 bg-app/90 backdrop-blur-sm z-10 py-2 border-b border-line-soft">
                   {{ group.letter }}
                 </h2>
                 
@@ -101,9 +92,10 @@ import pinyin from 'pinyin';
                        (click)="openModal(item)" 
                        class="group cursor-pointer flex flex-col gap-3 animate-fade-in-up" 
                        [style.animation-delay]="(i % 21 * 30) + 'ms'" 
+                       appGsapCardHover
                      >
                       <!-- Book Cover -->
-                      <div class="aspect-[2/3] bg-[#18181b] rounded-lg border border-white/5 group-hover:border-white/20 overflow-hidden relative shadow-lg group-hover:shadow-xl transition-all group-hover:-translate-y-1">
+                      <div class="aspect-[2/3] bg-surface rounded-control border border-line-soft overflow-hidden relative shadow-lg">
                         @if (item.imageUrl && !failedImages().has(item.id)) {
                           <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                         } @else {
@@ -175,19 +167,19 @@ import pinyin from 'pinyin';
           ></div>
           
           <div 
-            class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex overflow-hidden relative z-10 transition-all duration-300"
+            class="ui-modal-panel w-full max-w-4xl max-h-[85vh] flex overflow-hidden transition-all duration-300"
             [class.scale-95]="isClosing()"
             [class.opacity-0]="isClosing()"
           >
-            <button (click)="closeModal()" class="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 hover:bg-white/20 text-white transition-colors">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <button (click)="closeModal()" class="absolute top-4 right-4 z-20 ui-icon-btn bg-black/50">
+              <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
             </button>
 
             <!-- Layout: Image Left, Content Right -->
             <div class="flex flex-col md:flex-row w-full h-full">
                
                <!-- Left: Cover Image Area -->
-               <div class="hidden md:flex md:w-2/5 bg-[#0f0f11] items-center justify-center p-6 md:p-8 relative overflow-hidden shrink-0">
+               <div class="hidden md:flex md:w-2/5 bg-app items-center justify-center p-6 md:p-8 relative overflow-hidden shrink-0">
                   <!-- Abstract background pattern -->
                   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
                   
@@ -254,34 +246,34 @@ import pinyin from 'pinyin';
                   </div>
                   </div>
 
-                  <div class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-[#18181b] border-t border-white/10 z-10 shrink-0 flex gap-4">
-                    <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="cursor-pointer flex-1 bg-white text-black hover:bg-gray-200 transition-colors py-3 rounded-lg font-bold flex items-center justify-center gap-2">
-                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  <div class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-surface border-t border-line z-10 shrink-0 flex gap-4">
+                    <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="ui-btn-primary cursor-pointer flex-1">
+                       <svg lucideSearch class="w-5 h-5" [strokeWidth]="2"></svg>
                        <span>在线搜索</span>
                     </a>
                     
                     <div class="relative">
                       <button 
                         (click)="handleShare(item)" 
-                        class="h-full px-4 rounded-lg border border-white/10 text-white hover:bg-white/10 transition-colors flex items-center justify-center gap-2" 
+                        class="h-full ui-btn-secondary px-4" 
                         title="分享并搜索"
                       >
-                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                         <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
                       </button>
 
                       <!-- Share Menu -->
                       @if (showShareMenu()) {
-                        <div class="absolute bottom-full right-0 mb-3 w-40 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-fade-in-up z-30 flex flex-col">
+                        <div class="absolute bottom-full right-0 mb-3 w-40 ui-card shadow-panel overflow-hidden animate-fade-in-up z-30 flex flex-col">
                            @if (shareMenuCopied()) {
                              <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
-                               已复制信息 ✅
+                               已复制信息
                              </div>
                            }
                            
                            <div class="p-1.5 flex flex-col gap-1">
                              <a [href]="getPlatformUrl('wechat', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
                                <div class="w-6 h-6 rounded bg-[#07c160] flex items-center justify-center shrink-0">
-                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8.5,1.5c-4.1,0-7.5,2.9-7.5,6.5c0,2.1,1.1,3.9,2.9,5.1c-0.1,0.6-0.4,2.2-0.5,2.6c0,0,0,0,0,0c0,0.1,0,0.2,0.1,0.2c0.1,0,0.2,0,0.4-0.1c1.3-0.7,2.9-1.8,3.3-2.1c0.4,0.1,0.9,0.2,1.3,0.2c4.1,0,7.5-2.9,7.5-6.5S12.6,1.5,8.5,1.5z M17.5,8c-3.6,0-6.5,2.6-6.5,5.8c0,1.9,1,3.5,2.6,4.6c-0.1,0.5-0.4,1.9-0.4,2.3c0,0,0,0,0,0c0,0.1,0.1,0.2,0.2,0.2c0.1,0,0.2,0,0.3-0.1c1.2-0.6,2.6-1.6,2.9-1.9c0.4,0.1,0.8,0.2,1.2,0.2c3.6,0,6.5-2.6,6.5-5.8S21.1,8,17.5,8z"/></svg>
+                                 <span class="text-[10px] font-bold text-white">微</span>
                                </div>
                                微信
                              </a>
@@ -299,7 +291,7 @@ import pinyin from 'pinyin';
                              </a>
                              <a [href]="getPlatformUrl('duozhuayu', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
                                <div class="w-6 h-6 rounded bg-[#499d75] flex items-center justify-center shrink-0">
-                                 <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                 <svg lucideBookOpen class="w-4 h-4 text-white" [strokeWidth]="2"></svg>
                                </div>
                                多抓鱼
                              </a>
@@ -326,10 +318,10 @@ import pinyin from 'pinyin';
         <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="closeEResourceFlow()"></div>
           
-          <div class="bg-[#18181b] border border-white/10 rounded-xl shadow-2xl w-full max-w-md flex flex-col relative z-10 animate-fade-in-up overflow-hidden">
+          <div class="ui-modal-panel w-full max-w-md flex flex-col animate-modal-pop-in overflow-hidden">
              
              <!-- Modal Header -->
-             <div class="p-5 border-b border-white/10 bg-[#202024]">
+             <div class="ui-modal-header block">
                <h3 class="font-bold text-lg text-white text-center">
                  @switch(eResourceFlowStep()) {
                    @case('verification') { 学生身份验证 }
@@ -340,25 +332,25 @@ import pinyin from 'pinyin';
              </div>
 
              <!-- Content -->
-             <div class="p-6">
+             <div class="ui-modal-body">
                 @switch(eResourceFlowStep()) {
                   @case('verification') {
                     <div class="flex flex-col gap-4">
                       <div>
-                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">学校</label>
-                        <input [(ngModel)]="verificationForm().school" type="text" placeholder="请输入学校全称" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                        <label class="ui-label">学校</label>
+                        <input [(ngModel)]="verificationForm().school" type="text" placeholder="请输入学校全称" class="ui-field">
                       </div>
                       <div>
-                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">学院</label>
-                        <input [(ngModel)]="verificationForm().college" type="text" placeholder="请输入学院全称" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                        <label class="ui-label">学院</label>
+                        <input [(ngModel)]="verificationForm().college" type="text" placeholder="请输入学院全称" class="ui-field">
                       </div>
                       <div>
-                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">专业</label>
-                        <input [(ngModel)]="verificationForm().major" type="text" placeholder="请输入专业全称" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                        <label class="ui-label">专业</label>
+                        <input [(ngModel)]="verificationForm().major" type="text" placeholder="请输入专业全称" class="ui-field">
                       </div>
                       <div>
-                        <label class="text-xs font-bold uppercase text-gray-500 mb-1 block">学号</label>
-                        <input [(ngModel)]="verificationForm().studentId" type="text" placeholder="请输入11位学号" class="w-full bg-[#27272a] border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-blue-500">
+                        <label class="ui-label">学号</label>
+                        <input [(ngModel)]="verificationForm().studentId" type="text" placeholder="请输入学号" class="ui-field">
                       </div>
 
                       @if (verificationStatus() !== 'idle' && verificationMessage()) {
@@ -382,7 +374,7 @@ import pinyin from 'pinyin';
                     </div>
                   }
                   @case('resources') {
-                    <div class="bg-[#0f0f11] p-4 rounded border border-white/10 text-sm font-mono text-gray-300 break-all whitespace-pre-wrap">
+                    <div class="bg-app p-4 rounded-control border border-line text-sm font-mono text-gray-300 break-all whitespace-pre-wrap">
                       {{ resourceLinkText() }}
                     </div>
                   }
@@ -390,21 +382,21 @@ import pinyin from 'pinyin';
              </div>
 
              <!-- Footer -->
-             <div class="p-5 border-t border-white/10 bg-[#202024] flex gap-3 justify-end">
+             <div class="ui-modal-footer">
                 @switch(eResourceFlowStep()) {
                   @case('verification') {
-                    <button (click)="closeEResourceFlow()" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">取消</button>
-                    <button (click)="handleVerification()" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-200 transition-colors">
+                    <button (click)="closeEResourceFlow()" class="ui-btn-ghost">取消</button>
+                    <button (click)="handleVerification()" class="ui-btn-primary">
                       {{ verificationStatus() === 'verifying' ? '核验中...' : '核验' }}
                     </button>
                   }
                   @case('declaration') {
-                    <button (click)="goToResourcesStep()" [disabled]="declarationCountdown() > 0" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button (click)="goToResourcesStep()" [disabled]="declarationCountdown() > 0" class="ui-btn-primary">
                       {{ declarationCountdown() > 0 ? '请等待 ' + declarationCountdown() + 's' : '确认并继续' }}
                     </button>
                   }
                   @case('resources') {
-                    <button (click)="copyResourceInfo()" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-200 transition-colors">{{ copyButtonText() }}</button>
+                    <button (click)="copyResourceInfo()" class="ui-btn-primary">{{ copyButtonText() }}</button>
                   }
                 }
              </div>
@@ -592,10 +584,10 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (level.includes('T3')) return 'bg-blue-500/20 text-blue-300 border border-blue-500/30 backdrop-blur-sm';
     
     // Existing logic as fallback
-    if (level.includes('SCI') || level.includes('SSCI') || level.includes('AHCI')) return 'bg-red-100 text-red-800 border-red-200';
-    if (level.includes('CSCD') || level.includes('CSSCI')) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    if (level.includes('北大核心')) return 'bg-blue-100 text-blue-800 border-blue-200';
-    return 'bg-gray-100 text-gray-800 border-gray-200';
+    if (level.includes('SCI') || level.includes('SSCI') || level.includes('AHCI')) return 'bg-red-500/15 text-red-300 border border-red-500/30 backdrop-blur-sm';
+    if (level.includes('CSCD') || level.includes('CSSCI')) return 'bg-amber-500/15 text-amber-300 border border-amber-500/30 backdrop-blur-sm';
+    if (level.includes('北大核心')) return 'bg-blue-500/15 text-blue-300 border border-blue-500/30 backdrop-blur-sm';
+    return 'bg-white/10 text-gray-300 border border-white/10 backdrop-blur-sm';
   }
 
   getSearchUrl(item: Reading) {
@@ -748,24 +740,73 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
   }
 
+  private readonly allowedEResourceMajors = ['建筑学', '城乡规划', '智能建造'];
+
+  private normalizeVerificationValue(value: string): string {
+    return value.replace(/\s+/g, '').trim();
+  }
+
+  private hasValidEResourceVerification(): boolean {
+    const { school, college, major, studentId } = this.verificationForm();
+    const normalizedSchool = this.normalizeVerificationValue(school);
+    const normalizedCollege = this.normalizeVerificationValue(college);
+    const normalizedMajor = this.normalizeVerificationValue(major);
+    const normalizedStudentId = this.normalizeVerificationValue(studentId);
+
+    return (
+      normalizedSchool === '宁夏大学' &&
+      normalizedCollege === '建筑学院' &&
+      this.allowedEResourceMajors.includes(normalizedMajor) &&
+      /^120\d{8}$/.test(normalizedStudentId)
+    );
+  }
+
   handleVerification() {
     const { school, college, major, studentId } = this.verificationForm();
-    if (!school || !college || !major || !studentId) {
+    const normalizedSchool = this.normalizeVerificationValue(school);
+    const normalizedCollege = this.normalizeVerificationValue(college);
+    const normalizedMajor = this.normalizeVerificationValue(major);
+    const normalizedStudentId = this.normalizeVerificationValue(studentId);
+
+    if (!normalizedSchool || !normalizedCollege || !normalizedMajor || !normalizedStudentId) {
       this.verificationStatus.set('error');
       this.verificationMessage.set('请填写所有必填项。');
       return;
     }
-    
-    // Simple mock verification logic
-    if (studentId.length !== 11) {
-       this.verificationStatus.set('error');
-       this.verificationMessage.set('学号必须为11位数字。');
-       return;
+
+    if (normalizedSchool !== '宁夏大学') {
+      this.verificationStatus.set('error');
+      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
+      return;
     }
+
+    if (normalizedCollege !== '建筑学院') {
+      this.verificationStatus.set('error');
+      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
+      return;
+    }
+
+    if (!this.allowedEResourceMajors.includes(normalizedMajor)) {
+      this.verificationStatus.set('error');
+      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
+      return;
+    }
+
+    if (!/^120\d{8}$/.test(normalizedStudentId)) {
+      this.verificationStatus.set('error');
+      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
+      return;
+    }
+
+    this.verificationForm.set({
+      school: normalizedSchool,
+      college: normalizedCollege,
+      major: normalizedMajor,
+      studentId: normalizedStudentId,
+    });
 
     this.verificationStatus.set('verifying');
     setTimeout(() => {
-      // Success
       this.verificationStatus.set('success');
       this.verificationMessage.set('验证成功！');
       setTimeout(() => {
@@ -788,6 +829,13 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   goToResourcesStep() {
+    if (!this.hasValidEResourceVerification()) {
+      this.eResourceFlowStep.set('verification');
+      this.verificationStatus.set('error');
+      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
+      return;
+    }
+
     this.eResourceFlowStep.set('resources');
   }
 

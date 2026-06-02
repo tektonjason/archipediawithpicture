@@ -2,48 +2,48 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DataService, Competition } from '../../services/data.service';
+import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
+import { APP_UI_ICONS } from '../shared/ui-icons';
 
 @Component({
   selector: 'app-competitions',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, GsapHoverTooltipDirective, ...APP_UI_ICONS],
   template: `
-    <div class="h-full flex flex-col p-6 md:p-8 bg-[#0f0f11] text-white overflow-hidden">
+    <div class="ui-page ui-page-pad text-white">
       
       <!-- Header Section -->
-      <div class="flex flex-col items-center mb-8 shrink-0 space-y-2">
-        <h1 class="text-3xl md:text-4xl font-bold tracking-wide">竞赛合集</h1>
-        <p class="text-gray-400 text-sm md:text-base max-w-2xl text-center">
+      <div class="ui-page-header">
+        <h1 class="ui-title">竞赛合集</h1>
+        <p class="ui-subtitle">
           汇集全球建筑设计竞赛资讯
         </p>
 
         <!-- View Toggle (Centered below title) -->
-        <div class="mt-4 flex bg-[#18181b] rounded-xl border border-white/10 p-1 shrink-0">
+        <div class="mt-4 flex bg-surface rounded-card border border-line p-1 shrink-0">
           <button 
             (click)="switchView('grid')"
-            class="p-2 rounded-lg transition-all"
+            class="p-2 rounded-lg transition-colors"
             [class.bg-white/10]="viewMode() === 'grid'"
             [class.text-white]="viewMode() === 'grid'"
             [class.text-gray-500]="viewMode() !== 'grid'"
             [class.hover:text-gray-300]="viewMode() !== 'grid'"
-            title="网格视图"
+            appGsapTooltip="网格视图"
+            [hoverScale]="1.15"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
+            <svg lucideLayoutGrid class="w-5 h-5" [strokeWidth]="2"></svg>
           </button>
           <button 
             (click)="switchView('calendar')"
-            class="p-2 rounded-lg transition-all"
+            class="p-2 rounded-lg transition-colors"
             [class.bg-white/10]="viewMode() === 'calendar'"
             [class.text-white]="viewMode() === 'calendar'"
             [class.text-gray-500]="viewMode() !== 'calendar'"
             [class.hover:text-gray-300]="viewMode() !== 'calendar'"
-            title="日历视图"
+            appGsapTooltip="日历视图"
+            [hoverScale]="1.15"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
+            <svg lucideCalendarDays class="w-5 h-5" [strokeWidth]="2"></svg>
           </button>
         </div>
       </div>
@@ -54,22 +54,18 @@ import { DataService, Competition } from '../../services/data.service';
         <!-- Disclaimer & Useful Links -->
         <div class="mb-8 space-y-4 max-w-5xl mx-auto">
           <!-- Disclaimer -->
-          <div *ngIf="showDisclaimer()" class="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex gap-3 items-center text-sm text-amber-200/80 pr-2 group transition-all">
-            <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+          <div *ngIf="showDisclaimer()" class="ui-alert-warning flex gap-3 items-center pr-2 group transition-all">
+            <svg lucideAlertTriangle class="w-5 h-5 text-amber-500 shrink-0" [strokeWidth]="2"></svg>
             <p class="flex-1">相关竞赛的信息整理于2026年1月，实际情况可能与本页面内容不同，请以官方文件或学校通知为准。</p>
             <button (click)="showDisclaimer.set(false)" class="text-amber-500/50 hover:text-amber-500 transition-colors p-1 rounded hover:bg-amber-500/10 shrink-0 flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <svg lucideX class="w-4 h-4" [strokeWidth]="2"></svg>
             </button>
           </div>
 
           <!-- Useful Links -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Official Libraries -->
-            <div class="bg-[#18181b] border border-white/10 rounded-xl p-4">
+            <div class="ui-card p-4">
               <h3 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
                 官方竞赛库
               </h3>
@@ -80,7 +76,7 @@ import { DataService, Competition } from '../../services/data.service';
             </div>
 
             <!-- Info Websites -->
-            <div class="bg-[#18181b] border border-white/10 rounded-xl p-4">
+            <div class="ui-card p-4">
               <h3 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
                 竞赛信息查询
               </h3>
@@ -98,16 +94,14 @@ import { DataService, Competition } from '../../services/data.service';
         
         <div class="view-transition-wrapper" [class.switching]="isSwitching()">
           <!-- Loading / Empty State -->
-          <div *ngIf="sortedCompetitions().length === 0" class="flex flex-col items-center justify-center h-64 text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
+          <div *ngIf="sortedCompetitions().length === 0" class="ui-empty-state h-64">
+            <div class="ui-empty-icon"><svg lucideTrophy class="w-8 h-8" [strokeWidth]="1.8"></svg></div>
             <p>暂无竞赛数据</p>
           </div>
 
           <!-- Grid View -->
           <div *ngIf="viewMode() === 'grid' && sortedCompetitions().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
-            <div *ngFor="let comp of sortedCompetitions()" (click)="dataService.openExternalModal(comp.url)" class="bg-[#18181b] border border-white/5 rounded-xl p-3 md:p-5 hover:bg-white/5 hover:border-white/10 transition-all hover:shadow-lg group flex flex-col h-full relative cursor-pointer">
+            <div *ngFor="let comp of sortedCompetitions()" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover p-3 md:p-5 group flex flex-col h-full relative cursor-pointer">
               <div class="flex items-start justify-between mb-2 md:mb-3">
                 <span [class]="getLevelClass(comp.level)">
                   {{ comp.level || '未知级别' }}
@@ -147,7 +141,7 @@ import { DataService, Competition } from '../../services/data.service';
           <div *ngIf="viewMode() === 'calendar' && sortedCompetitions().length > 0" class="flex flex-col gap-8 pb-20">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               <div *ngFor="let m of months" 
-                class="aspect-[3/4] md:aspect-square bg-[#18181b] border rounded-xl p-3 md:p-5 relative cursor-pointer transition-all hover:border-white/20 group flex flex-col overflow-hidden"
+                class="aspect-[3/4] md:aspect-square bg-surface border rounded-card p-3 md:p-5 relative cursor-pointer transition-all hover:border-line-strong group flex flex-col overflow-hidden"
                 [class.border-white_20]="selectedMonth() === m"
                 [class.bg-white_5]="selectedMonth() === m"
                 [class.border-white_5]="selectedMonth() !== m"
@@ -178,7 +172,7 @@ import { DataService, Competition } from '../../services/data.service';
                   <!-- More Indicator -->
                   <div *ngIf="getCountByMonth(m) > 7" class="text-[10px] text-gray-600 mt-auto pt-2 border-t border-white/5 flex items-center gap-1">
                     <span>还有 {{ getCountByMonth(m) - 7 }} 个竞赛</span>
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg lucideChevronDown class="w-3 h-3" [strokeWidth]="2"></svg>
                   </div>
                   
                   <!-- Empty State -->
@@ -200,7 +194,7 @@ import { DataService, Competition } from '../../services/data.service';
               </h2>
               
               <div class="grid grid-cols-1 gap-3">
-                 <div *ngFor="let comp of getCompetitionsByMonth(sm)" (click)="dataService.openExternalModal(comp.url)" class="bg-[#18181b] border border-white/5 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start md:items-center group hover:border-white/10 transition-all cursor-pointer">
+                 <div *ngFor="let comp of getCompetitionsByMonth(sm)" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover rounded-control p-4 flex flex-col md:flex-row gap-4 items-start md:items-center group cursor-pointer">
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-3 mb-1">
                         <span [class]="getLevelClass(comp.level)">

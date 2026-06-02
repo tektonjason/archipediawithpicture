@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data.service';
+import { APP_UI_ICONS } from '../shared/ui-icons';
 
 interface MethodColumn {
   title: string;
@@ -13,15 +14,13 @@ interface MethodColumn {
 
 @Component({
   selector: 'app-methodology',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ...APP_UI_ICONS],
   template: `
-    <div class="h-full flex flex-col bg-[#0f0f11] text-white overflow-hidden">
+    <div class="ui-page text-white">
       <!-- Header -->
-      <div class="p-4 pl-24 border-b border-white/5 flex items-center gap-4 bg-[#18181b] shrink-0">
-        <a routerLink="/essentials" class="px-4 py-2 rounded-lg bg-[#18181b] border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-gray-300 hover:text-white flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
+      <div class="ui-topbar">
+        <a routerLink="/essentials" class="ui-btn-secondary">
+          <svg lucideArrowLeft class="w-4 h-4" [strokeWidth]="2"></svg>
           返回
         </a>
         <div>
@@ -36,22 +35,18 @@ interface MethodColumn {
           @for (col of methodologyColumns; track col.title) {
             <a 
               (click)="openLink(col.url)"
-              class="group cursor-pointer bg-[#18181b] border border-white/5 rounded-xl p-5 hover:bg-white/5 hover:border-white/10 transition-all duration-300 flex flex-col gap-4 relative overflow-hidden"
+              class="group cursor-pointer ui-card ui-card-hover p-5 flex flex-col gap-4 relative overflow-hidden"
             >
               <!-- Hover Glow Effect -->
               <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
 
               <div class="flex items-start justify-between relative z-10">
                 <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
+                  <svg lucideExternalLink class="w-5 h-5" [strokeWidth]="1.8"></svg>
                 </div>
                 
                 <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:border-blue-500/50 group-hover:text-blue-400 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
+                  <svg lucideChevronRight class="w-3 h-3" [strokeWidth]="2"></svg>
                 </div>
               </div>
 
@@ -66,9 +61,7 @@ interface MethodColumn {
           
           <!-- Add New Placeholder (Visual cue for extensibility) -->
           <div class="border border-dashed border-white/10 rounded-xl p-5 flex flex-col items-center justify-center text-gray-600 gap-2 min-h-[140px] opacity-50 hover:opacity-100 hover:border-white/20 transition-all cursor-default">
-             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
-             </svg>
+             <svg lucidePlus class="w-6 h-6" [strokeWidth]="1.8"></svg>
              <span class="text-xs">更多栏目建设中...</span>
           </div>
         </div>
