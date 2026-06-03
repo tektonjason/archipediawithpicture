@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, NgZone } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.compon
 import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-readings',
@@ -161,17 +162,17 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
       @if (selectedReading(); as item) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-            class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
-            [class.opacity-0]="isClosing()"
+            #readingModalBackdrop
+            class="absolute inset-0 bg-black/80 backdrop-blur-md"
             (click)="closeModal()"
           ></div>
           
           <div 
-            class="ui-modal-panel w-full max-w-4xl max-h-[85vh] flex overflow-hidden transition-all duration-300"
-            [class.scale-95]="isClosing()"
-            [class.opacity-0]="isClosing()"
+            #readingModalPanel
+            class="reading-modal-panel ui-modal-panel w-full max-w-4xl max-h-[85vh] flex overflow-hidden"
+            [class.pointer-events-none]="isClosing()"
           >
-            <button (click)="closeModal()" class="absolute top-4 right-4 z-20 ui-icon-btn bg-black/50">
+            <button (click)="closeModal()" class="absolute top-4 right-4 z-20 ui-icon-btn bg-black/50 active:scale-90">
               <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
             </button>
 
@@ -184,7 +185,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
                   
                   <!-- Book Cover Mockup -->
-                  <div class="relative w-full max-w-[320px] aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col items-center justify-center transform transition-transform hover:scale-105 duration-500 overflow-hidden">
+                  <div #readingModalCover class="reading-cover-preview relative w-full max-w-[320px] aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col items-center justify-center overflow-hidden">
                      @if (item.imageUrl && !failedImages().has(item.id)) {
                        <img [src]="item.imageUrl" [alt]="item.title" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                      } @else {
@@ -200,10 +201,10 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                <!-- Right: Content -->
                <div class="flex-1 flex flex-col overflow-hidden">
                   <div class="flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col">
-                  <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ item.title }}</h2>
-                  <p class="text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
+                  <h2 class="reading-modal-stagger text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ item.title }}</h2>
+                  <p class="reading-modal-stagger text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
                   
-                  <div class="space-y-4 md:space-y-6 flex-1">
+                  <div class="reading-modal-stagger space-y-4 md:space-y-6 flex-1">
                     <div>
                       <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">内容简介</h4>
                       <p class="text-sm text-gray-300 leading-relaxed font-serif">
@@ -246,8 +247,8 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                   </div>
                   </div>
 
-                  <div class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-surface border-t border-line z-10 shrink-0 flex gap-4">
-                    <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="ui-btn-primary cursor-pointer flex-1">
+                  <div #readingModalActions class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-surface border-t border-line z-10 shrink-0 flex gap-4">
+                    <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="ui-btn-primary cursor-pointer flex-1 active:scale-[0.98]">
                        <svg lucideSearch class="w-5 h-5" [strokeWidth]="2"></svg>
                        <span>在线搜索</span>
                     </a>
@@ -255,7 +256,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                     <div class="relative">
                       <button 
                         (click)="handleShare(item)" 
-                        class="h-full ui-btn-secondary px-4" 
+                        class="h-full ui-btn-secondary px-4 active:scale-95"
                         title="分享并搜索"
                       >
                          <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
@@ -263,7 +264,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
 
                       <!-- Share Menu -->
                       @if (showShareMenu()) {
-                        <div class="absolute bottom-full right-0 mb-3 w-40 ui-card shadow-panel overflow-hidden animate-fade-in-up z-30 flex flex-col">
+                        <div #readingShareMenu class="reading-share-menu absolute bottom-full right-0 mb-3 w-40 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
                            @if (shareMenuCopied()) {
                              <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
                                已复制信息
@@ -433,14 +434,37 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
     .animate-fade-in-up {
       animation: fadeInUp 0.44s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
+    .reading-modal-panel {
+      transform-origin: center center;
+    }
+    .reading-cover-preview {
+      transform-origin: center center;
+      transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reading-cover-preview:hover {
+      transform: translateY(-3px) scale(1.025);
+      box-shadow: 0 28px 70px -32px rgba(59, 130, 246, 0.55), 0 24px 55px -28px rgba(0, 0, 0, 0.85);
+    }
+    .reading-share-menu {
+      transform-origin: bottom right;
+    }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(12px) scale(0.985); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reading-cover-preview {
+        transition-duration: 0.01ms;
+      }
+      .reading-cover-preview:hover {
+        transform: none;
+      }
     }
   `]
 })
 export class ReadingsComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
+  private zone = inject(NgZone);
   searchQuery = signal('');
   selectedTag = signal('all');
   selectedReading = signal<Reading | null>(null);
@@ -472,11 +496,21 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   private declarationTimer: ReturnType<typeof setTimeout> | null = null;
   private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
   private shareResetTimer: ReturnType<typeof setTimeout> | null = null;
+  private modalEnterFrame = 0;
+  private shareMenuEnterFrame = 0;
+  private readingModalTl?: gsap.core.Timeline;
+  private shareMenuTl?: gsap.core.Tween;
+  private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private lastScrubScrollTarget = '';
 
   // Scrubber State
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('scrubber') scrubber!: ElementRef<HTMLElement>;
+  @ViewChild('readingModalBackdrop') readingModalBackdrop?: ElementRef<HTMLDivElement>;
+  @ViewChild('readingModalPanel') readingModalPanel?: ElementRef<HTMLDivElement>;
+  @ViewChild('readingModalCover') readingModalCover?: ElementRef<HTMLDivElement>;
+  @ViewChild('readingModalActions') readingModalActions?: ElementRef<HTMLDivElement>;
+  @ViewChild('readingShareMenu') readingShareMenu?: ElementRef<HTMLDivElement>;
   alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   currentLetter = signal('#');
   isScrubbing = signal(false);
@@ -547,6 +581,10 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);
     if (this.tagResetFrame) cancelAnimationFrame(this.tagResetFrame);
+    if (this.modalEnterFrame) cancelAnimationFrame(this.modalEnterFrame);
+    if (this.shareMenuEnterFrame) cancelAnimationFrame(this.shareMenuEnterFrame);
+    this.readingModalTl?.kill();
+    this.shareMenuTl?.kill();
   }
 
   private clearDeferredTimers() {
@@ -596,20 +634,183 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       clearTimeout(this.modalCloseTimer);
       this.modalCloseTimer = null;
     }
+    if (this.modalEnterFrame) {
+      cancelAnimationFrame(this.modalEnterFrame);
+      this.modalEnterFrame = 0;
+    }
+    this.readingModalTl?.kill();
+    this.shareMenuTl?.kill();
+    if (this.shareMenuEnterFrame) {
+      cancelAnimationFrame(this.shareMenuEnterFrame);
+      this.shareMenuEnterFrame = 0;
+    }
+    this.showShareMenu.set(false);
+    this.shareMenuCopied.set(false);
     this.isClosing.set(false);
     this.selectedReading.set(item);
+    this.scheduleReadingModalEnter();
   }
 
   closeModal() {
     if (!this.selectedReading() || this.isClosing()) return;
     this.isClosing.set(true);
     this.showShareMenu.set(false);
+    this.shareMenuTl?.kill();
+    if (this.shareMenuEnterFrame) {
+      cancelAnimationFrame(this.shareMenuEnterFrame);
+      this.shareMenuEnterFrame = 0;
+    }
     if (this.modalCloseTimer) clearTimeout(this.modalCloseTimer);
-    this.modalCloseTimer = setTimeout(() => {
+    if (this.modalEnterFrame) {
+      cancelAnimationFrame(this.modalEnterFrame);
+      this.modalEnterFrame = 0;
+    }
+
+    const targets = this.getReadingModalTargets();
+    if (this.prefersReducedMotion || !targets.backdrop || !targets.panel) {
+      this.modalCloseTimer = setTimeout(() => this.finishReadingModalClose(), 0);
+      return;
+    }
+
+    this.readingModalTl?.kill();
+    this.zone.runOutsideAngular(() => {
+      this.setReadingModalWillChange(true, targets);
+      this.readingModalTl = gsap.timeline({
+        defaults: { overwrite: 'auto', force3D: true },
+        onComplete: () => this.zone.run(() => this.finishReadingModalClose())
+      });
+
+      const contentTargets = [...targets.contentItems].reverse();
+      this.readingModalTl
+        .to([...contentTargets, targets.actions].filter((target): target is HTMLElement => !!target), {
+          autoAlpha: 0,
+          y: 8,
+          duration: 0.16,
+          stagger: 0.018,
+          ease: 'power2.in'
+        }, 0)
+        .to(targets.cover, {
+          autoAlpha: 0,
+          y: 12,
+          scale: 0.98,
+          rotationY: -4,
+          duration: 0.22,
+          ease: 'power2.in'
+        }, 0)
+        .to(targets.panel, {
+          autoAlpha: 0,
+          y: 16,
+          scale: 0.97,
+          duration: 0.24,
+          ease: 'power2.inOut'
+        }, 0.04)
+        .to(targets.backdrop, {
+          autoAlpha: 0,
+          duration: 0.22,
+          ease: 'power2.in'
+        }, 0.04);
+    });
+  }
+
+  private scheduleReadingModalEnter() {
+    if (this.prefersReducedMotion) return;
+
+    this.modalEnterFrame = requestAnimationFrame(() => {
+      this.modalEnterFrame = 0;
+      this.animateReadingModalEnter();
+    });
+  }
+
+  private animateReadingModalEnter() {
+    if (!this.selectedReading() || this.isClosing()) return;
+
+    const targets = this.getReadingModalTargets();
+    if (!targets.backdrop || !targets.panel) return;
+
+    this.readingModalTl?.kill();
+    this.zone.runOutsideAngular(() => {
+      this.setReadingModalWillChange(true, targets);
+      this.readingModalTl = gsap.timeline({
+        defaults: { overwrite: 'auto', force3D: true },
+        onComplete: () => this.clearReadingModalAnimationProps(targets)
+      });
+
+      this.readingModalTl
+        .fromTo(targets.backdrop,
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.28, ease: 'power2.out' },
+          0
+        )
+        .fromTo(targets.panel,
+          { autoAlpha: 0, y: 24, scale: 0.965 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.46, ease: 'power3.out' },
+          0.02
+        )
+        .fromTo(targets.cover,
+          { autoAlpha: 0, y: 18, scale: 0.96, rotationY: -7 },
+          { autoAlpha: 1, y: 0, scale: 1, rotationY: 0, duration: 0.52, ease: 'power3.out' },
+          0.12
+        )
+        .fromTo(targets.contentItems,
+          { autoAlpha: 0, y: 14 },
+          { autoAlpha: 1, y: 0, duration: 0.36, stagger: 0.045, ease: 'power2.out' },
+          0.16
+        )
+        .fromTo(targets.actions,
+          { autoAlpha: 0, y: 12 },
+          { autoAlpha: 1, y: 0, duration: 0.34, ease: 'power2.out' },
+          0.24
+        );
+    });
+  }
+
+  private getReadingModalTargets() {
+    const panel = this.readingModalPanel?.nativeElement ?? null;
+    return {
+      backdrop: this.readingModalBackdrop?.nativeElement ?? null,
+      panel,
+      cover: this.readingModalCover?.nativeElement ?? null,
+      actions: this.readingModalActions?.nativeElement ?? null,
+      contentItems: panel ? Array.from(panel.querySelectorAll<HTMLElement>('.reading-modal-stagger')) : []
+    };
+  }
+
+  private setReadingModalWillChange(active: boolean, targets = this.getReadingModalTargets()) {
+    const animatedTargets = [
+      targets.backdrop,
+      targets.panel,
+      targets.cover,
+      targets.actions,
+      ...targets.contentItems
+    ].filter((target): target is HTMLElement => !!target);
+
+    animatedTargets.forEach(target => {
+      target.style.willChange = active ? 'transform, opacity' : '';
+    });
+  }
+
+  private clearReadingModalAnimationProps(targets = this.getReadingModalTargets()) {
+    const animatedTargets = [
+      targets.backdrop,
+      targets.panel,
+      targets.cover,
+      targets.actions,
+      ...targets.contentItems
+    ].filter((target): target is HTMLElement => !!target);
+
+    gsap.set(animatedTargets, { clearProps: 'transform,opacity,visibility' });
+    this.setReadingModalWillChange(false, targets);
+  }
+
+  private finishReadingModalClose() {
+    if (this.modalCloseTimer) {
+      clearTimeout(this.modalCloseTimer);
       this.modalCloseTimer = null;
-      this.selectedReading.set(null);
-      this.isClosing.set(false);
-    }, 300);
+    }
+    this.readingModalTl?.kill();
+    this.setReadingModalWillChange(false);
+    this.selectedReading.set(null);
+    this.isClosing.set(false);
   }
 
   @HostListener('document:keydown.escape')
@@ -958,7 +1159,16 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       text = parts.join(' ');
     }
 
-    // 2. Copy to clipboard
+    // 2. Toggle menu immediately so the click always gives visible feedback
+    const shouldOpenMenu = !this.showShareMenu();
+    this.showShareMenu.set(shouldOpenMenu);
+    if (shouldOpenMenu) {
+      this.scheduleShareMenuEnter();
+    } else {
+      this.shareMenuTl?.kill();
+    }
+
+    // 3. Copy to clipboard
     navigator.clipboard.writeText(text).then(() => {
       this.shareMenuCopied.set(true);
       if (this.shareResetTimer) clearTimeout(this.shareResetTimer);
@@ -967,9 +1177,41 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
         this.shareMenuCopied.set(false);
       }, 2000);
     });
+  }
 
-    // 3. Toggle Menu
-    this.showShareMenu.set(!this.showShareMenu());
+  private scheduleShareMenuEnter() {
+    if (this.prefersReducedMotion) return;
+
+    if (this.shareMenuEnterFrame) {
+      cancelAnimationFrame(this.shareMenuEnterFrame);
+    }
+
+    this.shareMenuEnterFrame = requestAnimationFrame(() => {
+      this.shareMenuEnterFrame = 0;
+      const menu = this.readingShareMenu?.nativeElement;
+      if (!menu || !this.showShareMenu()) return;
+
+      this.shareMenuTl?.kill();
+      this.zone.runOutsideAngular(() => {
+        menu.style.willChange = 'transform, opacity';
+        this.shareMenuTl = gsap.fromTo(menu,
+          { autoAlpha: 0, y: 10, scale: 0.96 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.22,
+            ease: 'power3.out',
+            overwrite: 'auto',
+            force3D: true,
+            onComplete: () => {
+              menu.style.willChange = '';
+              gsap.set(menu, { clearProps: 'transform,opacity,visibility' });
+            }
+          }
+        );
+      });
+    });
   }
 
   getPlatformUrl(platform: string, item: Reading): string {
