@@ -1,0 +1,47 @@
+[
+  {
+    "file": "public/images/xfgdjz/xf16.webp",
+    "sourceTitle": "File:Ruins of Apadana and Tachara in Persepolis.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ruins%20of%20Apadana%20and%20Tachara%20in%20Persepolis.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ruins%20of%20Apadana%20and%20Tachara%20in%20Persepolis.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Ruins_of_Apadana_and_Tachara_in_Persepolis.jpg",
+    "source": "manual-commons-exact-file-correction",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons description identifies ruins of Apadana and Tachara in Persepolis.",
+    "size": 60958,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:16:35.172Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/xfgdjz/xf64.webp",
+    "sourceTitle": "File:Persepolis panorama of palace of 100 columns, with apadana stairs in the background.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Persepolis%20panorama%20of%20palace%20of%20100%20columns%2C%20with%20apadana%20stairs%20in%20the%20background.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Persepolis%20panorama%20of%20palace%20of%20100%20columns%2C%20with%20apadana%20stairs%20in%20the%20background.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Persepolis_panorama_of_palace_of_100_columns,_with_apadana_stairs_in_the_background.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file title explicitly identifies the palace/hall of 100 columns at Persepolis.",
+    "size": 85926,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:16:42.993Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/csghyggkj/gh92.webp",
+    "sourceTitle": "File:Street canyon sundown (New York) (44520483694).jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Street%20canyon%20sundown%20(New%20York)%20(44520483694).jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Street%20canyon%20sundown%20(New%20York)%20(44520483694).jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Street_canyon_sundown_(New_York)_(44520483694).jpg",
+    "source": "manual-commons-exact-file-correction",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file title directly names a street canyon; closer visual match than prior skyline crop.",
+    "size": 14958,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:17:03.393Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  }
+]

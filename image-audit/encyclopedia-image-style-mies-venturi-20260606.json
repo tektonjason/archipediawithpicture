@@ -1,0 +1,62 @@
+[
+  {
+    "file": "public/images/jzfgysjsc/fg27.webp",
+    "sourceTitle": "Farnsworth House",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Farnsworth_House_by_Mies_Van_Der_Rohe_-_exterior-8.jpg/1920px-Farnsworth_House_by_Mies_Van_Der_Rohe_-_exterior-8.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Farnsworth_House_by_Mies_Van_Der_Rohe_-_exterior-8.jpg",
+    "sourcePageUrl": "https://en.wikipedia.org/wiki/Farnsworth_House",
+    "source": "manual-en-wikipedia-pageimage",
+    "sourceClass": "web-page-image",
+    "matchBasis": "Farnsworth House is a canonical Mies work widely used to illustrate the 'less is more' modernist idea.",
+    "size": 81642,
+    "ok": true,
+    "replacedAt": "2026-06-06T04:41:49.004Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg28.webp",
+    "sourceTitle": "Barcelona Pavilion",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/The_Barcelona_Pavilion%2C_Barcelona%2C_2010.jpg/1920px-The_Barcelona_Pavilion%2C_Barcelona%2C_2010.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/42/The_Barcelona_Pavilion%2C_Barcelona%2C_2010.jpg",
+    "sourcePageUrl": "https://en.wikipedia.org/wiki/Barcelona_Pavilion",
+    "source": "manual-en-wikipedia-pageimage",
+    "sourceClass": "web-page-image",
+    "matchBasis": "Barcelona Pavilion is a canonical Mies work used to illustrate flowing space and free spatial continuity.",
+    "size": 55288,
+    "ok": true,
+    "replacedAt": "2026-06-06T04:41:56.713Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg29.webp",
+    "sourceTitle": "S. R. Crown Hall",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a5/S.R._Crown_Hall.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a5/S.R._Crown_Hall.jpg",
+    "sourcePageUrl": "https://en.wikipedia.org/wiki/S._R._Crown_Hall",
+    "source": "manual-en-wikipedia-pageimage",
+    "sourceClass": "web-page-image",
+    "matchBasis": "S. R. Crown Hall is a canonical Mies clear-span/universal-space example.",
+    "size": 71490,
+    "ok": true,
+    "replacedAt": "2026-06-06T04:42:19.559Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg42.webp",
+    "sourceTitle": "File:Vanna Venturi House in Chestnut Hill, Philadelphia, Pennsylvania LCCN2011631388.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vanna%20Venturi%20House%20in%20Chestnut%20Hill%2C%20Philadelphia%2C%20Pennsylvania%20LCCN2011631388.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vanna%20Venturi%20House%20in%20Chestnut%20Hill%2C%20Philadelphia%2C%20Pennsylvania%20LCCN2011631388.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Vanna_Venturi_House_in_Chestnut_Hill,_Philadelphia,_Pennsylvania_LCCN2011631388.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons/LOC file directly identifies Vanna Venturi House, a Venturi postmodern work associated with the 'less is bore' critique.",
+    "size": 97746,
+    "ok": true,
+    "replacedAt": "2026-06-06T04:42:30.903Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  }
+]

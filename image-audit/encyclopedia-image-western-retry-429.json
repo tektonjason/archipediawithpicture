@@ -1,0 +1,28 @@
+[
+  {
+    "file": "public/images/xfgdjz/xf94.webp",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 20 --max-time 90 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Cattedrale_di_Santa_Maria_del_Fiore_%E2%80%93_Il_Duomo_di_Firenze.jpg/640px-Cattedrale_di_Santa_Maria_del_Fiore_%E2%80%93_Il_Duomo_di_Firenze.jpg\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf85.webp",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 20 --max-time 90 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Tiryns_-_Cyclopean_masonry.jpg/640px-Tiryns_-_Cyclopean_masonry.jpg\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf89.webp",
+    "size": 78140,
+    "ok": true
+  },
+  {
+    "file": "public/images/xfgdjz/xf95.webp",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 20 --max-time 90 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Palazzo_Medici_Riccardi-Florence.jpg/640px-Palazzo_Medici_Riccardi-Florence.jpg\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf96.webp",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 20 --max-time 90 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Basilica_Palladiana_%28Vicenza%29_-_facade_on_Piazza_dei_signori.jpg/640px-Basilica_Palladiana_%28Vicenza%29_-_facade_on_Piazza_dei_signori.jpg\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf98.webp",
+    "size": 84104,
+    "ok": true
+  }
+]

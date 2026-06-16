@@ -1,0 +1,38 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/jzfgysjsc/fg62.webp",
+      "sourceTitle": "Vernacular architecture",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Istano_Pagaruyuang.jpg/1920px-Istano_Pagaruyuang.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Istano_Pagaruyuang.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Vernacular_architecture",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Vernacular architecture page image supports the vernacular basis of New Vernacular architecture.",
+      "size": 91762,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:03:35.598Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/jzfgysjsc/fg70.webp",
+      "sourceTitle": "Livio Vacchini",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Ticino_Losone_Palestra_Vacchini_02.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Ticino_Losone_Palestra_Vacchini_02.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Livio_Vacchini",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Livio Vacchini is a key Ticino architect; the page image shows his Ticino building, matching Ticino School.",
+      "size": 65372,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:04:14.542Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    }
+  ]
+}

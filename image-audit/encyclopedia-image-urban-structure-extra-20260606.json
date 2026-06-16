@@ -1,0 +1,78 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/csghyggkj/gh50.webp",
+      "sourceTitle": "Sustainable city",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Tram_in_front_of_the_Taschenbergpalais_Hotel%2C_Dresden_-_1448.jpg/1920px-Tram_in_front_of_the_Taschenbergpalais_Hotel%2C_Dresden_-_1448.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Tram_in_front_of_the_Taschenbergpalais_Hotel%2C_Dresden_-_1448.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Sustainable_city",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Sustainable city is the closest Wikipedia concept to eco-city; page image shows transit-oriented urban sustainability.",
+      "size": 99480,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:00:54.192Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/csghyggkj/gh66.webp",
+      "sourceTitle": "Urban Green Space - geograph",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Urban_Green_Space_-_geograph.org.uk_-_2040305.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Urban_Green_Space_-_geograph.org.uk_-_2040305.jpg",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Urban_Green_Space_-_geograph.org.uk_-_2040305.jpg",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons file title identifies an urban green/open space, matching open space.",
+      "size": 61468,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:01:21.048Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/csghyggkj/gh85.webp",
+      "sourceTitle": "Urban density",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Skyscrapers_of_Shinjuku_2009_January_%28revised%29.jpg/1920px-Skyscrapers_of_Shinjuku_2009_January_%28revised%29.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Skyscrapers_of_Shinjuku_2009_January_%28revised%29.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Urban_density",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Urban density page image shows high-rise dense development, matching development density.",
+      "size": 95346,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:01:29.513Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/jgygzll/gz42.webp",
+      "sourceTitle": "Concrete honeycomb on ring beam",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/14/Concrete_honeycomb_on_ring_beam.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/1/14/Concrete_honeycomb_on_ring_beam.jpg",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Concrete_honeycomb_on_ring_beam.jpg",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons file title explicitly identifies a ring beam, matching ring beam.",
+      "size": 88318,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:01:44.588Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    }
+  ],
+  "skipped": [
+    {
+      "file": "public/images/csghyggkj/gh61.webp",
+      "reason": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --retry 1 --connect-timeout 25 --max-time 120 --user-agent Mozilla/5.0 https://upload.wikimedia.org/wikipedia/commons/5/53/K%C3%B6ln_Kern_Netze.jpg\ncurl: (56) Recv failure: Connection was reset\r\n"
+    }
+  ]
+}

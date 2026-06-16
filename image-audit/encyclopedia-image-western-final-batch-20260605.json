@@ -1,0 +1,29 @@
+[
+  {
+    "file": "public/images/xfgdjz/xf4.webp",
+    "sourceTitle": "French Baroque architecture",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Versailles_chateau.jpg/1920px-Versailles_chateau.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Versailles_chateau.jpg",
+    "sourcePageUrl": "https://en.wikipedia.org/wiki/French_Baroque_architecture",
+    "source": "manual-en-wikipedia-pageimage",
+    "sourceClass": "web-page-image",
+    "matchBasis": "Wikipedia page says French Baroque is also called French classicism; page image shows Versailles.",
+    "size": 81654,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:27:07.936Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/xfgdjz/xf73.webp",
+    "sourceTitle": "File:Clustered column at Wells Cathedral.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Clustered%20column%20at%20Wells%20Cathedral.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Clustered%20column%20at%20Wells%20Cathedral.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Clustered_column_at_Wells_Cathedral.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file title directly identifies a clustered column.",
+    "ok": false,
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --retry 2 --connect-timeout 12 --max-time 80 --user-agent ArchipediaImageAuditor/1.0 local educational asset pipeline https://commons.wikimedia.org/wiki/Special:FilePath/Clustered%20column%20at%20Wells%20Cathedral.jpg?width=1600\ncurl: (22) The requested URL returned error: 404\r\n"
+  }
+]

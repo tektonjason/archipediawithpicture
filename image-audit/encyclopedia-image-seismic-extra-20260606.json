@@ -1,0 +1,38 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/jgygzll/gz57.webp",
+      "sourceTitle": "1948 Fukui earthquake intensity map",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b2/1948_Fukui_earthquake_intensity_map.png",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b2/1948_Fukui_earthquake_intensity_map.png",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:1948_Fukui_earthquake_intensity_map.png",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons file title identifies an earthquake intensity map, matching seismic intensity.",
+      "size": 56930,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:19:43.033Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/jgygzll/gz58.webp",
+      "sourceTitle": "Seismic retrofit",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/%E5%9B%A3%E5%9C%B0_support_structure.jpg/1920px-%E5%9B%A3%E5%9C%B0_support_structure.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/%E5%9B%A3%E5%9C%B0_support_structure.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Seismic_retrofit",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Seismic retrofit page image shows support structure for earthquake resistance, matching seismic fortification.",
+      "size": 47760,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:19:52.719Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    }
+  ]
+}

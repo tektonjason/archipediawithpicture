@@ -1,0 +1,47 @@
+[
+  {
+    "file": "public/images/jgygzll/gz32.webp",
+    "sourceTitle": "File:Prestressed concrete.svg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Prestressed%20concrete.svg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Prestressed%20concrete.svg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Prestressed_concrete.svg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file description states it is a diagram of forces acting on prestressed concrete.",
+    "size": 13668,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:45:23.462Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jgygzll/gz33.webp",
+    "sourceTitle": "File:Multi-strand post-tensioning process.png",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Multi-strand%20post-tensioning%20process.png?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Multi-strand%20post-tensioning%20process.png?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Multi-strand_post-tensioning_process.png",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons Prestressed concrete diagrams category lists this post-tensioning process diagram.",
+    "size": 30382,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:45:28.045Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jgygzll/gz44.webp",
+    "sourceTitle": "File:Beam cantilever.png",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Beam%20cantilever.png?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Beam%20cantilever.png?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Beam_cantilever.png",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file title directly identifies a cantilever beam diagram.",
+    "size": 5766,
+    "ok": true,
+    "replacedAt": "2026-06-05T14:45:46.875Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  }
+]

@@ -13,7 +13,7 @@ import { gsap } from 'gsap';
       <!-- Island Container -->
       <div 
         #island 
-        class="island fixed bg-surface border border-line shadow-panel flex items-center overflow-hidden z-20"
+        class="island absolute left-0 top-0 bg-surface border border-line shadow-panel flex items-center overflow-hidden z-20"
         style="width: 48px; height: 48px; border-radius: 24px;"
       >
         <!-- Toggle Button -->
@@ -119,13 +119,7 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
 
   updatePosition = () => {
     if (!this.isOpen && !this.isAnimating && this.islandContainer && this.island) {
-      const rect = this.islandContainer.nativeElement.getBoundingClientRect();
-      gsap.set(this.island.nativeElement, { 
-        left: rect.left, 
-        top: rect.top,
-        xPercent: 0,
-        yPercent: 0
-      });
+      this.pinIslandToAnchor();
     }
   }
 
@@ -158,6 +152,31 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
     this.layoutSyncFrame = requestAnimationFrame(tick);
   }
 
+  private pinIslandToAnchor() {
+    gsap.set(this.island.nativeElement, {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: 48,
+      xPercent: 0,
+      yPercent: 0,
+      clearProps: 'transform'
+    });
+  }
+
+  private floatIslandFromAnchor() {
+    const rect = this.islandContainer.nativeElement.getBoundingClientRect();
+    gsap.set(this.island.nativeElement, {
+      position: 'fixed',
+      left: rect.left,
+      top: rect.top,
+      width: 48,
+      xPercent: 0,
+      yPercent: 0,
+      clearProps: 'transform'
+    });
+  }
+
   private observePositionSources() {
     if (typeof ResizeObserver === 'undefined') return;
 
@@ -171,7 +190,7 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.updatePosition();
+    this.pinIslandToAnchor();
     window.addEventListener('resize', this.schedulePositionUpdate);
     window.addEventListener('scroll', this.schedulePositionUpdate, this.scrollListenerOptions);
     window.addEventListener('archipedia:layout-shift', this.handleLayoutShift);
@@ -187,6 +206,7 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
     if (this.isOpen) {
       this.searchInput.nativeElement.setAttribute('tabindex', '0');
       this.isAnimating = true;
+      this.floatIslandFromAnchor();
       
       const expandedWidth = Math.min(window.innerWidth * 0.9, 400);
       const openDuration = this.prefersReducedMotion ? 0.01 : 0.36;
@@ -238,7 +258,7 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
           gsap.set(this.barBot.nativeElement, { attr: { x1: 10.5, y1: 10.5, x2: 14, y2: 14 } });
           gsap.set(this.menuPanel.nativeElement, { autoAlpha: 0, yPercent: -10, scale: 0.6 });
           this.isAnimating = false;
-          this.updatePosition(); // ensure position is correct after closing
+          this.pinIslandToAnchor();
           this.trackPositionDuringLayoutChange(140);
         }
       })

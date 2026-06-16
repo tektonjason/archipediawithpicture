@@ -1,0 +1,72 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/zggdjz/arch_52.webp",
+      "sourceTitle": "Sutra Pillar of the Tang Dynasty in Songjiang",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Sutra_Pillar_of_the_Tang_Dynasty_in_Songjiang_03_2015-03.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Sutra_Pillar_of_the_Tang_Dynasty_in_Songjiang_03_2015-03.JPG",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Sutra_Pillar_of_the_Tang_Dynasty_in_Songjiang_03_2015-03.JPG",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons file title identifies a Tang dynasty sutra pillar, matching jingchuang/sutra pillar.",
+      "size": 49132,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:10:13.218Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/zggdjz/arch_71.webp",
+      "sourceTitle": "Dougong",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Foguang_Temple_5.JPG/1920px-Foguang_Temple_5.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/54/Foguang_Temple_5.JPG",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Dougong",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Dougong page image shows Chinese bracket sets, matching puzuo.",
+      "size": 37078,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:10:19.403Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/zggdjz/arch_100.webp",
+      "sourceTitle": "Temple of Heaven",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Temple_of_Heaven_20160323_01.jpg/1920px-Temple_of_Heaven_20160323_01.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Temple_of_Heaven_20160323_01.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Temple_of_Heaven",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Temple of Heaven is a canonical Chinese altar-temple complex, matching tanmiao.",
+      "size": 82696,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:10:28.440Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/zggdjz/arch_122.webp",
+      "sourceTitle": "Imperial garden of the Forbidden City",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Imperial_garden_of_the_Forbidden_City_20160826.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Imperial_garden_of_the_Forbidden_City_20160826.jpg",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Imperial_garden_of_the_Forbidden_City_20160826.jpg",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons file title identifies the Imperial Garden of the Forbidden City, matching imperial garden/yuan you.",
+      "size": 93558,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:11:22.565Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "file": "public/images/jzfgysjsc/fg9.webp",
+    "title": "Bauhaus",
+    "pageTitle": "Bauhaus",
+    "size": 71610,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/6265_Dessau.JPG/1280px-6265_Dessau.JPG"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg60.webp",
+    "title": "Chicago school (architecture)",
+    "pageTitle": "Chicago school (architecture)",
+    "size": 99616,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a3/2010-03-03_1856x2784_chicago_chicago_building.jpg"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg36.webp",
+    "title": "Functionalism (architecture)",
+    "pageTitle": "Functionalism (architecture)",
+    "size": 4966,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/df/Olympiastadionin_torni.jpg"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg54.webp",
+    "title": "Team 10",
+    "pageTitle": "Team 10",
+    "size": 37194,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Congres_Team_10_in_Otterlo_-_Team_10_Meeting_in_Otterlo.jpg"
+  },
+  {
+    "title": "New York Five",
+    "pageTitle": "The New York Five",
+    "reason": "no page image"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg69.webp",
+    "title": "Sustainable architecture",
+    "pageTitle": "Sustainable architecture",
+    "size": 92608,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Freiburg_071ss.jpg/1280px-Freiburg_071ss.jpg"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg41.webp",
+    "title": "Structuralism (architecture)",
+    "pageTitle": "Structuralism (architecture)",
+    "size": 77454,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Kimbell_museum%2C_Louis_Kahn_%2817350270166%29.jpg/1280px-Kimbell_museum%2C_Louis_Kahn_%2817350270166%29.jpg"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg64.webp",
+    "title": "Ville Radieuse",
+    "pageTitle": "Ville Radieuse",
+    "size": 61648,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cb/Monumental_axis.jpg"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg52.webp",
+    "title": "Mies van der Rohe",
+    "pageTitle": "Ludwig Mies van der Rohe",
+    "size": 71982,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Ludwig_Mies_van_der_Rohe_in_Arts_%26_Architecture%2C_June_1960_issue.jpg/1280px-Ludwig_Mies_van_der_Rohe_in_Arts_%26_Architecture%2C_June_1960_issue.jpg"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg73.webp",
+    "title": "Ornament and Crime",
+    "pageTitle": "Ornament and Crime",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 15 --max-time 70 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/c/ce/Adolf_Loos_%281870%E2%80%931933%29_%28vor_1920%3B_Franz_L%C3%B6wy%29.jpg\ncurl: (22) The requested URL returned error: 429\r\n"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg56.webp",
+    "title": "Form follows function",
+    "pageTitle": "Form follows function",
+    "size": 72754,
+    "ok": true,
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Wainwright_Building%2C_7th_Street_and_Chestnut_Street%2C_St._Louis%2C_MO_-_53051647915.jpg/1280px-Wainwright_Building%2C_7th_Street_and_Chestnut_Street%2C_St._Louis%2C_MO_-_53051647915.jpg"
+  },
+  {
+    "title": "Less is more",
+    "pageTitle": "Less is more",
+    "reason": "no page image"
+  }
+]

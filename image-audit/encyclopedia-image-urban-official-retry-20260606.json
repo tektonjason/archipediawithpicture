@@ -1,0 +1,47 @@
+[
+  {
+    "file": "public/images/csghyggkj/gh13.webp",
+    "sourceTitle": "File:Beijing City Master Plan spatial structure map",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%E5%B8%82%E5%9F%9F%E7%A9%BA%E9%97%B4%E7%BB%93%E6%9E%84%E8%A7%84%E5%88%92%E5%9B%BE.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%E5%B8%82%E5%9F%9F%E7%A9%BA%E9%97%B4%E7%BB%93%E6%9E%84%E8%A7%84%E5%88%92%E5%9B%BE.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:%E5%B8%82%E5%9F%9F%E7%A9%BA%E9%97%B4%E7%BB%93%E6%9E%84%E8%A7%84%E5%88%92%E5%9B%BE.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons description identifies Beijing City Master Plan (2016-2035) spatial structure planning map.",
+    "size": 43368,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:21:51.936Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/csghyggkj/gh16.webp",
+    "sourceTitle": "Pudong regulatory detailed planning diagram 1",
+    "imageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/680f4a93b14541aaa9aabdba1afc019d.png",
+    "originalUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/680f4a93b14541aaa9aabdba1afc019d.png",
+    "sourcePageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338.html",
+    "source": "manual-government-page-image",
+    "sourceClass": "trusted-web",
+    "matchBasis": "Pudong government page names a regulatory detailed planning project and links planning diagram 1.",
+    "size": 81098,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:24:22.227Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/csghyggkj/gh15.webp",
+    "sourceTitle": "Pudong regulatory detailed planning diagram 2",
+    "imageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/38143bf7b5154257bd84c7dfff9f66d4.png",
+    "originalUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/38143bf7b5154257bd84c7dfff9f66d4.png",
+    "sourcePageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338.html",
+    "source": "manual-government-page-image",
+    "sourceClass": "trusted-web",
+    "matchBasis": "Pudong government detailed planning page links a planning regulation diagram, matching detailed planning.",
+    "size": 81352,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:27:35.334Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  }
+]

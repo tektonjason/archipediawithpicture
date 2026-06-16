@@ -9,13 +9,15 @@
 //
 // =================================================================
 import { Component, inject, signal, computed, OnInit, OnDestroy, effect, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { DataService } from './services/data.service';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { gsap } from 'gsap';
+import { Subscription, filter } from 'rxjs';
 import { GsapHoverTooltipDirective } from './components/shared/gsap-hover-tooltip.directive';
 import { GsapCardHoverDirective } from './components/shared/gsap-card-hover.directive';
+import { AnalyticsService } from './services/analytics.service';
 
 import { SplashScreenComponent } from './components/shared/splash-screen.component';
 import { APP_UI_ICONS } from './components/shared/ui-icons';
@@ -27,6 +29,7 @@ import { APP_UI_ICONS } from './components/shared/ui-icons';
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   dataService = inject(DataService);
+  private analytics = inject(AnalyticsService);
   private router = inject(Router);
 
   showSplash = signal(true);
@@ -61,6 +64,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private sidebarTl!: gsap.core.Timeline;
   private mm!: gsap.MatchMedia;
+  private routerEventsSub?: Subscription;
+  private hasHandledInitialNavigation = false;
   private isFirstRun = true;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private handleVisibilityChange = () => {
@@ -105,6 +110,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       document.addEventListener('visibilitychange', this.handleVisibilityChange);
     }
+    this.routerEventsSub = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => {
+        const path = event.urlAfterRedirects || event.url;
+        this.analytics.trackPageView(path, document.title, this.hasHandledInitialNavigation);
+        this.hasHandledInitialNavigation = true;
+      });
   }
 
   ngAfterViewInit() {
@@ -144,6 +156,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.stopCarousel();
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    this.routerEventsSub?.unsubscribe();
     if (this.sidebarTl) this.sidebarTl.kill();
     if (this.mm) this.mm.revert();
   }

@@ -1,0 +1,72 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/xfgdjz/xf30.webp",
+      "sourceTitle": "Superposed order",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Exterior_of_the_Colosseum_01.JPG/1920px-Exterior_of_the_Colosseum_01.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/81/Exterior_of_the_Colosseum_01.JPG",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Superposed_order",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Superposed order page image shows classical orders applied to arched bays on the Colosseum, matching arch-order composition.",
+      "size": 98552,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T06:27:56.803Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/xfgdjz/xf39.webp",
+      "sourceTitle": "Knossos - North entrance",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Knossos%20-%20North%20entrance.jpg?width=1600",
+      "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Knossos%20-%20North%20entrance.jpg",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Knossos_-_North_entrance.jpg",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Knossos is a canonical Minoan/Aegean architectural site; the Commons file identifies the North Entrance of the palace complex.",
+      "size": 94884,
+      "width": 760,
+      "height": 507,
+      "ok": true,
+      "replacedAt": "2026-06-06T06:28:38.611Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/xfgdjz/xf51.webp",
+      "sourceTitle": "Churrigueresque",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Santiago_GDFL_catedral_050318_43.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Santiago_GDFL_catedral_050318_43.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Churrigueresque",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Churrigueresque is described as a Spanish Ultra-Baroque ornamental style; the page image shows the style on a cathedral facade.",
+      "size": 96682,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T06:28:58.063Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/xfgdjz/xf53.webp",
+      "sourceTitle": "Perspective portal, Rotenturmstrasse, Vienna",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Perspective_portal%2C_Rotenturmstra%C3%9Fe%2C_Vienna.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Perspective_portal%2C_Rotenturmstra%C3%9Fe%2C_Vienna.jpg",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Perspective_portal,_Rotenturmstra%C3%9Fe,_Vienna.jpg",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons metadata identifies a perspective portal/pseudoportal using perspectival illusion at Rotenturmstrasse in Vienna.",
+      "size": 49734,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T06:29:39.229Z",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    }
+  ]
+}

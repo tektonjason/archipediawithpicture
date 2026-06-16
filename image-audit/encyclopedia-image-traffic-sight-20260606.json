@@ -1,0 +1,27 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/csghyggkj/gh87.webp",
+      "sourceTitle": "AASHTO Stopping Sight Distance",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4c/AASHTOSSD.png",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4c/AASHTOSSD.png",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:AASHTOSSD.png",
+      "source": "manual-commons-file",
+      "sourceClass": "commons-search-image",
+      "matchBasis": "Commons description identifies the image as AASHTO Stopping Sight Distance forces, matching stopping sight distance.",
+      "size": 13874,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:16:04.316Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    }
+  ],
+  "skipped": [
+    {
+      "file": "public/images/csghyggkj/gh88.webp",
+      "reason": "FHWA direct image returned HTTP 403; skipped to avoid unstable source."
+    }
+  ]
+}

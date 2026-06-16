@@ -1,0 +1,65 @@
+[
+  {
+    "file": "public/images/csghyggkj/gh13.webp",
+    "sourceTitle": "File:?????????.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%3F%3F%3F%3F%3F%3F%3F%3F%3F.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%3F%3F%3F%3F%3F%3F%3F%3F%3F.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:%E5%B8%82%E5%9F%9F%E7%A9%BA%E9%97%B4%E7%BB%93%E6%9E%84%E8%A7%84%E5%88%92%E5%9B%BE.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons description identifies Beijing City Master Plan (2016-2035) spatial structure planning map.",
+    "ok": false,
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --retry 1 --connect-timeout 12 --max-time 80 --user-agent Mozilla/5.0 https://commons.wikimedia.org/wiki/Special:FilePath/%3F%3F%3F%3F%3F%3F%3F%3F%3F.jpg?width=1600\ncurl: (22) The requested URL returned error: 404\r\n"
+  },
+  {
+    "file": "public/images/csghyggkj/gh16.webp",
+    "sourceTitle": "???????????????????? ????1",
+    "imageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/680f4a93b14541aaa9aabdba1afc019d.png",
+    "originalUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/680f4a93b14541aaa9aabdba1afc019d.png",
+    "sourcePageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338.html",
+    "source": "manual-government-page-image",
+    "sourceClass": "trusted-web",
+    "matchBasis": "Pudong government page names ???????????????????? and links ????1.",
+    "ok": false,
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --retry 1 --connect-timeout 12 --max-time 80 --user-agent Mozilla/5.0 https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/680f4a93b14541aaa9aabdba1afc019d.png\ncurl: (28) Operation timed out after 80008 milliseconds with 10567204 out of 21028352 bytes received\r\n"
+  },
+  {
+    "file": "public/images/csghyggkj/gh15.webp",
+    "sourceTitle": "???????????????????? ????2",
+    "imageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/38143bf7b5154257bd84c7dfff9f66d4.png",
+    "originalUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/38143bf7b5154257bd84c7dfff9f66d4.png",
+    "sourcePageUrl": "https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338.html",
+    "source": "manual-government-page-image",
+    "sourceClass": "trusted-web",
+    "matchBasis": "Pudong government detailed planning page links planning regulation diagram, matching detailed planning.",
+    "ok": false,
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --retry 1 --connect-timeout 12 --max-time 80 --user-agent Mozilla/5.0 https://www.pudong.gov.cn/zwgk/14523.gkml_ywl_pzgh_pzgh/2022/311/267338/38143bf7b5154257bd84c7dfff9f66d4.png\ncurl: (28) Operation timed out after 80000 milliseconds with 10255908 out of 21071717 bytes received\r\n"
+  },
+  {
+    "file": "public/images/csghyggkj/gh19.webp",
+    "sourceTitle": "File:Architectural and land use study. LOC 73696017.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Architectural%20and%20land%20use%20study.%20LOC%2073696017.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Architectural%20and%20land%20use%20study.%20LOC%2073696017.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Architectural_and_land_use_study._LOC_73696017.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons/LOC map is titled Architectural and land use study and categorized under urban land use and city planning.",
+    "size": 62340,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:20:34.007Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/csghyggkj/gh81.webp",
+    "sourceTitle": "?????????????",
+    "imageUrl": "https://www.guifan.net/uploads/soft/200221/1-200221135R0.jpg",
+    "originalUrl": "https://www.guifan.net/uploads/soft/200221/1-200221135R0.jpg",
+    "sourcePageUrl": "https://www.guifan.net/biaozhun/guojia/313251.html",
+    "source": "manual-standards-page-image",
+    "sourceClass": "general-web",
+    "matchBasis": "Source page title is ?????????? and preview image illustrates urban green line standard.",
+    "ok": false,
+    "error": "Input buffer contains unsupported image format"
+  }
+]

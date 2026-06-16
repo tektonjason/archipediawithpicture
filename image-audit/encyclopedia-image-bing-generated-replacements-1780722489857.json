@@ -1,0 +1,221 @@
+{
+  "createdAt": "2026-06-06T05:13:03.294Z",
+  "limit": 30,
+  "offset": 0,
+  "categoryFilter": "",
+  "attempted": 30,
+  "replaced": 0,
+  "failed": 30,
+  "results": [
+    {
+      "file": "public\\images\\csghyggkj\\gh10.webp",
+      "term": "城乡规划",
+      "termEn": "Urban and Rural Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh12.webp",
+      "term": "城市总体规划纲要",
+      "termEn": "City Comprehensive Planning Outline",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh13.webp",
+      "term": "城市总体规划",
+      "termEn": "City Comprehensive Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh14.webp",
+      "term": "分区规划",
+      "termEn": "District Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh15.webp",
+      "term": "详细规划",
+      "termEn": "Detailed Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh16.webp",
+      "term": "控制性详细规划",
+      "termEn": "Regulatory Detailed Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh17.webp",
+      "term": "修建性详细规划",
+      "termEn": "Constructive Detailed Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh18.webp",
+      "term": "城市设计导则",
+      "termEn": "Urban Design Guideline",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh19.webp",
+      "term": "土地使用规划",
+      "termEn": "Land Use Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh2.webp",
+      "term": "居民点",
+      "termEn": "Settlement",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh20.webp",
+      "term": "理性规划",
+      "termEn": "Rational Planning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh21.webp",
+      "term": "区位理论",
+      "termEn": "Location Theory",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh22.webp",
+      "term": "核心-边缘理论",
+      "termEn": "Core-Periphery Theory",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh23.webp",
+      "term": "集聚效应",
+      "termEn": "Concentration Effect",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh3.webp",
+      "term": "城市",
+      "termEn": "City/Urban",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh32.webp",
+      "term": "芝加哥学派",
+      "termEn": "Chicago School",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh41.webp",
+      "term": "功能分区",
+      "termEn": "Functional Zoning",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh43.webp",
+      "term": "城市意象",
+      "termEn": "City Image",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh44.webp",
+      "term": "雅典宪章",
+      "termEn": "Charter of Athens",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh5.webp",
+      "term": "城市群",
+      "termEn": "Urban Cluster",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh50.webp",
+      "term": "生态城市",
+      "termEn": "Eco-city",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh53.webp",
+      "term": "韧性城市",
+      "termEn": "Resilient City",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh55.webp",
+      "term": "城市景观",
+      "termEn": "Cityscape",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh56.webp",
+      "term": "建成环境",
+      "termEn": "Built Environment",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh58.webp",
+      "term": "中央活动区",
+      "termEn": "CAZ",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh59.webp",
+      "term": "城市原型",
+      "termEn": "Urban Archetype",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh61.webp",
+      "term": "城市肌理",
+      "termEn": "Urban Fabric",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh62.webp",
+      "term": "城市文脉",
+      "termEn": "Urban Context",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh63.webp",
+      "term": "图底关系",
+      "termEn": "Figure-Ground",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    },
+    {
+      "file": "public\\images\\csghyggkj\\gh65.webp",
+      "term": "城市触媒",
+      "termEn": "Urban Catalyst",
+      "ok": false,
+      "reason": "no bing candidates passed score threshold"
+    }
+  ]
+}

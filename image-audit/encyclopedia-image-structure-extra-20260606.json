@@ -1,0 +1,72 @@
+{
+  "replaced": [
+    {
+      "file": "public/images/jgygzll/gz17.webp",
+      "sourceTitle": "Creep (deformation)",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Beagle_Channel_-k.jpg/1920px-Beagle_Channel_-k.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/7/74/Beagle_Channel_-k.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Creep_(deformation)",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Creep (deformation) page image directly supports the material creep concept.",
+      "size": 81598,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:17:27.758Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/jgygzll/gz26.webp",
+      "sourceTitle": "Tensile structure",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Tensile_Steel_Lattice_Shell_of_Oval_Pavilion_by_Vladimir_Shukhov_1895.jpg/1920px-Tensile_Steel_Lattice_Shell_of_Oval_Pavilion_by_Vladimir_Shukhov_1895.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/2/27/Tensile_Steel_Lattice_Shell_of_Oval_Pavilion_by_Vladimir_Shukhov_1895.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Tensile_structure",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Tensile structure page image shows a steel lattice shell designed through tensile members, matching axially tensioned member.",
+      "size": 97692,
+      "width": 640,
+      "height": 427,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:18:02.656Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/jgygzll/gz48.webp",
+      "sourceTitle": "Steel",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/%D0%90%D1%80%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%BD%D1%8B%D0%B9_%D0%BF%D1%80%D0%BE%D0%BA%D0%B0%D1%82.jpg/1920px-%D0%90%D1%80%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%BD%D1%8B%D0%B9_%D0%BF%D1%80%D0%BE%D0%BA%D0%B0%D1%82.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5d/%D0%90%D1%80%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%BD%D1%8B%D0%B9_%D0%BF%D1%80%D0%BE%D0%BA%D0%B0%D1%82.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Steel",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Steel page image shows steel/rebar material, matching steel property indicators.",
+      "size": 37962,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:18:09.788Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    },
+    {
+      "file": "public/images/jgygzll/gz50.webp",
+      "sourceTitle": "Buckling",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/B52-buckling.jpg/1920px-B52-buckling.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dd/B52-buckling.jpg",
+      "sourcePageUrl": "https://en.wikipedia.org/wiki/Buckling",
+      "source": "manual-en-wikipedia-pageimage",
+      "sourceClass": "web-page-image",
+      "matchBasis": "Buckling page image shows instability under compression, matching local instability/buckling concept.",
+      "size": 35478,
+      "width": 980,
+      "height": 653,
+      "ok": true,
+      "replacedAt": "2026-06-06T07:18:14.257Z",
+      "license": "See source page",
+      "licenseUrl": ""
+    }
+  ]
+}

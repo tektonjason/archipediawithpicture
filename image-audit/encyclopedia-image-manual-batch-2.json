@@ -1,0 +1,57 @@
+[
+  {
+    "file": "public/images/jzfgysjsc/fg23.webp",
+    "sourceTitle": "Notre-Dame du Haut, Ronchamp",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 15 --max-time 70 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/en/thumb/5/59/RonchampCorbu.jpg/640px-RonchampCorbu.jpg\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg24.webp",
+    "sourceTitle": "Robie House",
+    "size": 84244,
+    "ok": true
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg37.webp",
+    "sourceTitle": "Shukhov Tower",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 15 --max-time 70 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Shukhov_tower_shabolovka_moscow_02.jpg/800px-Shukhov_tower_shabolovka_moscow_02.jpg\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg40.webp",
+    "sourceTitle": "Preston Bus Station",
+    "size": 79114,
+    "ok": true
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg55.webp",
+    "sourceTitle": "Nakagin Capsule Tower",
+    "size": 54172,
+    "ok": true
+  },
+  {
+    "file": "public/images/jzfgysjsc/fg59.webp",
+    "sourceTitle": "Vers Une Architecture cover",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 15 --max-time 70 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Vers-Une-Architecture.2.png/640px-Vers-Une-Architecture.2.png\ncurl: (22) The requested URL returned error: 400\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf100.webp",
+    "sourceTitle": "St. Peter's Basilica",
+    "size": 93330,
+    "ok": true
+  },
+  {
+    "file": "public/images/xfgdjz/xf36.webp",
+    "sourceTitle": "Villa La Rotonda",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 15 --max-time 70 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Palladio_Villa_Rotonda_1.jpg/1280px-Palladio_Villa_Rotonda_1.jpg\ncurl: (22) The requested URL returned error: 404\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf56.webp",
+    "sourceTitle": "Spanish Steps",
+    "error": "Command failed: curl.exe --silent --show-error --location --ssl-no-revoke --fail --connect-timeout 15 --max-time 70 --user-agent ArchipediaImageAuditor/1.0 https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Scalinata_della_Trinit%C3%A0_dei_Monti_%28Roma%29.jpg/1280px-Scalinata_della_Trinit%C3%A0_dei_Monti_%28Roma%29.jpg\ncurl: (22) The requested URL returned error: 404\r\n"
+  },
+  {
+    "file": "public/images/xfgdjz/xf88.webp",
+    "sourceTitle": "Baths of Caracalla",
+    "size": 83964,
+    "ok": true
+  }
+]

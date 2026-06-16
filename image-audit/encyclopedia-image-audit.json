@@ -1,0 +1,42 @@
+{
+  "totalEntries": 594,
+  "mappedEntries": 594,
+  "existing": 594,
+  "missing": 0,
+  "oversized": 0,
+  "nonWebp": 0,
+  "byCategory": {
+    "中国古代建筑": {
+      "total": 228,
+      "missing": 0,
+      "oversized": 0
+    },
+    "西方古代建筑": {
+      "total": 102,
+      "missing": 0,
+      "oversized": 0
+    },
+    "建筑风格与设计思潮": {
+      "total": 75,
+      "missing": 0,
+      "oversized": 0
+    },
+    "城市规划与公共空间": {
+      "total": 98,
+      "missing": 0,
+      "oversized": 0
+    },
+    "可持续与绿色建筑": {
+      "total": 28,
+      "missing": 0,
+      "oversized": 0
+    },
+    "结构与构造理论": {
+      "total": 63,
+      "missing": 0,
+      "oversized": 0
+    }
+  },
+  "missingItems": [],
+  "oversizedItems": []
+}

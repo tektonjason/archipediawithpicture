@@ -10,36 +10,78 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { gsap } from 'gsap';
 
+type ReadingType = 'all' | 'books' | 'journals';
+
+interface ReadingTheme {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+}
+
 @Component({
   selector: 'app-readings',
   imports: [FormsModule, CommonModule, NgClass, RouterLink, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   standalone: true,
   template: `
-    <div class="ui-page ui-page-pad text-white">
+    <div class="ui-page ui-page-pad text-white" (wheel)="onPageWheel($event)">
+      <div class="readings-chrome" [class.is-compact]="readingChromeCompact()">
       
       <!-- Header Section -->
-      <div class="ui-page-header">
+      <div class="ui-page-header readings-hero">
         <h1 class="ui-title">建筑读物</h1>
-        <p class="ui-subtitle mb-4">
+        <p class="ui-subtitle readings-hero-copy mb-4">
           发现有价值的建筑书籍与期刊
         </p>
 
         <!-- Search Input -->
-        <div class="relative w-full max-w-2xl mt-4 flex gap-4 items-center justify-center h-12 z-20">
-          <app-animated-search-bar 
-            [query]="searchQuery()" 
-            (queryChange)="searchQuery.set($event)" 
-            placeholder="搜索书名、作者或出版社..."
-          ></app-animated-search-bar>
-          
-          <button (click)="startEResourceFlow()" appGsapTooltip="获取受限电子资源" [hoverScale]="1.05" class="ui-btn-secondary h-12 whitespace-nowrap shadow-lg">
-            电子资源
-          </button>
+        @if (!readingChromeCompact()) {
+          <div class="readings-hero-search relative w-full max-w-2xl mt-4 flex gap-4 items-center justify-center h-12 z-20">
+            <app-animated-search-bar
+              [query]="searchQuery()"
+              (queryChange)="searchQuery.set($event)"
+              placeholder="搜索书名、作者或出版社..."
+            ></app-animated-search-bar>
+
+            <button (click)="startEResourceFlow()" appGsapTooltip="获取受限电子资源" [hoverScale]="1.05" class="ui-btn-secondary h-12 whitespace-nowrap shadow-lg">
+              电子资源
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Type Filter -->
+      <div class="readings-type-filter flex justify-center mb-4 shrink-0">
+        <div class="inline-flex items-center rounded-control border border-line bg-surface/80 p-1 shadow-sm">
+          <button
+            (click)="selectReadingType('all')"
+            class="min-w-16 px-4 py-2 text-sm font-medium rounded-control transition-colors"
+            [class.bg-white]="readingType() === 'all'"
+            [class.text-black]="readingType() === 'all'"
+            [class.text-gray-400]="readingType() !== 'all'"
+            [class.hover:text-white]="readingType() !== 'all'"
+          >全部</button>
+          <button
+            (click)="selectReadingType('books')"
+            class="min-w-16 px-4 py-2 text-sm font-medium rounded-control transition-colors"
+            [class.bg-white]="readingType() === 'books'"
+            [class.text-black]="readingType() === 'books'"
+            [class.text-gray-400]="readingType() !== 'books'"
+            [class.hover:text-white]="readingType() !== 'books'"
+          >书籍</button>
+          <button
+            (click)="selectReadingType('journals')"
+            class="min-w-16 px-4 py-2 text-sm font-medium rounded-control transition-colors"
+            [class.bg-white]="readingType() === 'journals'"
+            [class.text-black]="readingType() === 'journals'"
+            [class.text-gray-400]="readingType() !== 'journals'"
+            [class.hover:text-white]="readingType() !== 'journals'"
+          >期刊</button>
         </div>
       </div>
 
       <!-- Tags Filter -->
-      <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-start px-1">
+      <div class="readings-tags-filter flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-start px-1">
         <button 
           (click)="selectTag('all')"
           class="ui-chip flex-shrink-0 whitespace-nowrap"
@@ -64,9 +106,70 @@ import { gsap } from 'gsap';
         }
       </div>
 
+      <!-- Theme Booklists -->
+      <div class="readings-theme-panel mb-6 shrink-0">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">主题书单</h2>
+          @if (activeTheme()) {
+            <button
+              (click)="selectTheme('all')"
+              class="text-xs font-medium text-gray-500 hover:text-white transition-colors"
+            >全部主题</button>
+          }
+        </div>
+
+        <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 custom-scrollbar mask-gradient px-1">
+          @for (theme of readingThemes; track theme.id) {
+            <button
+              (click)="selectTheme(theme.id)"
+              class="ui-chip flex-shrink-0 whitespace-nowrap"
+              [class.bg-blue-500]="selectedTheme() === theme.id"
+              [class.text-white]="selectedTheme() === theme.id"
+              [class.border-blue-400]="selectedTheme() === theme.id"
+              [class.bg-white/5]="selectedTheme() !== theme.id"
+              [class.text-gray-300]="selectedTheme() !== theme.id"
+              [class.hover:bg-white/10]="selectedTheme() !== theme.id"
+            >
+              {{ theme.title }}
+              <span class="ml-1 text-[10px] opacity-60">{{ themeCount(theme) }}</span>
+            </button>
+          }
+        </div>
+
+        @if (activeTheme(); as theme) {
+          <div class="mt-3 rounded-control border border-blue-500/20 bg-blue-500/10 px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <svg lucideBookOpen class="w-4 h-4 text-blue-300 shrink-0" [strokeWidth]="2"></svg>
+                <h3 class="text-sm font-semibold text-blue-100 truncate">{{ theme.title }}</h3>
+                <span class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-blue-100">{{ filteredReadings().length }} 项</span>
+              </div>
+              <p class="mt-1 text-xs text-blue-100/70 leading-relaxed">{{ theme.description }}</p>
+            </div>
+            <button
+              (click)="copyThemeReadingList()"
+              class="ui-btn-secondary h-10 shrink-0"
+              appGsapTooltip="复制当前主题下的书单"
+            >
+              <svg lucideCopy class="w-4 h-4" [strokeWidth]="2"></svg>
+              <span>复制书单</span>
+            </button>
+          </div>
+        }
+      </div>
+      </div>
+
       <!-- Content Area -->
       <div class="flex-1 relative overflow-hidden">
-        <div #scrollContainer class="h-full overflow-y-auto pb-20 hide-scrollbar" [class.pr-10]="filteredReadings().length > 0" (scroll)="onScroll()">
+        <div
+          #scrollContainer
+          class="h-full overflow-y-auto pb-20 hide-scrollbar"
+          [class.pr-10]="filteredReadings().length > 0"
+          (scroll)="onScroll()"
+          (wheel)="onReadingWheel($event)"
+          (touchstart)="onReadingTouchStart($event)"
+          (touchmove)="onReadingTouchMove($event)"
+        >
           @if (filteredReadings().length === 0) {
             <div class="ui-empty-state h-60 opacity-80">
               <div class="ui-empty-icon"><svg lucideBookOpen class="w-8 h-8" [strokeWidth]="1.8"></svg></div>
@@ -431,6 +534,67 @@ import { gsap } from 'gsap';
     .mask-gradient {
       mask-image: linear-gradient(to right, black 85%, transparent 100%);
     }
+    .readings-chrome {
+      max-height: 640px;
+      overflow: hidden;
+      transition: max-height 320ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: max-height;
+    }
+    .readings-hero,
+    .readings-hero-copy,
+    .readings-hero-search,
+    .readings-type-filter,
+    .readings-tags-filter,
+    .readings-theme-panel {
+      transition:
+        margin 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        max-height 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 220ms ease,
+        transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        padding 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .readings-hero-copy {
+      max-height: 4rem;
+    }
+    .readings-hero-search {
+      max-height: 4.5rem;
+    }
+    .readings-theme-panel {
+      max-height: 22rem;
+    }
+    .readings-hero .ui-title {
+      transition: font-size 260ms cubic-bezier(0.16, 1, 0.3, 1), line-height 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .readings-chrome.is-compact {
+      max-height: 150px;
+    }
+    .readings-chrome.is-compact .readings-hero {
+      margin-bottom: 0.5rem;
+      transform: translateY(-2px);
+    }
+    .readings-chrome.is-compact .readings-hero .ui-title {
+      font-size: 1.375rem;
+      line-height: 1.15;
+    }
+    .readings-chrome.is-compact .readings-hero-copy,
+    .readings-chrome.is-compact .readings-hero-search,
+    .readings-chrome.is-compact .readings-theme-panel {
+      max-height: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+    }
+    .readings-chrome.is-compact .readings-type-filter {
+      margin-bottom: 0.5rem;
+    }
+    .readings-chrome.is-compact .readings-tags-filter {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.25rem;
+    }
     .animate-fade-in-up {
       animation: fadeInUp 0.44s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
@@ -453,6 +617,16 @@ import { gsap } from 'gsap';
       to { opacity: 1; transform: translateY(0); }
     }
     @media (prefers-reduced-motion: reduce) {
+      .readings-chrome,
+      .readings-hero,
+      .readings-hero-copy,
+      .readings-hero-search,
+      .readings-type-filter,
+      .readings-tags-filter,
+      .readings-theme-panel,
+      .readings-hero .ui-title {
+        transition-duration: 0.01ms;
+      }
       .reading-cover-preview {
         transition-duration: 0.01ms;
       }
@@ -467,10 +641,45 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   private zone = inject(NgZone);
   searchQuery = signal('');
   selectedTag = signal('all');
+  readingType = signal<ReadingType>('all');
+  selectedTheme = signal('all');
   selectedReading = signal<Reading | null>(null);
   isClosing = signal(false);
 
   failedImages = signal<Set<string>>(new Set());
+
+  readingThemes: ReadingTheme[] = [
+    {
+      id: 'design-foundation',
+      title: '设计基础',
+      description: '从空间、形式、构成与设计训练入门，适合建立建筑学基础语感。',
+      tags: ['建筑设计', '高校教材', '建筑教育']
+    },
+    {
+      id: 'history-theory',
+      title: '史论入门',
+      description: '把建筑史、理论与文化放在一起读，适合补足批判性阅读背景。',
+      tags: ['建筑史', '建筑理论', '建筑文化']
+    },
+    {
+      id: 'urban-public',
+      title: '城市公共',
+      description: '围绕城市规划、公共空间与社会生活，适合城市设计方向阅读。',
+      tags: ['城市规划', '建筑文化', '建筑理论']
+    },
+    {
+      id: 'tools-research',
+      title: '工具研究',
+      description: '偏工具书、期刊与研究资料，适合查术语、找文献和做专题调研。',
+      tags: ['专业工具', '期刊']
+    },
+    {
+      id: 'portfolio-practice',
+      title: '作品实践',
+      description: '偏作品集、案例与表达训练，适合方案参考和作品集准备。',
+      tags: ['作品集', '建筑设计', '建筑教育']
+    }
+  ];
 
   handleImageError(id: string | undefined) {
     if (!id) return;
@@ -498,6 +707,8 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   private shareResetTimer: ReturnType<typeof setTimeout> | null = null;
   private modalEnterFrame = 0;
   private shareMenuEnterFrame = 0;
+  private lastReadingScrollTop = 0;
+  private lastReadingTouchY = 0;
   private readingModalTl?: gsap.core.Timeline;
   private shareMenuTl?: gsap.core.Tween;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -515,6 +726,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   currentLetter = signal('#');
   isScrubbing = signal(false);
   scrubbingLetter = signal('#');
+  readingChromeCompact = signal(false);
   
   // Cache available letters for visual feedback
   availableLetters = computed(() => {
@@ -535,13 +747,21 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     return Array.from(tags).sort();
   });
 
+  activeTheme = computed(() => {
+    return this.readingThemes.find(theme => theme.id === this.selectedTheme()) ?? null;
+  });
+
   filteredReadings = computed(() => {
     const q = this.searchQuery().toLowerCase();
     const tag = this.selectedTag();
+    const type = this.readingType();
+    const theme = this.activeTheme();
     return this.dataService.readings().filter(r => {
-      const matchSearch = !q || r.title.toLowerCase().includes(q) || r.author.toLowerCase().includes(q) || r.publisher.toLowerCase().includes(q);
+      const matchSearch = !q || r.title.toLowerCase().includes(q) || (r.author || '').toLowerCase().includes(q) || r.publisher.toLowerCase().includes(q);
       const matchTag = tag === 'all' || r.tags.includes(tag);
-      return matchSearch && matchTag;
+      const matchType = this.matchesReadingType(r, type);
+      const matchTheme = !theme || this.matchesTheme(r, theme);
+      return matchSearch && matchTag && matchType && matchTheme;
     });
   });
 
@@ -600,11 +820,47 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     this.shareResetTimer = null;
   }
 
+  private matchesReadingType(item: Reading, type: ReadingType = this.readingType()) {
+    if (type === 'all') return true;
+    const isJournal = this.isJournal(item);
+    return type === 'journals' ? isJournal : !isJournal;
+  }
+
+  private matchesTheme(item: Reading, theme: ReadingTheme) {
+    return theme.tags.some(tag => item.tags.includes(tag));
+  }
+
+  themeCount(theme: ReadingTheme) {
+    return this.dataService.readings().filter(item => this.matchesReadingType(item) && this.matchesTheme(item, theme)).length;
+  }
+
+  selectReadingType(type: ReadingType) {
+    if (this.readingType() === type) return;
+    this.readingType.set(type);
+    this.expandReadingChrome();
+    this.resetReadingPosition();
+  }
+
+  selectTheme(themeId: string) {
+    if (this.selectedTheme() === themeId) return;
+    this.selectedTheme.set(themeId);
+    this.selectedTag.set('all');
+    this.searchQuery.set('');
+    this.expandReadingChrome();
+    this.resetReadingPosition();
+  }
+
   selectTag(tag: string) {
     if (this.selectedTag() !== tag) {
       this.searchQuery.set('');
     }
+    this.selectedTheme.set('all');
     this.selectedTag.set(tag);
+    this.expandReadingChrome();
+    this.resetReadingPosition();
+  }
+
+  private resetReadingPosition() {
     if (this.tagResetFrame) {
       cancelAnimationFrame(this.tagResetFrame);
     }
@@ -612,6 +868,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.tagResetFrame = 0;
       if (this.scrollContainer) {
         this.scrollContainer.nativeElement.scrollTo({ top: 0, behavior: 'auto' });
+        this.lastReadingScrollTop = 0;
         
         // Reset current letter to the first available letter in the new list
         const available = Array.from(this.availableLetters()).sort((a, b) => {
@@ -626,6 +883,21 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
           this.currentLetter.set('#');
         }
       }
+    });
+  }
+
+  copyThemeReadingList() {
+    const theme = this.activeTheme();
+    if (!theme) return;
+
+    const rows = this.filteredReadings().map((item, index) => {
+      const meta = [item.author, item.publisher, item.identifier].filter(Boolean).join(' / ');
+      return meta ? `${index + 1}. ${item.title} - ${meta}` : `${index + 1}. ${item.title}`;
+    });
+
+    const text = `${theme.title}主题书单\n${theme.description}\n\n${rows.join('\n')}`;
+    navigator.clipboard.writeText(text).then(() => {
+      this.dataService.displayToast('主题书单已复制');
     });
   }
 
@@ -853,6 +1125,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   // --- Scrubber Logic ---
   onScroll() {
+    this.updateReadingChromeFromScroll();
     if (this.isScrubbing()) return;
     if (this.scrollFrame) return;
 
@@ -860,6 +1133,77 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.scrollFrame = 0;
       this.updateCurrentLetterFromScroll();
     });
+  }
+
+  onReadingWheel(event: WheelEvent) {
+    const container = this.scrollContainer?.nativeElement;
+    if (!container) return;
+
+    if (event.deltaY > 8) {
+      this.collapseReadingChrome();
+    } else if (event.deltaY < -8 && container.scrollTop <= 1) {
+      this.expandReadingChrome();
+    }
+  }
+
+  onPageWheel(event: WheelEvent) {
+    const container = this.scrollContainer?.nativeElement;
+    if (!container || container.contains(event.target as Node)) return;
+
+    if (event.deltaY > 8) {
+      this.collapseReadingChrome();
+      container.scrollBy({ top: event.deltaY, behavior: 'auto' });
+      event.preventDefault();
+    } else if (event.deltaY < -8) {
+      if (container.scrollTop <= 1) {
+        this.expandReadingChrome();
+      } else {
+        container.scrollBy({ top: event.deltaY, behavior: 'auto' });
+      }
+      event.preventDefault();
+    }
+  }
+
+  onReadingTouchStart(event: TouchEvent) {
+    this.lastReadingTouchY = event.touches[0]?.clientY ?? 0;
+  }
+
+  onReadingTouchMove(event: TouchEvent) {
+    const container = this.scrollContainer?.nativeElement;
+    const currentY = event.touches[0]?.clientY ?? this.lastReadingTouchY;
+    const deltaY = this.lastReadingTouchY - currentY;
+    this.lastReadingTouchY = currentY;
+
+    if (!container) return;
+    if (deltaY > 8) {
+      this.collapseReadingChrome();
+    } else if (deltaY < -8 && container.scrollTop <= 1) {
+      this.expandReadingChrome();
+    }
+  }
+
+  private updateReadingChromeFromScroll() {
+    const container = this.scrollContainer?.nativeElement;
+    if (!container) return;
+
+    const currentTop = container.scrollTop;
+    const delta = currentTop - this.lastReadingScrollTop;
+    if (currentTop > 24 && delta > 1) {
+      this.collapseReadingChrome();
+    }
+    this.lastReadingScrollTop = currentTop;
+  }
+
+  private collapseReadingChrome() {
+    if (!this.readingChromeCompact()) {
+      this.readingChromeCompact.set(true);
+    }
+  }
+
+  private expandReadingChrome() {
+    if (this.readingChromeCompact()) {
+      this.readingChromeCompact.set(false);
+    }
   }
 
   private updateCurrentLetterFromScroll() {
@@ -1250,7 +1594,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private isJournal(item: Reading): boolean {
+  isJournal(item: Reading): boolean {
     return !!item.journalLevel || item.tags.some(t => t.includes('期刊') || t.includes('杂志'));
   }
 }

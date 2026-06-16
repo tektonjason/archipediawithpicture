@@ -1,0 +1,405 @@
+{
+  "filled": [],
+  "rejected": [
+    {
+      "term": "小式建筑",
+      "file": "public\\images\\zggdjz\\arch_105.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "厦两头",
+      "file": "public\\images\\zggdjz\\arch_106.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "小中见大",
+      "file": "public\\images\\zggdjz\\arch_108.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "徐杲",
+      "file": "public\\images\\zggdjz\\arch_109.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "象眼",
+      "file": "public\\images\\zggdjz\\arch_110.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "一明二暗",
+      "file": "public\\images\\zggdjz\\arch_111.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "一整二破",
+      "file": "public\\images\\zggdjz\\arch_112.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "一颗印",
+      "file": "public\\images\\zggdjz\\arch_113.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "营缮司",
+      "file": "public\\images\\zggdjz\\arch_114.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "压地隐起",
+      "file": "public\\images\\zggdjz\\arch_116.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "烟云",
+      "file": "public\\images\\zggdjz\\arch_117.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "宇文恺",
+      "file": "public\\images\\zggdjz\\arch_118.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "喻皓",
+      "file": "public\\images\\zggdjz\\arch_119.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "样式雷",
+      "file": "public\\images\\zggdjz\\arch_120.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "檐柱",
+      "file": "public\\images\\zggdjz\\arch_121.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "苑囿",
+      "file": "public\\images\\zggdjz\\arch_122.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "因山为陵",
+      "file": "public\\images\\zggdjz\\arch_123.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "杨廷宝",
+      "file": "public\\images\\zggdjz\\arch_124.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "营造学社",
+      "file": "public\\images\\zggdjz\\arch_125.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "足材",
+      "file": "public\\images\\zggdjz\\arch_127.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "藻头",
+      "file": "public\\images\\zggdjz\\arch_129.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "兆域图",
+      "file": "public\\images\\zggdjz\\arch_130.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "中柱",
+      "file": "public\\images\\zggdjz\\arch_131.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "仔角梁",
+      "file": "public\\images\\zggdjz\\arch_133.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "材",
+      "file": "public\\images\\zggdjz\\arch_137.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "转角铺作",
+      "file": "public\\images\\zggdjz\\arch_138.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "柱头铺作",
+      "file": "public\\images\\zggdjz\\arch_139.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "栌斗",
+      "file": "public\\images\\zggdjz\\arch_140.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "交互斗",
+      "file": "public\\images\\zggdjz\\arch_141.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "散斗",
+      "file": "public\\images\\zggdjz\\arch_142.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "华栱",
+      "file": "public\\images\\zggdjz\\arch_143.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "瓜栱",
+      "file": "public\\images\\zggdjz\\arch_144.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "泥道栱",
+      "file": "public\\images\\zggdjz\\arch_145.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "令栱",
+      "file": "public\\images\\zggdjz\\arch_146.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "蚂蚱头",
+      "file": "public\\images\\zggdjz\\arch_148.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "七铺作",
+      "file": "public\\images\\zggdjz\\arch_149.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "人字栱",
+      "file": "public\\images\\zggdjz\\arch_150.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "槫",
+      "file": "public\\images\\zggdjz\\arch_151.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "脊槫",
+      "file": "public\\images\\zggdjz\\arch_152.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "平槫",
+      "file": "public\\images\\zggdjz\\arch_153.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "撩风槫",
+      "file": "public\\images\\zggdjz\\arch_154.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "飞子",
+      "file": "public\\images\\zggdjz\\arch_156.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "花架椽",
+      "file": "public\\images\\zggdjz\\arch_157.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "檐椽",
+      "file": "public\\images\\zggdjz\\arch_158.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "驼峰",
+      "file": "public\\images\\zggdjz\\arch_159.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "平闇",
+      "file": "public\\images\\zggdjz\\arch_160.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "平棋",
+      "file": "public\\images\\zggdjz\\arch_161.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "五彩遍装",
+      "file": "public\\images\\zggdjz\\arch_162.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "七朱八白",
+      "file": "public\\images\\zggdjz\\arch_163.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "直棂窗",
+      "file": "public\\images\\zggdjz\\arch_164.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "偷心",
+      "file": "public\\images\\zggdjz\\arch_167.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "丁头栱",
+      "file": "public\\images\\zggdjz\\arch_168.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "上昂",
+      "file": "public\\images\\zggdjz\\arch_169.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "八架椽",
+      "file": "public\\images\\zggdjz\\arch_170.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "九脊屋顶",
+      "file": "public\\images\\zggdjz\\arch_171.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "九踩斗栱",
+      "file": "public\\images\\zggdjz\\arch_172.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "门屋",
+      "file": "public\\images\\zggdjz\\arch_173.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "山花蕉叶",
+      "file": "public\\images\\zggdjz\\arch_174.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "斗子蜀柱",
+      "file": "public\\images\\zggdjz\\arch_175.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "五土五谷",
+      "file": "public\\images\\zggdjz\\arch_176.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "月牙城",
+      "file": "public\\images\\zggdjz\\arch_177.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "五音姓利",
+      "file": "public\\images\\zggdjz\\arch_178.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "方城明楼",
+      "file": "public\\images\\zggdjz\\arch_179.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "天宫楼阁",
+      "file": "public\\images\\zggdjz\\arch_180.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "石几筵",
+      "file": "public\\images\\zggdjz\\arch_181.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "冬瓜梁",
+      "file": "public\\images\\zggdjz\\arch_182.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "四阿屋顶",
+      "file": "public\\images\\zggdjz\\arch_183.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "正贴",
+      "file": "public\\images\\zggdjz\\arch_184.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "边贴",
+      "file": "public\\images\\zggdjz\\arch_185.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "平棋",
+      "file": "public\\images\\zggdjz\\arch_186.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "四铺作",
+      "file": "public\\images\\zggdjz\\arch_187.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "瓜楞柱",
+      "file": "public\\images\\zggdjz\\arch_188.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "当心间",
+      "file": "public\\images\\zggdjz\\arch_189.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "羊马城",
+      "file": "public\\images\\zggdjz\\arch_190.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "讹角斗",
+      "file": "public\\images\\zggdjz\\arch_191.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "托脚",
+      "file": "public\\images\\zggdjz\\arch_192.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "抄",
+      "file": "public\\images\\zggdjz\\arch_193.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "两厦",
+      "file": "public\\images\\zggdjz\\arch_194.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "灵寝门",
+      "file": "public\\images\\zggdjz\\arch_195.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    },
+    {
+      "term": "卤簿",
+      "file": "public\\images\\zggdjz\\arch_196.webp",
+      "reason": "no exact high-confidence Wikipedia page image"
+    }
+  ]
+}

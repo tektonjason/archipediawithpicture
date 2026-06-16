@@ -15,58 +15,61 @@ gsap.registerPlugin(Flip);
   selector: 'app-encyclopedia',
   imports: [RouterLink, FormsModule, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
-    <div class="ui-page ui-page-pad text-white">
+    <div class="ui-page ui-page-pad text-white" (wheel)="onPageWheel($event)">
+      <div class="encyclopedia-chrome" [class.is-compact]="encyclopediaChromeCompact()">
       
       <!-- Header Section -->
-      <div class="ui-page-header">
-        <h1 class="ui-title h-[48px] flex items-center">
+      <div class="ui-page-header encyclopedia-hero">
+        <h1 class="ui-title h-[48px] flex items-center encyclopedia-title">
           {{ currentTitle() }}<span class="animate-pulse text-gray-400 font-thin">|</span>
         </h1>
-        <p class="ui-subtitle mb-4">
+        <p class="ui-subtitle mb-4 encyclopedia-hero-copy">
           探索全面的建筑知识库
         </p>
 
         <!-- Animated Search Input & View Toggle -->
-        <div class="relative w-full max-w-2xl mt-4 flex justify-center items-center gap-4 h-12 z-20">
-          
-          <app-animated-search-bar 
-            [query]="searchQuery()" 
-            (queryChange)="updateSearch($event)" 
-            placeholder="搜索百科词条..."
-          ></app-animated-search-bar>
-          
-          <!-- View Toggle Button -->
-          <div class="flex bg-surface rounded-card border border-line p-1 shrink-0 z-20 shadow-lg h-12 items-center">
-            <button 
-              (click)="switchView('grid')"
-              class="p-2 rounded-lg transition-colors"
-              [class.bg-white/10]="viewMode() === 'grid'"
-              [class.text-white]="viewMode() === 'grid'"
-              [class.text-gray-500]="viewMode() !== 'grid'"
-              [class.hover:text-gray-300]="viewMode() !== 'grid'"
-              appGsapTooltip="网格视图"
-              [hoverScale]="1.15"
-            >
-              <svg lucideLayoutGrid class="w-5 h-5" [strokeWidth]="2"></svg>
-            </button>
-            <button 
-              (click)="switchView('list')"
-              class="p-2 rounded-lg transition-colors"
-              [class.bg-white/10]="viewMode() === 'list'"
-              [class.text-white]="viewMode() === 'list'"
-              [class.text-gray-500]="viewMode() !== 'list'"
-              [class.hover:text-gray-300]="viewMode() !== 'list'"
-              appGsapTooltip="列表视图"
-              [hoverScale]="1.15"
-            >
-              <svg lucideLayoutList class="w-5 h-5" [strokeWidth]="2"></svg>
-            </button>
+        @if (!encyclopediaChromeCompact()) {
+          <div class="encyclopedia-controls relative w-full max-w-2xl mt-4 flex justify-center items-center gap-4 h-12 z-20">
+            
+            <app-animated-search-bar 
+              [query]="searchQuery()" 
+              (queryChange)="updateSearch($event)" 
+              placeholder="搜索百科词条..."
+            ></app-animated-search-bar>
+            
+            <!-- View Toggle Button -->
+            <div class="flex bg-surface rounded-card border border-line p-1 shrink-0 z-20 shadow-lg h-12 items-center">
+              <button 
+                (click)="switchView('grid')"
+                class="p-2 rounded-lg transition-colors"
+                [class.bg-white/10]="viewMode() === 'grid'"
+                [class.text-white]="viewMode() === 'grid'"
+                [class.text-gray-500]="viewMode() !== 'grid'"
+                [class.hover:text-gray-300]="viewMode() !== 'grid'"
+                appGsapTooltip="网格视图"
+                [hoverScale]="1.15"
+              >
+                <svg lucideLayoutGrid class="w-5 h-5" [strokeWidth]="2"></svg>
+              </button>
+              <button 
+                (click)="switchView('list')"
+                class="p-2 rounded-lg transition-colors"
+                [class.bg-white/10]="viewMode() === 'list'"
+                [class.text-white]="viewMode() === 'list'"
+                [class.text-gray-500]="viewMode() !== 'list'"
+                [class.hover:text-gray-300]="viewMode() !== 'list'"
+                appGsapTooltip="列表视图"
+                [hoverScale]="1.15"
+              >
+                <svg lucideLayoutList class="w-5 h-5" [strokeWidth]="2"></svg>
+              </button>
+            </div>
           </div>
-        </div>
+        }
       </div>
 
       <!-- Categories Filter -->
-      <div class="flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient">
+      <div class="encyclopedia-categories flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient">
         <button 
           (click)="selectCategory('all')"
           class="ui-chip flex-shrink-0 whitespace-nowrap"
@@ -90,9 +93,18 @@ gsap.registerPlugin(Flip);
           </button>
         }
       </div>
+      </div>
 
       <!-- Content Grid -->
-      <div id="encyclopedia-scroll-container" #scrollContainer (scroll)="onScroll()" class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2">
+      <div
+        id="encyclopedia-scroll-container"
+        #scrollContainer
+        (scroll)="onScroll()"
+        (wheel)="onContentWheel($event)"
+        (touchstart)="onContentTouchStart($event)"
+        (touchmove)="onContentTouchMove($event)"
+        class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2"
+      >
         @if (filteredEntries().length === 0) {
           <div class="ui-empty-state h-60 opacity-80">
             <div class="ui-empty-icon"><svg lucideBuilding2 class="w-8 h-8" [strokeWidth]="1.8"></svg></div>
@@ -197,6 +209,60 @@ gsap.registerPlugin(Flip);
     .mask-gradient {
       mask-image: linear-gradient(to right, black 95%, transparent 100%);
     }
+    .encyclopedia-chrome {
+      max-height: 320px;
+      overflow: hidden;
+      transition: max-height 320ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: max-height;
+    }
+    .encyclopedia-hero,
+    .encyclopedia-title,
+    .encyclopedia-hero-copy,
+    .encyclopedia-controls,
+    .encyclopedia-categories {
+      transition:
+        margin 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        max-height 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        height 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 220ms ease,
+        transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        padding 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        font-size 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        line-height 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .encyclopedia-hero-copy {
+      max-height: 4rem;
+    }
+    .encyclopedia-controls {
+      max-height: 4.5rem;
+    }
+    .encyclopedia-chrome.is-compact {
+      max-height: 132px;
+    }
+    .encyclopedia-chrome.is-compact .encyclopedia-hero {
+      margin-bottom: 0.75rem;
+      transform: translateY(-2px);
+    }
+    .encyclopedia-chrome.is-compact .encyclopedia-title {
+      height: 2rem;
+      font-size: 1.5rem;
+      line-height: 1.15;
+    }
+    .encyclopedia-chrome.is-compact .encyclopedia-hero-copy,
+    .encyclopedia-chrome.is-compact .encyclopedia-controls {
+      max-height: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+    }
+    .encyclopedia-chrome.is-compact .encyclopedia-categories {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.25rem;
+    }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(14px) scale(0.985); }
       to { opacity: 1; transform: translateY(0); }
@@ -222,6 +288,12 @@ gsap.registerPlugin(Flip);
       transition-duration: 0ms !important;
     }
     @media (prefers-reduced-motion: reduce) {
+      .encyclopedia-chrome,
+      .encyclopedia-hero,
+      .encyclopedia-title,
+      .encyclopedia-hero-copy,
+      .encyclopedia-controls,
+      .encyclopedia-categories,
       .entries-grid,
       .entry-card,
       .entry-image,
@@ -238,6 +310,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
   viewMode = this.dataService.encyclopediaViewMode;
   displayLimit = this.dataService.encyclopediaDisplayLimit;
+  encyclopediaChromeCompact = signal(false);
   private lastAnimatedIndex = 0;
 
   // Typewriter properties
@@ -248,6 +321,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   private isDeleting = false;
   private timer: any;
   private scrollFrame = 0;
+  private lastContentScrollTop = 0;
+  private lastContentTouchY = 0;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
@@ -279,7 +354,12 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     setTimeout(() => {
       if (this.scrollContainer?.nativeElement) {
-        this.scrollContainer.nativeElement.scrollTop = this.dataService.encyclopediaScrollPosition();
+        const savedTop = this.dataService.encyclopediaScrollPosition();
+        this.scrollContainer.nativeElement.scrollTop = savedTop;
+        this.lastContentScrollTop = savedTop;
+        if (savedTop > 24) {
+          this.collapseEncyclopediaChrome();
+        }
       }
     }, 0);
     
@@ -358,12 +438,84 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   }
 
   onScroll() {
+    this.updateChromeFromScroll();
     if (this.scrollFrame) return;
 
     this.scrollFrame = requestAnimationFrame(() => {
       this.scrollFrame = 0;
       this.extendListNearEnd();
     });
+  }
+
+  onContentWheel(event: WheelEvent) {
+    const container = this.scrollContainer?.nativeElement;
+    if (!container) return;
+
+    if (event.deltaY > 8) {
+      this.collapseEncyclopediaChrome();
+    } else if (event.deltaY < -8 && container.scrollTop <= 1) {
+      this.expandEncyclopediaChrome();
+    }
+  }
+
+  onPageWheel(event: WheelEvent) {
+    const container = this.scrollContainer?.nativeElement;
+    if (!container || container.contains(event.target as Node)) return;
+
+    if (event.deltaY > 8) {
+      this.collapseEncyclopediaChrome();
+      container.scrollBy({ top: event.deltaY, behavior: 'auto' });
+      event.preventDefault();
+    } else if (event.deltaY < -8) {
+      if (container.scrollTop <= 1) {
+        this.expandEncyclopediaChrome();
+      } else {
+        container.scrollBy({ top: event.deltaY, behavior: 'auto' });
+      }
+      event.preventDefault();
+    }
+  }
+
+  onContentTouchStart(event: TouchEvent) {
+    this.lastContentTouchY = event.touches[0]?.clientY ?? 0;
+  }
+
+  onContentTouchMove(event: TouchEvent) {
+    const container = this.scrollContainer?.nativeElement;
+    const currentY = event.touches[0]?.clientY ?? this.lastContentTouchY;
+    const deltaY = this.lastContentTouchY - currentY;
+    this.lastContentTouchY = currentY;
+
+    if (!container) return;
+    if (deltaY > 8) {
+      this.collapseEncyclopediaChrome();
+    } else if (deltaY < -8 && container.scrollTop <= 1) {
+      this.expandEncyclopediaChrome();
+    }
+  }
+
+  private updateChromeFromScroll() {
+    const container = this.scrollContainer?.nativeElement;
+    if (!container) return;
+
+    const currentTop = container.scrollTop;
+    const delta = currentTop - this.lastContentScrollTop;
+    if (currentTop > 24 && delta > 1) {
+      this.collapseEncyclopediaChrome();
+    }
+    this.lastContentScrollTop = currentTop;
+  }
+
+  private collapseEncyclopediaChrome() {
+    if (!this.encyclopediaChromeCompact()) {
+      this.encyclopediaChromeCompact.set(true);
+    }
+  }
+
+  private expandEncyclopediaChrome() {
+    if (this.encyclopediaChromeCompact()) {
+      this.encyclopediaChromeCompact.set(false);
+    }
   }
 
   private extendListNearEnd() {
@@ -392,8 +544,10 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   updateSearch(query: string) {
     this.searchQuery.set(query);
     this.displayLimit.set(50);
+    this.expandEncyclopediaChrome();
     if (this.scrollContainer?.nativeElement) {
       this.scrollContainer.nativeElement.scrollTop = 0;
+      this.lastContentScrollTop = 0;
     }
   }
 
@@ -462,12 +616,14 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     const currentCards = Array.from(container.querySelectorAll('.entry-card'));
 
     if (this.prefersReducedMotion || currentCards.length === 0) {
+      this.expandEncyclopediaChrome();
       this.selectedCategory.set(category);
       this.searchQuery.set('');
       this.displayLimit.set(50);
       this.dataService.encyclopediaScrollPosition.set(0);
       if (this.scrollContainer?.nativeElement) {
         this.scrollContainer.nativeElement.scrollTop = 0;
+        this.lastContentScrollTop = 0;
       }
       return;
     }
@@ -482,12 +638,14 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       overwrite: "auto",
       onComplete: () => {
         // Update category and reset scroll/search after exit animation
+        this.expandEncyclopediaChrome();
         this.selectedCategory.set(category);
         this.searchQuery.set('');
         this.displayLimit.set(50);
         this.dataService.encyclopediaScrollPosition.set(0);
         if (this.scrollContainer?.nativeElement) {
           this.scrollContainer.nativeElement.scrollTop = 0;
+          this.lastContentScrollTop = 0;
         }
 
         // Enter animation for new cards

@@ -1,0 +1,62 @@
+[
+  {
+    "file": "public/images/jgygzll/gz25.webp",
+    "sourceTitle": "File:Reinforced concrete beam section.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Reinforced%20concrete%20beam%20section.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Reinforced%20concrete%20beam%20section.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Reinforced_concrete_beam_section.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file description identifies a reinforced concrete beam section, matching rectangular section reinforcement.",
+    "size": 5214,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:42:06.664Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jgygzll/gz38.webp",
+    "sourceTitle": "Concrete slab",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/23/Suspended-slab-formwork.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/2/23/Suspended-slab-formwork.jpg",
+    "sourcePageUrl": "https://en.wikipedia.org/wiki/Concrete_slab",
+    "source": "manual-en-wikipedia-pageimage",
+    "sourceClass": "web-page-image",
+    "matchBasis": "Concrete slab page image shows slab formwork; one-way slab is a slab structural type.",
+    "size": 72284,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:42:10.338Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jgygzll/gz37.webp",
+    "sourceTitle": "Reinforced brick masonry",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Homenaje_a_Eladio_Dieste_monumento_Salto_02.jpg/1920px-Homenaje_a_Eladio_Dieste_monumento_Salto_02.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/42/Homenaje_a_Eladio_Dieste_monumento_Salto_02.jpg",
+    "sourcePageUrl": "https://en.wikipedia.org/wiki/Reinforced_brick_masonry",
+    "source": "manual-en-wikipedia-pageimage",
+    "sourceClass": "web-page-image",
+    "matchBasis": "Reinforced brick masonry page image matches reinforced masonry/block masonry topic.",
+    "size": 56160,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:42:21.112Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  },
+  {
+    "file": "public/images/jgygzll/gz55.webp",
+    "sourceTitle": "File:DEAD lOAD.jpg",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/DEAD%20lOAD.jpg?width=1600",
+    "originalUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/DEAD%20lOAD.jpg?width=",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:DEAD_lOAD.jpg",
+    "source": "manual-commons-exact-file",
+    "sourceClass": "commons-search-image",
+    "matchBasis": "Commons file title directly identifies dead load.",
+    "size": 6514,
+    "ok": true,
+    "replacedAt": "2026-06-06T05:42:26.018Z",
+    "license": "See source page",
+    "licenseUrl": ""
+  }
+]
