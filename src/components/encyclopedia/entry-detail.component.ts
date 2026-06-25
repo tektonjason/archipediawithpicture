@@ -2,10 +2,18 @@
 
 import { Component, inject, signal, effect, computed, HostListener, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DataService } from '../../services/data.service';
+import { DataService, Entry } from '../../services/data.service';
 import { FormsModule } from '@angular/forms';
 import { Location as NgLocation } from '@angular/common';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { ShareCardService } from '../../services/share-card.service';
+import {
+  EntryRelations,
+  getRelatedEntries,
+  HighlightSegment,
+  inferEntryRelations,
+  splitHighlight
+} from './encyclopedia-tools';
 
 @Component({
   selector: 'app-entry-detail',
@@ -20,6 +28,12 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
           返回
         </button>
         <div class="flex items-center gap-2">
+           <button (click)="shareEntry()" class="ui-icon-btn" [disabled]="isSharing()" title="生成分享卡片">
+             <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
+           </button>
+           <button (click)="showFeedbackModal.set(true)" class="ui-icon-btn" title="内容纠错">
+             <svg lucideMail class="w-5 h-5" [strokeWidth]="2"></svg>
+           </button>
            <button (click)="toggleFav()" class="ui-icon-btn transition-all active:scale-90 group border-transparent bg-transparent">
              <svg lucideStar class="w-6 h-6 transition-all" 
                 [class.text-yellow-400]="isFav()"
@@ -93,7 +107,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                 @if (editForm.imageUrl) {
                   <div class="mt-2">
                     <p class="text-xs font-bold text-gray-500 mb-2">当前图片预览:</p>
-                    <img [src]="editForm.imageUrl" class="w-full max-h-60 object-contain border border-line rounded-control bg-black/50 p-2">
+                    <img [src]="editForm.imageUrl" loading="lazy" decoding="async" class="w-full max-h-60 object-contain border border-line rounded-control bg-black/50 p-2">
                   </div>
                 }
              </div>
@@ -106,11 +120,23 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                   <span class="ui-badge bg-white/10 text-white border-line-soft">{{ e.category }}</span>
                   <span class="ui-badge bg-surface text-gray-400 border-line">{{ e.subcategory }}</span>
                 </div>
-                <h1 class="text-4xl md:text-6xl font-bold mb-2 text-white tracking-wide">{{ e.term }}</h1>
-                <h2 class="text-xl md:text-2xl font-serif italic text-gray-500 mb-8">{{ e.termEn }}</h2>
+                <h1 class="text-4xl md:text-6xl font-bold mb-2 text-white tracking-wide">
+                  @for (segment of highlightSegments(e.term); track $index) {
+                    <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                  }
+                </h1>
+                <h2 class="text-xl md:text-2xl font-serif italic text-gray-500 mb-8">
+                  @for (segment of highlightSegments(e.termEn); track $index) {
+                    <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                  }
+                </h2>
                 
                 <div class="p-6 ui-card border-l-4 border-blue-500/50 shadow-lg">
-                  <p class="font-medium text-lg lg:text-xl leading-relaxed text-gray-200">{{ e.definition }}</p>
+                  <p class="font-medium text-lg lg:text-xl leading-relaxed text-gray-200">
+                    @for (segment of highlightSegments(e.definition); track $index) {
+                      <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                    }
+                  </p>
                 </div>
               </div>
 
@@ -121,7 +147,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                   [class.cursor-pointer]="e.imageUrl"
                   (click)="openImageModal()">
                   @if(e.imageUrl) {
-                    <img [src]="e.imageUrl" class="w-full h-full object-contain md:object-cover transition-transform duration-700 group-hover/image:scale-105" [style.object-position]="e.imagePosition || 'center'" alt="{{e.term}}">
+                    <img [src]="e.imageUrl" decoding="async" fetchpriority="high" class="w-full h-full object-contain md:object-cover transition-transform duration-700 group-hover/image:scale-105" [style.object-position]="e.imagePosition || 'center'" alt="{{e.term}}">
                     <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-all duration-300">
                       <div class="bg-white/10 p-3 rounded-full backdrop-blur-md border border-white/20 text-white transform translate-y-4 group-hover/image:translate-y-0 transition-transform">
                         <svg lucideZoomIn class="h-8 w-8" [strokeWidth]="2"></svg>
@@ -142,8 +168,49 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
                   <span class="w-1 h-8 bg-blue-500 rounded-full"></span>
                   详细解析
                 </h3>
-                <p class="whitespace-pre-wrap leading-relaxed text-gray-300 font-sans tracking-wide text-lg text-left">{{ e.details }}</p>
+                <p class="whitespace-pre-wrap leading-relaxed text-gray-300 font-sans tracking-wide text-lg text-left">
+                  @for (segment of highlightSegments(e.details); track $index) {
+                    <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                  }
+                </p>
               </div>
+
+              @if (relationGroups().length) {
+                <section class="mt-12 border-t border-line pt-8">
+                  <div class="flex items-center justify-between gap-4 mb-5">
+                    <h3 class="text-xl font-bold text-white">内容关联</h3>
+                    <span class="text-xs text-gray-500">自动生成，可能存在推断误差</span>
+                  </div>
+                  <div class="space-y-4">
+                    @for (group of relationGroups(); track group.label) {
+                      <div class="flex flex-col md:flex-row md:items-start gap-2 md:gap-4">
+                        <span class="w-16 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wider pt-2">{{ group.label }}</span>
+                        <div class="flex flex-wrap gap-2">
+                          @for (value of group.values; track value) {
+                            <button (click)="openRelation(value)" class="ui-chip bg-white/5 text-gray-300 hover:bg-blue-500/20 hover:text-blue-100">
+                              {{ value }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </section>
+              }
+
+              @if (relatedEntries().length) {
+                <section class="mt-12 border-t border-line pt-8 pb-8">
+                  <h3 class="text-xl font-bold text-white mb-5">相关词条</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    @for (related of relatedEntries(); track related.id) {
+                      <button (click)="openRelatedEntry(related)" class="ui-card p-4 text-left hover:border-blue-500/40 transition-colors">
+                        <div class="font-semibold text-white">{{ related.term }}</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ related.category }} · {{ related.subcategory }}</div>
+                      </button>
+                    }
+                  </div>
+                </section>
+              }
             </div>
           }
         } @else {
@@ -168,6 +235,51 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
         </div>
       }
 
+      @if (showFeedbackModal()) {
+        <div class="ui-modal-shell animate-fade-in-up">
+          <div class="ui-modal-backdrop" (click)="showFeedbackModal.set(false)"></div>
+          <div class="ui-modal-panel p-6 max-w-xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between gap-4 mb-5">
+              <div>
+                <h3 class="font-bold text-xl text-white">内容纠错</h3>
+                <p class="text-xs text-gray-500 mt-1">将生成一封预填邮件，不会上传到服务器。</p>
+              </div>
+              <button (click)="showFeedbackModal.set(false)" class="ui-icon-btn">
+                <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
+              </button>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="ui-label">问题类型</label>
+                <select [(ngModel)]="feedback.type" class="ui-field">
+                  <option>事实错误</option>
+                  <option>文字或翻译</option>
+                  <option>图片问题</option>
+                  <option>引用与来源</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div>
+                <label class="ui-label">问题说明</label>
+                <textarea [(ngModel)]="feedback.description" class="ui-field h-24" placeholder="请说明哪里有问题"></textarea>
+              </div>
+              <div>
+                <label class="ui-label">建议改法</label>
+                <textarea [(ngModel)]="feedback.suggestion" class="ui-field h-24" placeholder="建议如何修改"></textarea>
+              </div>
+              <div>
+                <label class="ui-label">参考来源</label>
+                <input [(ngModel)]="feedback.source" class="ui-field" placeholder="书名、论文或网址">
+              </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+              <button (click)="showFeedbackModal.set(false)" class="ui-btn-secondary">取消</button>
+              <button (click)="submitFeedback()" class="ui-btn-primary" [disabled]="!feedback.description.trim()">生成邮件</button>
+            </div>
+          </div>
+        </div>
+      }
+
       @if (showImageModal()) {
         <div class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 md:p-8">
           <!-- Backdrop -->
@@ -189,6 +301,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
               <img 
                 [src]="entry()?.imageUrl" 
                 alt="{{entry()?.term}}" 
+                decoding="async"
                 (load)="onImageLoad($event)"
                 class="modal-image object-contain shadow-2xl rounded-lg transition-transform duration-300"
                 (click)="$event.stopPropagation()">
@@ -224,6 +337,12 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.3);
+    }
+    .search-hit {
+      color: #dbeafe;
+      background: rgba(59, 130, 246, 0.28);
+      border-radius: 2px;
+      padding: 0 0.08em;
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -267,6 +386,7 @@ export class EntryDetailComponent implements OnDestroy {
   router: Router = inject(Router);
   location: NgLocation = inject(NgLocation);
   dataService = inject(DataService);
+  shareCardService = inject(ShareCardService);
 
   private resizeObserver: ResizeObserver | null = null;
   private activeImageElement: HTMLImageElement | null = null;
@@ -286,6 +406,26 @@ export class EntryDetailComponent implements OnDestroy {
 
   entryId = signal<string>('');
   entry = computed(() => this.dataService.getEntry(this.entryId())());
+  query = signal('');
+  relations = computed<EntryRelations>(() => {
+    const current = this.entry();
+    return current
+      ? inferEntryRelations(current, this.dataService.entries())
+      : { architects: [], periods: [], regions: [], styles: [] };
+  });
+  relationGroups = computed(() => {
+    const relations = this.relations();
+    return [
+      { label: '建筑师', values: relations.architects },
+      { label: '年代', values: relations.periods },
+      { label: '地区', values: relations.regions },
+      { label: '风格', values: relations.styles }
+    ].filter(group => group.values.length);
+  });
+  relatedEntries = computed(() => {
+    const current = this.entry();
+    return current ? getRelatedEntries(current, this.dataService.entries()) : [];
+  });
   
   isFav = computed(() => this.entryId() ? this.dataService.isFavorite(this.entryId())() : false);
   
@@ -295,6 +435,14 @@ export class EntryDetailComponent implements OnDestroy {
   showDeleteModal = signal(false);
   showImageModal = signal(false);
   isImageModalAnimatingOut = signal(false);
+  showFeedbackModal = signal(false);
+  isSharing = signal(false);
+  feedback = {
+    type: '事实错误',
+    description: '',
+    suggestion: '',
+    source: ''
+  };
 
   constructor() {
     this.route.params.subscribe(p => {
@@ -306,6 +454,7 @@ export class EntryDetailComponent implements OnDestroy {
     });
 
     this.route.queryParams.subscribe(p => {
+      this.query.set(p['q'] ?? '');
       if (p['edit'] === 'true' && this.dataService.isAdmin()) {
         this.isEditing.set(true);
       }
@@ -424,6 +573,11 @@ export class EntryDetailComponent implements OnDestroy {
 
     if (this.showDeleteModal()) {
       this.showDeleteModal.set(false);
+      return;
+    }
+
+    if (this.showFeedbackModal()) {
+      this.showFeedbackModal.set(false);
     }
   }
 
@@ -440,5 +594,71 @@ export class EntryDetailComponent implements OnDestroy {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  highlightSegments(text: string | undefined): HighlightSegment[] {
+    return splitHighlight(text, this.query());
+  }
+
+  openRelation(value: string) {
+    this.router.navigate(['/encyclopedia'], { queryParams: { q: value } });
+  }
+
+  openRelatedEntry(entry: Entry) {
+    this.router.navigate(['/entry', entry.id], {
+      queryParams: this.query() ? { q: this.query() } : undefined
+    });
+  }
+
+  async shareEntry() {
+    const current = this.entry();
+    if (!current || this.isSharing()) return;
+    this.isSharing.set(true);
+    try {
+      const query = this.query() ? `?q=${encodeURIComponent(this.query())}` : '';
+      const url = `${window.location.origin}${window.location.pathname}#/entry/${encodeURIComponent(current.id)}${query}`;
+      const blob = await this.shareCardService.generateEntryCard(current, url);
+      const result = await this.shareCardService.shareOrDownload(blob, `archipedia-${current.id}.png`, current.term);
+      if (result === 'downloaded') this.dataService.displayToast('分享卡片已下载');
+    } catch (error) {
+      console.error(error);
+      this.dataService.displayToast('分享卡片生成失败，请稍后重试');
+    } finally {
+      this.isSharing.set(false);
+    }
+  }
+
+  async submitFeedback() {
+    const current = this.entry();
+    if (!current || !this.feedback.description.trim()) return;
+    const pageUrl = window.location.href;
+    const report = [
+      'Archipedia 内容纠错',
+      `词条 ID：${current.id}`,
+      `词条标题：${current.term}`,
+      `页面地址：${pageUrl}`,
+      `问题类型：${this.feedback.type}`,
+      '',
+      '问题说明：',
+      this.feedback.description.trim(),
+      '',
+      '建议改法：',
+      this.feedback.suggestion.trim() || '未填写',
+      '',
+      '参考来源：',
+      this.feedback.source.trim() || '未填写'
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(report);
+      this.dataService.displayToast('纠错内容已复制，并尝试打开邮件客户端');
+    } catch {
+      this.dataService.displayToast('正在尝试打开邮件客户端');
+    }
+
+    const subject = encodeURIComponent(`[Archipedia 纠错] ${current.term}`);
+    const body = encodeURIComponent(report);
+    window.location.href = `mailto:tektonjason@163.com?subject=${subject}&body=${body}`;
+    this.showFeedbackModal.set(false);
   }
 }

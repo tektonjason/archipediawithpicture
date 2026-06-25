@@ -11,10 +11,6 @@
 // =================================================================
 
 import { Injectable, signal, computed, effect } from '@angular/core';
-import { ARCHIPEDIA_ROWS, CATEGORY_IMAGE_CONFIG } from '../data/archipedia-seed';
-import { SEED_COMPETITIONS } from '../data/competitions-seed';
-import { SEED_READINGS } from '../data/readings-seed';
-import { SEED_RESOURCES } from '../data/resources-seed';
 
 export interface Entry {
   id: string;
@@ -51,6 +47,20 @@ export interface Reading {
   url?: string;
   detailContent?: string;
   imageUrl?: string;
+  citation: ReadingCitation;
+}
+
+export interface ReadingCitation {
+  type: 'book' | 'journal';
+  creators: string[];
+  publicationPlace: string;
+  publisher: string;
+  publicationYear: string;
+  edition?: string;
+  volumeIssue?: string;
+  identifier?: string;
+  url?: string;
+  verifiedBy: string;
 }
 
 export interface Competition {
@@ -62,12 +72,6 @@ export interface Competition {
   url: string;       // 网址
   deadline: string;  // 报名截至时间
   month?: number;    // 1-12, derived from deadline
-}
-
-export interface ChatMessage {
-  role: 'user' | 'model';
-  text: string;
-  timestamp: number;
 }
 
 @Injectable({
@@ -135,7 +139,19 @@ export class DataService {
   webLinks = signal<Link[]>([]);
   readings = signal<Reading[]>([]);
   competitions = signal<Competition[]>([]);
-  chatHistory = signal<ChatMessage[]>([]);
+  encyclopediaLoaded = signal(false);
+  readingsLoaded = signal(false);
+  resourcesLoaded = signal(false);
+  competitionsLoaded = signal(false);
+  encyclopediaLoading = signal(false);
+  readingsLoading = signal(false);
+  resourcesLoading = signal(false);
+  competitionsLoading = signal(false);
+
+  private encyclopediaLoadPromise?: Promise<void>;
+  private readingsLoadPromise?: Promise<void>;
+  private resourcesLoadPromise?: Promise<void>;
+  private competitionsLoadPromise?: Promise<void>;
 
   // --- Encyclopedia View State ---
   encyclopediaScrollPosition = signal<number>(0);
@@ -145,21 +161,20 @@ export class DataService {
 
   constructor() {
     this.initLayout();
-    this.loadFromStorage();
-    // Only seed entries if completely empty
-    // if (this.entries().length === 0) {
-      this.seedArchipediaData();
-    // }
-    
-    this.syncResources();
-    this.seedReadingsData();
-    this.seedCompetitionsData();
+    this.loadPreferencesFromStorage();
 
     effect(() => localStorage.setItem('arch_favorites', JSON.stringify(this.favorites())));
     effect(() => localStorage.setItem('arch_history', JSON.stringify(this.history())));
-    effect(() => localStorage.setItem('arch_chat', JSON.stringify(this.chatHistory())));
-    effect(() => localStorage.setItem('arch_entries', JSON.stringify(this.entries())));
-    effect(() => localStorage.setItem('arch_links', JSON.stringify(this.webLinks())));
+    effect(() => {
+      if (this.encyclopediaLoaded()) {
+        localStorage.setItem('arch_entries', JSON.stringify(this.entries()));
+      }
+    });
+    effect(() => {
+      if (this.resourcesLoaded()) {
+        localStorage.setItem('arch_links', JSON.stringify(this.webLinks()));
+      }
+    });
     effect(() => localStorage.setItem('arch_view_mode', this.encyclopediaViewMode()));
   }
 
@@ -276,15 +291,6 @@ export class DataService {
     this.history.set([]);
   }
 
-  // --- Chat ---
-  addMessage(msg: ChatMessage) {
-    this.chatHistory.update(h => [...h, msg]);
-  }
-  
-  clearChat() {
-    this.chatHistory.set([]);
-  }
-
   // --- Links ---
   addLink(link: Link) {
     this.webLinks.update(l => [...l, link]);
@@ -347,18 +353,13 @@ export class DataService {
     });
   }
 
-  private loadFromStorage() {
+  private loadPreferencesFromStorage() {
     try {
-      const e = localStorage.getItem('arch_entries');
-      if (e) this.entries.set(JSON.parse(e));
+      localStorage.removeItem('arch_chat');
       const f = localStorage.getItem('arch_favorites');
       if (f) this.favorites.set(JSON.parse(f));
       const h = localStorage.getItem('arch_history');
       if (h) this.history.set(JSON.parse(h));
-      const c = localStorage.getItem('arch_chat');
-      if (c) this.chatHistory.set(JSON.parse(c));
-      const w = localStorage.getItem('arch_links');
-      if (w) this.webLinks.set(JSON.parse(w));
       const vm = localStorage.getItem('arch_view_mode');
       if (vm) this.encyclopediaViewMode.set(vm as 'grid' | 'list');
     } catch (err) {
@@ -366,8 +367,95 @@ export class DataService {
     }
   }
 
-  private syncResources() {
-    const seedLinks = SEED_RESOURCES;
+  async ensureEncyclopediaLoaded(): Promise<void> {
+    if (this.encyclopediaLoaded()) return;
+    if (this.encyclopediaLoadPromise) return this.encyclopediaLoadPromise;
+
+    this.encyclopediaLoading.set(true);
+    this.encyclopediaLoadPromise = import('../data/archipedia-seed')
+      .then(({ ARCHIPEDIA_ROWS, CATEGORY_IMAGE_CONFIG }) => {
+        const stored = localStorage.getItem('arch_entries');
+        if (stored) {
+          try {
+            this.entries.set(JSON.parse(stored));
+          } catch {
+            localStorage.removeItem('arch_entries');
+          }
+        }
+        this.seedArchipediaData(ARCHIPEDIA_ROWS, CATEGORY_IMAGE_CONFIG);
+        this.encyclopediaLoaded.set(true);
+      })
+      .finally(() => {
+        this.encyclopediaLoading.set(false);
+        this.encyclopediaLoadPromise = undefined;
+      });
+
+    return this.encyclopediaLoadPromise;
+  }
+
+  async ensureReadingsLoaded(): Promise<void> {
+    if (this.readingsLoaded()) return;
+    if (this.readingsLoadPromise) return this.readingsLoadPromise;
+
+    this.readingsLoading.set(true);
+    this.readingsLoadPromise = import('../data/readings-seed')
+      .then(({ SEED_READINGS }) => {
+        this.seedReadingsData(SEED_READINGS);
+        this.readingsLoaded.set(true);
+      })
+      .finally(() => {
+        this.readingsLoading.set(false);
+        this.readingsLoadPromise = undefined;
+      });
+
+    return this.readingsLoadPromise;
+  }
+
+  async ensureResourcesLoaded(): Promise<void> {
+    if (this.resourcesLoaded()) return;
+    if (this.resourcesLoadPromise) return this.resourcesLoadPromise;
+
+    this.resourcesLoading.set(true);
+    this.resourcesLoadPromise = import('../data/resources-seed')
+      .then(({ SEED_RESOURCES }) => {
+        const stored = localStorage.getItem('arch_links');
+        if (stored) {
+          try {
+            this.webLinks.set(JSON.parse(stored));
+          } catch {
+            localStorage.removeItem('arch_links');
+          }
+        }
+        this.syncResources(SEED_RESOURCES);
+        this.resourcesLoaded.set(true);
+      })
+      .finally(() => {
+        this.resourcesLoading.set(false);
+        this.resourcesLoadPromise = undefined;
+      });
+
+    return this.resourcesLoadPromise;
+  }
+
+  async ensureCompetitionsLoaded(): Promise<void> {
+    if (this.competitionsLoaded()) return;
+    if (this.competitionsLoadPromise) return this.competitionsLoadPromise;
+
+    this.competitionsLoading.set(true);
+    this.competitionsLoadPromise = import('../data/competitions-seed')
+      .then(({ SEED_COMPETITIONS }) => {
+        this.seedCompetitionsData(SEED_COMPETITIONS);
+        this.competitionsLoaded.set(true);
+      })
+      .finally(() => {
+        this.competitionsLoading.set(false);
+        this.competitionsLoadPromise = undefined;
+      });
+
+    return this.competitionsLoadPromise;
+  }
+
+  private syncResources(seedLinks: Link[]) {
     const currentLinks = this.webLinks();
     const currentMap = new Map<string, Link>();
     for (const link of currentLinks) {
@@ -407,16 +495,16 @@ export class DataService {
     }
   }
 
-  private seedReadingsData() {
-    this.readings.set(SEED_READINGS.map((item, index) => ({
+  private seedReadingsData(seedReadings: Reading[]) {
+    this.readings.set(seedReadings.map((item, index) => ({
       ...item,
       id: item.id ?? `r${index + 1}`,
       imageUrl: item.imageUrl ?? `/images/book/s${index + 1}.webp`
     })));
   }
 
-  private seedCompetitionsData() {
-    const competitions: Competition[] = SEED_COMPETITIONS.map(d => {
+  private seedCompetitionsData(seedCompetitions: Competition[]) {
+    const competitions: Competition[] = seedCompetitions.map(d => {
       let month: number | undefined;
       const mMatch = d.deadline.match(/(\d{1,2})月/);
       if (mMatch) {
@@ -432,19 +520,22 @@ export class DataService {
     this.competitions.set(competitions);
   }
 
-  private seedArchipediaData() {
+  private seedArchipediaData(
+    rows: Array<[string, string, string, string, string, string]>,
+    imageConfig: Record<string, { basePath: string; prefix?: string }>
+  ) {
     const currentEntries = this.entries();
     const currentMap = new Map(currentEntries.map(e => [e.id, e]));
     const uniqueEntries = new Map<string, Entry>();
     const categoryImageCounters = new Map<string, number>();
 
-    ARCHIPEDIA_ROWS.forEach(row => {
+    rows.forEach(row => {
       const id = row[2] + '_' + row[0];
       const existing = currentMap.get(id);
       const category = row[0];
 
       let imageUrl = existing?.imageUrl;
-      const cfg = CATEGORY_IMAGE_CONFIG[category];
+      const cfg = imageConfig[category];
 
       if (cfg) {
         const current = categoryImageCounters.get(category) ?? 0;

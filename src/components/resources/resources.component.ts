@@ -1,5 +1,5 @@
 
-import { Component, HostListener, inject, signal, computed } from '@angular/core';
+import { Component, HostListener, OnDestroy, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DataService, Link } from '../../services/data.service';
 import { FormsModule } from '@angular/forms';
@@ -90,14 +90,13 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
               
               <div class="flex items-center gap-4">
                  <span class="bg-white/10 text-gray-300 text-xs font-bold px-2.5 py-1 rounded-full">{{ group.links.length }}</span>
-                 <svg lucideChevronDown class="w-5 h-5 text-gray-500 transition-transform duration-300" [class.rotate-180]="expandedCategory() === group.category || searchQuery()" [strokeWidth]="2"></svg>
+                 <svg lucideChevronDown class="w-5 h-5 text-gray-500 transition-transform duration-300" [class.rotate-180]="isCategoryOpen(group.category)" [strokeWidth]="2"></svg>
               </div>
             </button>
              
-            <div class="transition-all duration-300 ease-in-out overflow-hidden bg-app" 
-                 [style.max-height]="(expandedCategory() === group.category || searchQuery()) ? '2000px' : '0px'"
-                 [style.opacity]="(expandedCategory() === group.category || searchQuery()) ? '1' : '0'">
-              <div class="p-4 md:p-6 border-t border-white/5">
+            <div class="resource-panel bg-app" [class.resource-panel-open]="isCategoryOpen(group.category)">
+              <div class="resource-panel-clip">
+                <div class="p-4 md:p-6 border-t border-white/5">
                 
                 @if (group.category === '院校展览') {
                   <div class="ui-alert-info mb-6 flex gap-3">
@@ -143,6 +142,7 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
                       </div>
                     </div>
                   }
+                </div>
                 </div>
               </div>
             </div>
@@ -216,9 +216,31 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.3);
     }
+    .resource-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      overflow: hidden;
+      transition:
+        grid-template-rows 300ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 220ms ease;
+    }
+    .resource-panel-open {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+    .resource-panel-clip {
+      min-height: 0;
+      overflow: hidden;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .resource-panel {
+        transition: none;
+      }
+    }
   `]
 })
-export class ResourcesComponent {
+export class ResourcesComponent implements OnDestroy {
   dataService = inject(DataService);
   
   newCategory = signal('');
@@ -232,6 +254,14 @@ export class ResourcesComponent {
     const id = this.pendingDeleteLinkId();
     return id ? this.dataService.webLinks().find(link => link.id === id) ?? null : null;
   });
+  private pendingCategoryScrollFrame: number | null = null;
+  private pendingCategoryScrollTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly categoryScrollOffset = 24;
+  private readonly categoryPanelTransitionMs = 330;
+
+  isCategoryOpen(category: string): boolean {
+    return this.expandedCategory() === category || !!this.searchQuery();
+  }
 
   private categoryOrder = [
     '院校展览','建筑资讯与媒体', '规范、学习与学术', '地图、气象与数据', '软件、插件与渲染',
@@ -265,6 +295,7 @@ export class ResourcesComponent {
 
   toggleCategory(category: string, element?: HTMLElement) {
     const isExpanding = this.expandedCategory() !== category;
+    this.cancelPendingCategoryScroll();
     
     // 如果是关闭操作，直接执行
     if (!isExpanding) {
@@ -274,7 +305,7 @@ export class ResourcesComponent {
 
     // 如果是展开操作
     if (element) {
-      const container = element.closest('.overflow-y-auto') as HTMLElement;
+      const container = this.findScrollContainer(element);
       if (!container) {
         this.expandedCategory.set(category);
         return;
@@ -282,23 +313,68 @@ export class ResourcesComponent {
 
       this.expandedCategory.set(category);
 
-      this.scrollCategoryIntoView(element, container);
+      if (!this.searchQuery()) {
+        this.scrollCategoryIntoViewAfterLayoutSettles(element, container);
+      }
 
     } else {
        this.expandedCategory.set(category);
     }
   }
 
-  private scrollCategoryIntoView(element: HTMLElement, container: HTMLElement) {
-    requestAnimationFrame(() => {
-      const targetOffset = 24;
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      const top = elementRect.top - containerRect.top + container.scrollTop - targetOffset;
-      const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  private findScrollContainer(element: HTMLElement): HTMLElement | null {
+    let parent = element.parentElement;
 
-      container.scrollTo({ top, behavior });
-    });
+    while (parent) {
+      const overflowY = window.getComputedStyle(parent).overflowY;
+      if (overflowY === 'auto' || overflowY === 'scroll') {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+
+    return null;
+  }
+
+  private scrollCategoryIntoViewAfterLayoutSettles(element: HTMLElement, container: HTMLElement) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const delay = prefersReducedMotion ? 0 : this.categoryPanelTransitionMs;
+
+    this.pendingCategoryScrollTimer = window.setTimeout(() => {
+      this.pendingCategoryScrollTimer = null;
+      this.pendingCategoryScrollFrame = window.requestAnimationFrame(() => {
+        this.pendingCategoryScrollFrame = null;
+        this.alignCategoryWithViewportTop(element, container, prefersReducedMotion ? 'auto' : 'smooth');
+      });
+    }, delay);
+  }
+
+  private alignCategoryWithViewportTop(element: HTMLElement, container: HTMLElement, behavior: ScrollBehavior) {
+    if (!element.isConnected || !container.isConnected) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    const rawTop = elementRect.top - containerRect.top + container.scrollTop - this.categoryScrollOffset;
+    const maxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+    const top = Math.min(Math.max(rawTop, 0), maxTop);
+
+    container.scrollTo({ top, behavior });
+  }
+
+  private cancelPendingCategoryScroll() {
+    if (this.pendingCategoryScrollFrame !== null) {
+      window.cancelAnimationFrame(this.pendingCategoryScrollFrame);
+      this.pendingCategoryScrollFrame = null;
+    }
+
+    if (this.pendingCategoryScrollTimer !== null) {
+      window.clearTimeout(this.pendingCategoryScrollTimer);
+      this.pendingCategoryScrollTimer = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.cancelPendingCategoryScroll();
   }
 
   addLink() {

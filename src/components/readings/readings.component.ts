@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, NgZone } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, CommonModule } from '@angular/common';
 import { DataService, Reading } from '../../services/data.service';
@@ -9,6 +9,8 @@ import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directiv
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { gsap } from 'gsap';
+import { ShareCardService } from '../../services/share-card.service';
+import { downloadTextFile, formatCitationList, formatGbT7714 } from './citation';
 
 type ReadingType = 'all' | 'books' | 'journals';
 
@@ -146,14 +148,24 @@ interface ReadingTheme {
               </div>
               <p class="mt-1 text-xs text-blue-100/70 leading-relaxed">{{ theme.description }}</p>
             </div>
-            <button
-              (click)="copyThemeReadingList()"
-              class="ui-btn-secondary h-10 shrink-0"
-              appGsapTooltip="复制当前主题下的书单"
-            >
-              <svg lucideCopy class="w-4 h-4" [strokeWidth]="2"></svg>
-              <span>复制书单</span>
-            </button>
+            <div class="flex gap-2 shrink-0">
+              <button
+                (click)="copyThemeReadingList()"
+                class="ui-btn-secondary h-10"
+                appGsapTooltip="复制当前主题下的书单"
+              >
+                <svg lucideCopy class="w-4 h-4" [strokeWidth]="2"></svg>
+                <span>复制书单</span>
+              </button>
+              <button
+                (click)="downloadThemeCitations()"
+                class="ui-btn-secondary h-10"
+                appGsapTooltip="导出 GB/T 7714-2015 引用"
+              >
+                <svg lucideDownload class="w-4 h-4" [strokeWidth]="2"></svg>
+                <span>导出引用</span>
+              </button>
+            </div>
           </div>
         }
       </div>
@@ -201,7 +213,7 @@ interface ReadingTheme {
                       <!-- Book Cover -->
                       <div class="entry-image aspect-[2/3] bg-surface rounded-control border border-line-soft overflow-hidden relative shadow-lg">
                         @if (item.imageUrl && !failedImages().has(item.id)) {
-                          <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
+                          <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" decoding="async" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                         } @else {
                           <div class="absolute inset-0 bg-gradient-to-br from-[#2a2a2e] to-[#18181b] flex items-center justify-center p-4 text-center">
                              <div class="absolute inset-x-4 top-0 h-[1px] bg-white/10"></div>
@@ -290,7 +302,7 @@ interface ReadingTheme {
                   <!-- Book Cover Mockup -->
                   <div #readingModalCover class="reading-cover-preview relative w-full max-w-[320px] aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col items-center justify-center overflow-hidden">
                      @if (item.imageUrl && !failedImages().has(item.id)) {
-                       <img [src]="item.imageUrl" [alt]="item.title" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
+                       <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" decoding="async" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                      } @else {
                        <div class="flex flex-col p-4 md:p-6 text-center justify-center h-full w-full relative">
                          <div class="absolute inset-y-0 left-2 w-[1px] bg-white/5"></div>
@@ -347,14 +359,33 @@ interface ReadingTheme {
                          </div>
                        }
                     </div>
+
+                    <div class="pt-4 md:pt-6 border-t border-white/10">
+                      <div class="flex items-center justify-between gap-3 mb-2">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">GB/T 7714-2015 引用</h4>
+                        <span class="text-[10px] text-gray-600">{{ item.citation.verifiedBy }}</span>
+                      </div>
+                      <p class="rounded-control bg-black/20 border border-line-soft p-3 text-xs leading-relaxed text-gray-300 font-mono">
+                        {{ citationText(item) }}
+                      </p>
+                    </div>
                   </div>
                   </div>
 
-                  <div #readingModalActions class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-surface border-t border-line z-10 shrink-0 flex gap-4">
+                  <div #readingModalActions class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-surface border-t border-line z-10 shrink-0 flex flex-wrap gap-3">
                     <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="ui-btn-primary cursor-pointer flex-1 active:scale-[0.98]">
                        <svg lucideSearch class="w-5 h-5" [strokeWidth]="2"></svg>
                        <span>在线搜索</span>
                     </a>
+                    <button (click)="copyCitation(item)" class="ui-btn-secondary px-3" title="复制引用">
+                      <svg lucideCopy class="w-5 h-5" [strokeWidth]="2"></svg>
+                    </button>
+                    <button (click)="downloadCitation(item)" class="ui-btn-secondary px-3" title="下载引用">
+                      <svg lucideDownload class="w-5 h-5" [strokeWidth]="2"></svg>
+                    </button>
+                    <button (click)="shareReadingCard(item)" class="ui-btn-secondary px-3" [disabled]="isGeneratingCard()" title="生成分享卡片">
+                      <svg lucideImage class="w-5 h-5" [strokeWidth]="2"></svg>
+                    </button>
                     
                     <div class="relative">
                       <button 
@@ -639,12 +670,16 @@ interface ReadingTheme {
 export class ReadingsComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
   private zone = inject(NgZone);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private shareCardService = inject(ShareCardService);
   searchQuery = signal('');
   selectedTag = signal('all');
   readingType = signal<ReadingType>('all');
   selectedTheme = signal('all');
   selectedReading = signal<Reading | null>(null);
   isClosing = signal(false);
+  isGeneratingCard = signal(false);
 
   failedImages = signal<Set<string>>(new Set());
 
@@ -727,6 +762,15 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   isScrubbing = signal(false);
   scrubbingLetter = signal('#');
   readingChromeCompact = signal(false);
+
+  constructor() {
+    this.route.queryParamMap.subscribe(params => {
+      const readingId = params.get('reading');
+      if (!readingId || this.selectedReading()?.id === readingId) return;
+      const reading = this.dataService.readings().find(item => item.id === readingId);
+      if (reading) this.openModal(reading, false);
+    });
+  }
   
   // Cache available letters for visual feedback
   availableLetters = computed(() => {
@@ -901,7 +945,15 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  openModal(item: Reading) {
+  downloadThemeCitations() {
+    const theme = this.activeTheme();
+    if (!theme) return;
+    const content = `${theme.title}主题书单\n${theme.description}\n\n${formatCitationList(this.filteredReadings())}`;
+    downloadTextFile(content, `${theme.title}-GB-T-7714.txt`);
+    this.dataService.displayToast('主题书单引用已导出');
+  }
+
+  openModal(item: Reading, updateRoute = true) {
     if (this.modalCloseTimer) {
       clearTimeout(this.modalCloseTimer);
       this.modalCloseTimer = null;
@@ -920,12 +972,26 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     this.shareMenuCopied.set(false);
     this.isClosing.set(false);
     this.selectedReading.set(item);
+    if (updateRoute && item.id) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { reading: item.id },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
     this.scheduleReadingModalEnter();
   }
 
   closeModal() {
     if (!this.selectedReading() || this.isClosing()) return;
     this.isClosing.set(true);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { reading: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
     this.showShareMenu.set(false);
     this.shareMenuTl?.kill();
     if (this.shareMenuEnterFrame) {
@@ -1521,6 +1587,40 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
         this.shareMenuCopied.set(false);
       }, 2000);
     });
+  }
+
+  citationText(item: Reading) {
+    return formatGbT7714(item);
+  }
+
+  async copyCitation(item: Reading) {
+    try {
+      await navigator.clipboard.writeText(formatGbT7714(item));
+      this.dataService.displayToast('引用已复制');
+    } catch {
+      this.dataService.displayToast('复制失败，请手动选择引用文本');
+    }
+  }
+
+  downloadCitation(item: Reading) {
+    downloadTextFile(formatGbT7714(item), `${item.title}-GB-T-7714.txt`);
+    this.dataService.displayToast('引用文件已下载');
+  }
+
+  async shareReadingCard(item: Reading) {
+    if (this.isGeneratingCard()) return;
+    this.isGeneratingCard.set(true);
+    try {
+      const url = `${window.location.origin}${window.location.pathname}#/readings?reading=${encodeURIComponent(item.id ?? '')}`;
+      const blob = await this.shareCardService.generateReadingCard(item, url);
+      const result = await this.shareCardService.shareOrDownload(blob, `archipedia-reading-${item.id ?? 'card'}.png`, item.title);
+      if (result === 'downloaded') this.dataService.displayToast('分享卡片已下载');
+    } catch (error) {
+      console.error(error);
+      this.dataService.displayToast('分享卡片生成失败，请稍后重试');
+    } finally {
+      this.isGeneratingCard.set(false);
+    }
   }
 
   private scheduleShareMenuEnter() {

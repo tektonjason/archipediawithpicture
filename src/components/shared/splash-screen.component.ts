@@ -1,6 +1,12 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { gsap } from 'gsap';
 
+type OrientationPermissionState = 'unknown' | 'pending' | 'granted' | 'denied' | 'unavailable';
+
+type DeviceOrientationEventConstructorWithPermission = typeof DeviceOrientationEvent & {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
 @Component({
   selector: 'app-splash-screen',
   standalone: true,
@@ -17,7 +23,7 @@ import { gsap } from 'gsap';
         <div #logoInner class="logo flex flex-col items-center gap-8 pointer-events-none transform-style-3d">
           <div class="w-28 h-28 md:w-32 md:h-32 bg-white/10 rounded-card flex items-center justify-center overflow-hidden shadow-2xl border border-line relative">
              <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent z-10"></div>
-             <img src="/icon/archipediaicon.webp" alt="Archipedia Logo" class="w-full h-full object-cover">
+             <img src="/icon/archipediaicon.webp" alt="Archipedia Logo" decoding="sync" fetchpriority="high" class="w-full h-full object-cover">
           </div>
           
           <div class="flex flex-col items-center gap-3">
@@ -61,6 +67,7 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
   private introTweens: gsap.core.Tween[] = [];
   private enterFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private hasEmittedEnter = false;
+  private orientationPermissionState: OrientationPermissionState = 'unknown';
 
   ngAfterViewInit() {
     if (typeof window === 'undefined') return;
@@ -69,20 +76,19 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
 
     this.mm.add(
       {
-        canAnimate: "(prefers-reduced-motion: no-preference)",
-        finePointer: "(pointer: fine)"
+        canAnimate: "(prefers-reduced-motion: no-preference)"
       },
       (context) => {
       const container = this.splashContainer.nativeElement;
       const outer = this.logoOuter.nativeElement;
       const inner = this.logoInner.nativeElement;
-      const { canAnimate, finePointer } = context.conditions as { canAnimate: boolean; finePointer: boolean };
+      const { canAnimate } = context.conditions as { canAnimate: boolean };
 
       gsap.set(container, { perspective: 1000 });
       gsap.set(outer, { transformStyle: "preserve-3d" });
       gsap.set(inner, { transformStyle: "preserve-3d", z: 50 });
 
-      if (!canAnimate || !finePointer) {
+      if (!canAnimate) {
         return;
       }
 
@@ -91,31 +97,111 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
       const innerX = gsap.quickTo(inner, "x", { duration: 0.28, ease: "power3.out" });
       const innerY = gsap.quickTo(inner, "y", { duration: 0.28, ease: "power3.out" });
 
+      let pointerActive = false;
+      let orientationBaseline: { beta: number; gamma: number; screenAngle: number } | null = null;
+      let orientationPose = { rotationX: 0, rotationY: 0 };
+
+      const applyPose = (rotationX: number, rotationY: number) => {
+        outerRX(rotationX);
+        outerRY(rotationY);
+        innerX(rotationY * 2);
+        innerY(rotationX * -2);
+      };
+
+      const applyOrientationPose = () => {
+        applyPose(orientationPose.rotationX, orientationPose.rotationY);
+      };
+
       this.pointerMoveHandler = (e: PointerEvent) => {
         if (this.isEntering) return;
+        if (e.pointerType !== 'mouse' && !pointerActive) return;
+
+        pointerActive = true;
         const xRatio = e.clientX / window.innerWidth;
         const yRatio = e.clientY / window.innerHeight;
-        
-        outerRX(gsap.utils.interpolate(15, -15, yRatio));
-        outerRY(gsap.utils.interpolate(-15, 15, xRatio));
-        innerX(gsap.utils.interpolate(-30, 30, xRatio));
-        innerY(gsap.utils.interpolate(-30, 30, yRatio));
+
+        applyPose(
+          gsap.utils.interpolate(15, -15, yRatio),
+          gsap.utils.interpolate(-15, 15, xRatio)
+        );
       };
 
-      this.pointerLeaveHandler = (e: PointerEvent) => {
+      this.pointerLeaveHandler = () => {
         if (this.isEntering) return;
-        outerRX(0);
-        outerRY(0);
-        innerX(0);
-        innerY(0);
+        pointerActive = false;
+        applyOrientationPose();
       };
 
+      const pointerDownHandler = (e: PointerEvent) => {
+        pointerActive = true;
+        this.pointerMoveHandler(e);
+      };
+
+      const normalizeAngleDelta = (value: number, baseline: number) => {
+        let delta = value - baseline;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+        return delta;
+      };
+
+      const getScreenAngle = () => {
+        const orientationAngle = window.screen.orientation?.angle;
+        if (typeof orientationAngle === 'number') return orientationAngle;
+
+        const legacyAngle = (window as Window & { orientation?: number }).orientation;
+        return typeof legacyAngle === 'number' ? legacyAngle : 0;
+      };
+
+      const orientationHandler = (event: DeviceOrientationEvent) => {
+        if (this.isEntering || event.beta === null || event.gamma === null) return;
+
+        const screenAngle = getScreenAngle();
+        if (!orientationBaseline || orientationBaseline.screenAngle !== screenAngle) {
+          orientationBaseline = { beta: event.beta, gamma: event.gamma, screenAngle };
+          orientationPose = { rotationX: 0, rotationY: 0 };
+          if (!pointerActive) applyOrientationPose();
+          return;
+        }
+
+        const betaDelta = normalizeAngleDelta(event.beta, orientationBaseline.beta);
+        const gammaDelta = normalizeAngleDelta(event.gamma, orientationBaseline.gamma);
+        let horizontalTilt = gammaDelta;
+        let verticalTilt = betaDelta;
+        const normalizedScreenAngle = ((screenAngle % 360) + 360) % 360;
+
+        if (normalizedScreenAngle === 90) {
+          horizontalTilt = betaDelta;
+          verticalTilt = -gammaDelta;
+        } else if (normalizedScreenAngle === 180) {
+          horizontalTilt = -gammaDelta;
+          verticalTilt = -betaDelta;
+        } else if (normalizedScreenAngle === 270) {
+          horizontalTilt = -betaDelta;
+          verticalTilt = gammaDelta;
+        }
+
+        orientationPose = {
+          rotationX: gsap.utils.clamp(-15, 15, -verticalTilt * 0.7),
+          rotationY: gsap.utils.clamp(-15, 15, horizontalTilt * 0.7)
+        };
+
+        if (!pointerActive) applyOrientationPose();
+      };
+
+      container.addEventListener("pointerdown", pointerDownHandler);
       container.addEventListener("pointermove", this.pointerMoveHandler);
       container.addEventListener("pointerleave", this.pointerLeaveHandler);
+      container.addEventListener("pointerup", this.pointerLeaveHandler);
+      container.addEventListener("pointercancel", this.pointerLeaveHandler);
+      window.addEventListener("deviceorientation", orientationHandler);
 
       return () => {
+        container.removeEventListener("pointerdown", pointerDownHandler);
         container.removeEventListener("pointermove", this.pointerMoveHandler);
         container.removeEventListener("pointerleave", this.pointerLeaveHandler);
+        container.removeEventListener("pointerup", this.pointerLeaveHandler);
+        container.removeEventListener("pointercancel", this.pointerLeaveHandler);
+        window.removeEventListener("deviceorientation", orientationHandler);
       };
     });
 
@@ -152,8 +238,41 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
     if (this.enterFallbackTimer) clearTimeout(this.enterFallbackTimer);
   }
 
-  enterApp() {
+  async enterApp() {
     if (this.isEntering) return;
+
+    const keepSplashOpen = await this.requestOrientationPermissionIfNeeded();
+    if (keepSplashOpen || this.isEntering) return;
+
+    this.startEnterAnimation();
+  }
+
+  private async requestOrientationPermissionIfNeeded(): Promise<boolean> {
+    if (this.orientationPermissionState === 'pending') return true;
+    if (this.orientationPermissionState !== 'unknown') return false;
+
+    const orientationEvent = window.DeviceOrientationEvent as DeviceOrientationEventConstructorWithPermission | undefined;
+    const requiresPermission = navigator.maxTouchPoints > 0
+      && typeof orientationEvent?.requestPermission === 'function';
+
+    if (!requiresPermission) {
+      this.orientationPermissionState = 'unavailable';
+      return false;
+    }
+
+    this.orientationPermissionState = 'pending';
+
+    try {
+      const permission = await orientationEvent.requestPermission!();
+      this.orientationPermissionState = permission;
+      return permission === 'granted';
+    } catch {
+      this.orientationPermissionState = 'denied';
+      return false;
+    }
+  }
+
+  private startEnterAnimation() {
     this.isEntering = true;
     this.enterFallbackTimer = setTimeout(() => this.completeEnter(), 900);
 

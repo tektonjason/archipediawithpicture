@@ -175,9 +175,11 @@ function checkResources() {
 }
 
 function checkReadings() {
-  const readings = exportedConst(files.readings, 'SEED_READINGS');
+  const readings = exportedConst(files.readings, 'RAW_READINGS');
   const missingAuthor = readings.filter(item => !item?.author?.trim());
-  const journals = readings.filter(item => Boolean(item?.journalLevel));
+  const journals = readings.filter(item => Boolean(item?.journalLevel) || item?.tags?.includes('期刊'));
+  const missingCitationSource = readings.filter(item => !item?.publisher?.trim());
+  const source = readSource(files.readings);
   const expectedImages = readings.map((item, index) => item?.imageUrl ?? `/images/book/s${index + 1}.webp`);
   const missingImages = expectedImages.filter(imageUrl => {
     const filePath = path.join(root, 'public', imageUrl.replace(/^\//, ''));
@@ -192,7 +194,20 @@ function checkReadings() {
     report.warnings.push(`SEED_READINGS has ${missingImages.length} missing cover images`);
   }
 
+  if (readings.length !== 79) {
+    report.errors.push(`RAW_READINGS has ${readings.length} entries; expected 79`);
+  }
+
+  if (missingCitationSource.length) {
+    report.errors.push(`RAW_READINGS has ${missingCitationSource.length} entries without a publisher for citation export`);
+  }
+
+  if (!source.includes('citation: {') || !source.includes('verifiedBy:')) {
+    report.errors.push('SEED_READINGS citation metadata generator is missing');
+  }
+
   report.notes.push(`SEED_READINGS: ${readings.length} readings (${journals.length} journals, ${readings.length - journals.length} books)`);
+  report.notes.push(`Reading citations: ${readings.length} entries can generate GB/T 7714 metadata`);
   summarizeCounts('Reading tags', countBy(readings.flatMap(item => item?.tags ?? []), tag => tag));
 }
 

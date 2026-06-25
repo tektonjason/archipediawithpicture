@@ -1,13 +1,20 @@
 import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementRef, effect, OnDestroy, QueryList, ViewChildren } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../services/data.service';
+import { DataService, Entry } from '../../services/data.service';
 import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
 import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/Flip';
+import {
+  buildSearchIndex,
+  createSearchSnippet,
+  HighlightSegment,
+  matchesSearch,
+  splitHighlight
+} from './encyclopedia-tools';
 
 gsap.registerPlugin(Flip);
 
@@ -123,6 +130,7 @@ gsap.registerPlugin(Flip);
           @for (entry of filteredEntries(); track entry.id; let i = $index) {
             <a 
               [routerLink]="['/entry', entry.id]" 
+              [queryParams]="searchQuery() ? { q: searchQuery() } : null"
               (click)="saveState(scrollContainer.scrollTop)" 
               class="group ui-media-card animate-fade-in-up entry-card" appGsapCardHover
               [class.flex]="viewMode() === 'list'"
@@ -138,7 +146,7 @@ gsap.registerPlugin(Flip);
               <!-- Image Section -->
               <div class="overflow-hidden relative bg-gray-800 entry-image" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
                 @if (entry.imageUrl) {
-                   <img [src]="entry.imageUrl" class="w-full h-full object-cover" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" [alt]="entry.term" data-flip-id="image-{{entry.id}}">
+                   <img [src]="entry.imageUrl" class="w-full h-full object-cover" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" decoding="async" [alt]="entry.term" data-flip-id="image-{{entry.id}}">
                 } @else {
                    <!-- Fallback Pattern -->
                    <div class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative" data-flip-id="image-{{entry.id}}">
@@ -154,16 +162,26 @@ gsap.registerPlugin(Flip);
               <!-- Content Section -->
               <div class="flex flex-col flex-1 min-w-0 entry-content" [class.p-4]="viewMode() === 'grid'" [class.p-2]="viewMode() === 'list'">
                 <div class="flex justify-between items-start gap-2 mb-1 shrink-0">
-                  <h3 class="font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-1" [class.text-lg]="viewMode() === 'grid'" [class.text-base]="viewMode() === 'list'">{{ entry.term }}</h3>
+                  <h3 class="font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-1" [class.text-lg]="viewMode() === 'grid'" [class.text-base]="viewMode() === 'list'">
+                    @for (segment of highlightSegments(entry.term); track $index) {
+                      <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                    }
+                  </h3>
                   @if (entry.details?.includes('19')) {
                     <span class="text-xs font-mono text-gray-500 shrink-0 bg-white/5 px-1.5 py-0.5 rounded">{{ extractYear(entry.details) }}</span>
                   }
                 </div>
                 
-                <p class="text-xs text-gray-500 italic truncate shrink-0" [class.mb-3]="viewMode() === 'grid'" [class.mb-1]="viewMode() === 'list'">{{ entry.termEn }}</p>
+                <p class="text-xs text-gray-500 italic truncate shrink-0" [class.mb-3]="viewMode() === 'grid'" [class.mb-1]="viewMode() === 'list'">
+                  @for (segment of highlightSegments(entry.termEn); track $index) {
+                    <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                  }
+                </p>
                 
                 <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-1 leading-relaxed" [class.hidden]="viewMode() === 'list'">
-                  {{ entry.definition }}
+                  @for (segment of highlightSegments(searchSnippet(entry)); track $index) {
+                    <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                  }
                 </p>
                 
                 <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5" [class.border-t-0]="viewMode() === 'list'" [class.pt-0]="viewMode() === 'list'">
@@ -284,6 +302,12 @@ gsap.registerPlugin(Flip);
     .entry-content {
       transition: opacity 300ms ease;
     }
+    .search-hit {
+      color: #dbeafe;
+      background: rgba(59, 130, 246, 0.28);
+      border-radius: 2px;
+      padding: 0 0.08em;
+    }
     .no-transition {
       transition-duration: 0ms !important;
     }
@@ -306,7 +330,9 @@ gsap.registerPlugin(Flip);
 export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
   router: Router = inject(Router);
+  route: ActivatedRoute = inject(ActivatedRoute);
   searchQuery = signal('');
+  debouncedQuery = signal('');
   selectedCategory = signal(this.dataService.encyclopediaSelectedCategory());
   viewMode = this.dataService.encyclopediaViewMode;
   displayLimit = this.dataService.encyclopediaDisplayLimit;
@@ -320,6 +346,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   private charIndex = 0;
   private isDeleting = false;
   private timer: any;
+  private queryUpdateTimer: ReturnType<typeof setTimeout> | null = null;
   private scrollFrame = 0;
   private lastContentScrollTop = 0;
   private lastContentTouchY = 0;
@@ -340,6 +367,15 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   ];
 
   constructor() {
+    this.route.queryParamMap.subscribe(params => {
+      const query = params.get('q') ?? '';
+      if (query !== this.searchQuery()) {
+        this.searchQuery.set(query);
+        this.debouncedQuery.set(query);
+        this.displayLimit.set(50);
+      }
+    });
+
     effect(() => {
       this.dataService.encyclopediaSelectedCategory.set(this.selectedCategory());
     });
@@ -347,6 +383,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.timer) clearTimeout(this.timer);
+    if (this.queryUpdateTimer) clearTimeout(this.queryUpdateTimer);
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);
     gsap.killTweensOf('.entry-card');
   }
@@ -545,6 +582,16 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     this.searchQuery.set(query);
     this.displayLimit.set(50);
     this.expandEncyclopediaChrome();
+    if (this.queryUpdateTimer) clearTimeout(this.queryUpdateTimer);
+    this.queryUpdateTimer = setTimeout(() => {
+      this.debouncedQuery.set(query);
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { q: query.trim() || null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }, 140);
     if (this.scrollContainer?.nativeElement) {
       this.scrollContainer.nativeElement.scrollTop = 0;
       this.lastContentScrollTop = 0;
@@ -564,43 +611,26 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     });
   });
 
+  private searchIndex = computed(() => buildSearchIndex(this.dataService.entries()));
+
   private _allFilteredEntries = computed(() => {
-    const rawQuery = this.searchQuery().trim().toLowerCase();
-    const hasQuery = !!rawQuery;
-    
-    // “栱”/“拱” 互通：为当前查询构造同义变体
-    const queryVariants = new Set<string>();
-    if (hasQuery) {
-      queryVariants.add(rawQuery);
-      if (rawQuery.includes('栱')) {
-        queryVariants.add(rawQuery.replace(/栱/g, '拱'));
-      }
-      if (rawQuery.includes('拱')) {
-        queryVariants.add(rawQuery.replace(/拱/g, '栱'));
-      }
-    }
-
+    const rawQuery = this.debouncedQuery().trim();
     const cat = this.selectedCategory();
-    let list = this.dataService.entries().filter(e => {
-      const matchCat = cat === 'all' || e.category === cat;
-      
-      let matchSearch = true;
-      if (hasQuery) {
-        const fields = [
-          e.term || '',
-          e.termEn || '',
-          e.definition || '',
-          e.details || ''
-        ].map(v => v.toLowerCase());
+    return this.searchIndex()
+      .filter(document => {
+        const matchCat = cat === 'all' || document.entry.category === cat;
+        if (!matchCat) return false;
+        if (!rawQuery) return true;
+        if (matchesSearch(document, rawQuery)) return true;
 
-        matchSearch = Array.from(queryVariants).some(qv =>
-          fields.some(f => f.includes(qv))
-        );
-      }
-
-      return matchCat && matchSearch;
-    });
-    return list; 
+        const alternate = rawQuery.includes('栱')
+          ? rawQuery.replace(/栱/g, '拱')
+          : rawQuery.includes('拱')
+            ? rawQuery.replace(/拱/g, '栱')
+            : '';
+        return Boolean(alternate && matchesSearch(document, alternate));
+      })
+      .map(document => document.entry);
   });
 
   filteredEntries = computed(() => {
@@ -619,6 +649,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       this.expandEncyclopediaChrome();
       this.selectedCategory.set(category);
       this.searchQuery.set('');
+      this.debouncedQuery.set('');
+      this.clearSearchQueryParam();
       this.displayLimit.set(50);
       this.dataService.encyclopediaScrollPosition.set(0);
       if (this.scrollContainer?.nativeElement) {
@@ -641,6 +673,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
         this.expandEncyclopediaChrome();
         this.selectedCategory.set(category);
         this.searchQuery.set('');
+        this.debouncedQuery.set('');
+        this.clearSearchQueryParam();
         this.displayLimit.set(50);
         this.dataService.encyclopediaScrollPosition.set(0);
         if (this.scrollContainer?.nativeElement) {
@@ -688,5 +722,23 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   extractYear(details: string): string {
     const match = details.match(/\b(18|19|20)\d{2}\b/);
     return match ? match[0] : '';
+  }
+
+  highlightSegments(text: string | undefined): HighlightSegment[] {
+    return splitHighlight(text, this.debouncedQuery());
+  }
+
+  searchSnippet(entry: Entry): string {
+    return createSearchSnippet(entry, this.debouncedQuery());
+  }
+
+  private clearSearchQueryParam() {
+    if (this.queryUpdateTimer) clearTimeout(this.queryUpdateTimer);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 }

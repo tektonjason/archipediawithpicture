@@ -1,6 +1,8 @@
 import type { Reading } from '../services/data.service';
 
-export const SEED_READINGS: Reading[] = [
+type SeedReading = Omit<Reading, 'citation'>;
+
+const RAW_READINGS: SeedReading[] = [
       { title: '建筑: 形式、空间和秩序', author: '程大锦', publisher: '天津大学出版社', description: '建筑设计基础语汇的经典图解入门书。', tags: ['建筑设计'], journalLevel: null, identifier: '9787561860793', detailContent: '程大锦所著的《建筑：形式、空间和秩序》是广受推崇的建筑设计基础读物，通过丰富的案例和图示阐述建筑构成的原则与规律。书中从构成要素出发，讲解形式、空间、秩序如何结合应用于设计，对建筑学生理解设计语言有重要帮助。' },
       { title: '美国大城市的死与生', author: '[加]简·雅各布斯', publisher: '译林出版社', description: '批判当下城市规划理论的经典著作。', tags: ['城市规划', '建筑理论'], journalLevel: null, identifier: '9787544740586', detailContent: '简·雅各布斯的《美国大城市的死与生》是一部经典城市规划批评著作，反对20世纪中期的规划思潮。她通过对纽约街区的实地观察，阐述了“街区综合功能”和“步行环境”对城市活力的重要性。书中主张混合用途、街道活跃与社区参与，揭示了现代主义规划的弊端，对后世城市设计产生深远影响。' },
       { title: '明日的田园城市', author: '[英]埃比尼泽·霍华德', publisher: '商务印书馆', description: '具有世界影响力的田园城市经典。', tags: ['城市规划', '建筑理论'], journalLevel: null, identifier: '9787100072250', detailContent: '霍华德的《明日的田园城市》倡导“田园城市”理念，即在城市与乡村之间建立自给自足的小城市，兼具自然环境和现代设施。该书是1898年出版的经典作品，首次系统提出花园城市模式，通过环形绿带分隔城市与工业区，成为全球城市规划史上的重要里程碑。' },
@@ -83,3 +85,37 @@ export const SEED_READINGS: Reading[] = [
       // 您可以在此处添加新书籍/读物，格式如下：
       // { title: '书名', author: '作者', publisher: '出版社', description: '简短描述', tags: ['标签1', '标签2'], journalLevel: null, identifier: 'ISBN', detailContent: '详细介绍' },
     ];
+
+function splitCreators(author: string): string[] {
+  const normalized = author
+    .replace(/\[[^\]]+\]/g, '')
+    .replace(/[著编译主编]/g, '')
+    .trim();
+
+  if (!normalized) return ['不详'];
+  return normalized.split(/[、，,;；/]/).map(value => value.trim()).filter(Boolean);
+}
+
+function isJournalReading(reading: SeedReading): boolean {
+  return reading.tags.includes('期刊') || Boolean(reading.journalLevel);
+}
+
+export const SEED_READINGS: Reading[] = RAW_READINGS.map((reading, index) => {
+  const journal = isJournalReading(reading);
+  return {
+    ...reading,
+    id: reading.id ?? `r${index + 1}`,
+    citation: {
+      type: journal ? 'journal' : 'book',
+      creators: splitCreators(reading.author),
+      publicationPlace: '不详',
+      publisher: reading.publisher || '不详',
+      publicationYear: reading.year?.trim() || '不详',
+      identifier: reading.identifier ?? undefined,
+      url: reading.url,
+      verifiedBy: reading.identifier
+        ? `${journal ? 'ISSN/CN' : 'ISBN'} ${reading.identifier}`
+        : '核验来源未收录'
+    }
+  };
+});
