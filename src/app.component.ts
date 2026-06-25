@@ -33,6 +33,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
 
   showSplash = signal(true);
+  showUpdateNotice = signal(false);
+  readonly updateNoticeDate = '2026.06.26';
+  readonly updateNoticeItems = [
+    '建筑读物新增主题书单、书籍/期刊切换与更顺手的详情浏览。',
+    '支持 GB/T 7714-2015 文献引用，一键复制或下载引用文本。',
+    '百科和读物可生成分享卡片，方便保存与转发。',
+    '百科详情新增内容纠错反馈，发现问题可以直接提交说明。'
+  ];
+  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_06_26';
 
   // Q&A Carousel Data
   qaQuestions = [
@@ -286,6 +295,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   handleEscape() {
+    if (this.showUpdateNotice()) {
+      this.dismissUpdateNotice();
+      return;
+    }
+
     if (this.dataService.showExternalModal()) {
       this.dataService.closeExternalModal();
       return;
@@ -308,5 +322,32 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onSplashEnter() {
     this.showSplash.set(false);
+    this.scheduleUpdateNotice();
+  }
+
+  dismissUpdateNotice() {
+    this.showUpdateNotice.set(false);
+    if (this.canUseLocalStorage()) {
+      localStorage.setItem(this.updateNoticeStorageKey, 'true');
+    }
+  }
+
+  private scheduleUpdateNotice() {
+    if (!this.shouldShowUpdateNotice()) return;
+    const delay = this.prefersReducedMotion ? 80 : 520;
+    window.setTimeout(() => {
+      if (this.shouldShowUpdateNotice()) {
+        this.showUpdateNotice.set(true);
+      }
+    }, delay);
+  }
+
+  private shouldShowUpdateNotice(): boolean {
+    if (!this.canUseLocalStorage()) return false;
+    return localStorage.getItem(this.updateNoticeStorageKey) !== 'true';
+  }
+
+  private canUseLocalStorage(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 }

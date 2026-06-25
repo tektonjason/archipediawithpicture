@@ -153,6 +153,56 @@
   </div>
 
   <!-- Modals (Login/Logout) -->
+  @if (showUpdateNotice()) {
+    <div class="fixed inset-0 z-[65] flex items-end justify-center p-4 sm:items-center">
+      <div class="absolute inset-0 bg-black/35 backdrop-blur-[2px]" (click)="dismissUpdateNotice()"></div>
+      <section
+        class="relative w-full max-w-md overflow-hidden rounded-card border border-white/10 bg-[#17181c]/80 shadow-panel backdrop-blur-xl animate-modal-pop-in"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="update-notice-title"
+      >
+        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
+        <button
+          (click)="dismissUpdateNotice()"
+          class="absolute right-3 top-3 ui-icon-btn h-9 w-9 bg-white/5"
+          aria-label="关闭更新提示"
+          title="关闭"
+        >
+          <svg lucideX class="h-4 w-4" [strokeWidth]="2"></svg>
+        </button>
+
+        <div class="p-5 pr-14 sm:p-6 sm:pr-16">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-control border border-blue-400/20 bg-blue-500/10 text-blue-300">
+              <svg lucideCheckCircle class="h-5 w-5" [strokeWidth]="2"></svg>
+            </div>
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Update · {{ updateNoticeDate }}</p>
+              <h2 id="update-notice-title" class="text-lg font-bold text-white">近期更新</h2>
+            </div>
+          </div>
+
+          <ul class="space-y-2.5 text-sm leading-relaxed text-gray-300">
+            @for (item of updateNoticeItems; track item) {
+              <li class="flex gap-2.5">
+                <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-300/80"></span>
+                <span>{{ item }}</span>
+              </li>
+            }
+          </ul>
+
+          <div class="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+            <span class="text-xs text-gray-500">此提示仅显示一次</span>
+            <button (click)="dismissUpdateNotice()" class="ui-btn-primary px-4 py-2 text-sm">
+              知道了
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+
   @if (dataService.showLoginModal()) {
     <div class="ui-modal-shell">
       <div class="ui-modal-backdrop" (click)="dataService.closeLoginModal()"></div>
