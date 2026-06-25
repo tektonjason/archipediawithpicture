@@ -284,7 +284,7 @@ interface ReadingTheme {
           
           <div 
             #readingModalPanel
-            class="reading-modal-panel ui-modal-panel w-full max-w-4xl max-h-[85vh] flex overflow-hidden"
+            class="reading-modal-panel ui-modal-panel w-full max-w-4xl flex overflow-hidden"
             [class.pointer-events-none]="isClosing()"
           >
             <button (click)="closeModal()" class="absolute top-4 right-4 z-20 ui-icon-btn bg-black/50 active:scale-90">
@@ -292,7 +292,7 @@ interface ReadingTheme {
             </button>
 
             <!-- Layout: Image Left, Content Right -->
-            <div class="flex flex-col md:flex-row w-full h-full">
+            <div class="reading-modal-layout flex flex-col md:flex-row w-full h-full min-h-0">
                
                <!-- Left: Cover Image Area -->
                <div class="hidden md:flex md:w-2/5 bg-app items-center justify-center p-6 md:p-8 relative overflow-hidden shrink-0">
@@ -314,8 +314,8 @@ interface ReadingTheme {
                </div>
 
                <!-- Right: Content -->
-               <div class="flex-1 flex flex-col overflow-hidden">
-                  <div class="flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col">
+               <div class="reading-modal-content flex-1 flex flex-col overflow-hidden min-h-0">
+                  <div class="reading-modal-scroll flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col min-h-0">
                   <h2 class="reading-modal-stagger text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ item.title }}</h2>
                   <p class="reading-modal-stagger text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
                   
@@ -330,7 +330,7 @@ interface ReadingTheme {
 
                     <div class="mt-6">
                       <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细介绍</h4>
-                      <div class="max-h-[25vh] overflow-y-auto custom-scrollbar pr-2">
+                      <div class="reading-detail-scrollbox overflow-y-auto custom-scrollbar pr-2">
                         <p class="text-sm text-gray-300 leading-relaxed font-serif whitespace-pre-wrap">{{ item.detailContent }}</p>
                       </div>
                     </div>
@@ -372,65 +372,118 @@ interface ReadingTheme {
                   </div>
                   </div>
 
-                  <div #readingModalActions class="px-5 pb-8 pt-4 md:p-8 md:pt-6 bg-surface border-t border-line z-10 shrink-0 flex flex-wrap gap-3">
-                    <a (click)="dataService.openExternalModal(getSearchUrl(item))" class="ui-btn-primary cursor-pointer flex-1 active:scale-[0.98]">
+                  <div #readingModalActions class="reading-modal-actions bg-surface border-t border-line z-10 shrink-0">
+                    <a
+                      (click)="dataService.openExternalModal(getSearchUrl(item))"
+                      class="reading-action-primary ui-btn-primary cursor-pointer active:scale-[0.98]"
+                      title="在线搜索"
+                      appGsapTooltip="在线搜索"
+                    >
                        <svg lucideSearch class="w-5 h-5" [strokeWidth]="2"></svg>
                        <span>在线搜索</span>
                     </a>
-                    <button (click)="copyCitation(item)" class="ui-btn-secondary px-3" title="复制引用">
+                    <button
+                      (click)="copyCitation(item)"
+                      class="reading-action-icon ui-btn-secondary"
+                      title="复制引用"
+                      aria-label="复制引用"
+                      appGsapTooltip="复制 GB/T 引用"
+                    >
                       <svg lucideCopy class="w-5 h-5" [strokeWidth]="2"></svg>
                     </button>
-                    <button (click)="downloadCitation(item)" class="ui-btn-secondary px-3" title="下载引用">
+                    <button
+                      (click)="downloadCitation(item)"
+                      class="reading-action-icon ui-btn-secondary"
+                      title="下载引用"
+                      aria-label="下载引用"
+                      appGsapTooltip="下载 GB/T 引用"
+                    >
                       <svg lucideDownload class="w-5 h-5" [strokeWidth]="2"></svg>
                     </button>
-                    <button (click)="shareReadingCard(item)" class="ui-btn-secondary px-3" [disabled]="isGeneratingCard()" title="生成分享卡片">
-                      <svg lucideImage class="w-5 h-5" [strokeWidth]="2"></svg>
-                    </button>
-                    
-                    <div class="relative">
-                      <button 
-                        (click)="handleShare(item)" 
-                        class="h-full ui-btn-secondary px-4 active:scale-95"
-                        title="分享并搜索"
+
+                    <div class="reading-share-wrap relative">
+                      <button
+                        (click)="handleShare()"
+                        class="reading-action-icon ui-btn-secondary active:scale-95"
+                        title="分享"
+                        aria-label="分享"
+                        appGsapTooltip="打开分享菜单"
                       >
                          <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
                       </button>
 
                       <!-- Share Menu -->
                       @if (showShareMenu()) {
-                        <div #readingShareMenu class="reading-share-menu absolute bottom-full right-0 mb-3 w-40 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
-                           @if (shareMenuCopied()) {
-                             <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
-                               已复制信息
-                             </div>
-                           }
-                           
-                           <div class="p-1.5 flex flex-col gap-1">
-                             <a [href]="getPlatformUrl('wechat', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
-                               <div class="w-6 h-6 rounded bg-[#07c160] flex items-center justify-center shrink-0">
-                                 <span class="text-[10px] font-bold text-white">微</span>
+                        <div #readingShareMenu class="reading-share-menu absolute bottom-full right-0 mb-3 w-52 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
+                           @if (shareMenuNotice()) {
+                              <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
+                                {{ shareMenuNotice() }}
+                              </div>
+                            }
+
+                            <div class="p-1.5 flex flex-col gap-1">
+                              <button
+                                type="button"
+                                (click)="shareReadingCard(item)"
+                                [disabled]="isGeneratingCard()"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                              >
+                                <div class="w-6 h-6 rounded bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+                                  <svg lucideImage class="w-4 h-4 text-gray-200" [strokeWidth]="2"></svg>
+                                </div>
+                                {{ isGeneratingCard() ? '正在生成...' : '生成分享图像' }}
+                              </button>
+                              <div class="h-px bg-white/10 my-1"></div>
+                              <a
+                                [href]="getPlatformUrl('wechat', item)"
+                                target="_blank"
+                                (click)="copyShareMenuText(item, 'wechat')"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
+                              >
+                                <div class="w-6 h-6 rounded bg-[#07c160] flex items-center justify-center shrink-0">
+                                  <span class="text-[10px] font-bold text-white">微</span>
                                </div>
                                微信
                              </a>
-                             <a [href]="getPlatformUrl('taobao', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
-                               <div class="w-6 h-6 rounded bg-[#ff5000] flex items-center justify-center shrink-0">
-                                 <span class="text-[10px] font-bold text-white">淘</span>
-                               </div>
-                               淘宝
-                             </a>
-                             <a [href]="getPlatformUrl('jd', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
-                               <div class="w-6 h-6 rounded bg-[#e1251b] flex items-center justify-center shrink-0">
-                                 <span class="text-[10px] font-bold text-white">JD</span>
-                               </div>
-                               京东
-                             </a>
-                             <a [href]="getPlatformUrl('duozhuayu', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
-                               <div class="w-6 h-6 rounded bg-[#499d75] flex items-center justify-center shrink-0">
-                                 <svg lucideBookOpen class="w-4 h-4 text-white" [strokeWidth]="2"></svg>
-                               </div>
-                               多抓鱼
-                             </a>
-                             <a [href]="getPlatformUrl('zhuanzhuan', item)" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group">
+                              <a
+                                [href]="getPlatformUrl('taobao', item)"
+                                target="_blank"
+                                (click)="copyShareMenuText(item, 'shopping')"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
+                              >
+                                <div class="w-6 h-6 rounded bg-[#ff5000] flex items-center justify-center shrink-0">
+                                  <span class="text-[10px] font-bold text-white">淘</span>
+                                </div>
+                                淘宝
+                              </a>
+                              <a
+                                [href]="getPlatformUrl('jd', item)"
+                                target="_blank"
+                                (click)="copyShareMenuText(item, 'shopping')"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
+                              >
+                                <div class="w-6 h-6 rounded bg-[#e1251b] flex items-center justify-center shrink-0">
+                                  <span class="text-[10px] font-bold text-white">JD</span>
+                                </div>
+                                京东
+                              </a>
+                              <a
+                                [href]="getPlatformUrl('duozhuayu', item)"
+                                target="_blank"
+                                (click)="copyShareMenuText(item, 'shopping')"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
+                              >
+                                <div class="w-6 h-6 rounded bg-[#499d75] flex items-center justify-center shrink-0">
+                                  <svg lucideBookOpen class="w-4 h-4 text-white" [strokeWidth]="2"></svg>
+                                </div>
+                                多抓鱼
+                              </a>
+                              <a
+                                [href]="getPlatformUrl('zhuanzhuan', item)"
+                                target="_blank"
+                                (click)="copyShareMenuText(item, 'shopping')"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
+                              >
                                <div class="w-6 h-6 rounded bg-[#ff3d3d] flex items-center justify-center shrink-0">
                                  <span class="text-[10px] font-bold text-white">转</span>
                                </div>
@@ -631,6 +684,43 @@ interface ReadingTheme {
     }
     .reading-modal-panel {
       transform-origin: center center;
+      height: min(85vh, 860px);
+      max-height: calc(100svh - 2rem);
+    }
+    .reading-modal-layout,
+    .reading-modal-content {
+      min-height: 0;
+    }
+    .reading-modal-scroll {
+      min-height: 0;
+      overscroll-behavior: contain;
+    }
+    .reading-detail-scrollbox {
+      max-height: clamp(8rem, 18svh, 14rem);
+      scrollbar-gutter: stable;
+    }
+    .reading-modal-actions {
+      display: grid;
+      grid-template-columns: minmax(12rem, 1fr) repeat(3, 3rem);
+      gap: 0.75rem;
+      align-items: stretch;
+      padding: 1.25rem 2rem 1.5rem;
+    }
+    .reading-action-primary,
+    .reading-action-icon {
+      min-height: 3rem;
+    }
+    .reading-action-primary {
+      justify-content: center;
+      min-width: 0;
+    }
+    .reading-action-primary span {
+      white-space: nowrap;
+    }
+    .reading-action-icon {
+      width: 3rem;
+      padding-inline: 0;
+      justify-content: center;
     }
     .reading-cover-preview {
       transform-origin: center center;
@@ -642,6 +732,54 @@ interface ReadingTheme {
     }
     .reading-share-menu {
       transform-origin: bottom right;
+    }
+    @media (max-height: 780px) and (min-width: 768px) {
+      .reading-detail-scrollbox {
+        max-height: clamp(6.5rem, 15svh, 10rem);
+      }
+      .reading-modal-scroll {
+        padding-top: 1.5rem;
+        padding-bottom: 1.25rem;
+      }
+      .reading-modal-actions {
+        padding-top: 1rem;
+        padding-bottom: 1.25rem;
+      }
+    }
+    @media (max-width: 767px) {
+      .reading-modal-panel {
+        width: calc(100vw - 2rem);
+        height: min(82svh, calc(100svh - 2rem));
+        max-height: calc(100svh - 2rem);
+      }
+      .reading-modal-scroll {
+        padding: 1.25rem;
+        padding-bottom: 1rem;
+      }
+      .reading-detail-scrollbox {
+        max-height: clamp(7.5rem, 22svh, 13rem);
+      }
+      .reading-modal-actions {
+        grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(3.25rem, 0.55fr));
+        gap: 0.75rem;
+        padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+      }
+      .reading-action-primary,
+      .reading-action-icon {
+        min-height: 3.25rem;
+      }
+      .reading-action-primary {
+        padding-inline: 0.75rem;
+      }
+      .reading-action-icon {
+        width: 100%;
+      }
+      .reading-share-wrap {
+        min-width: 0;
+      }
+      .reading-share-menu {
+        width: min(13rem, calc(100vw - 3rem));
+      }
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(12px) scale(0.985); }
@@ -969,7 +1107,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.shareMenuEnterFrame = 0;
     }
     this.showShareMenu.set(false);
-    this.shareMenuCopied.set(false);
+    this.shareMenuNotice.set('');
     this.isClosing.set(false);
     this.selectedReading.set(item);
     if (updateRoute && item.id) {
@@ -1155,6 +1293,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   handleEscape() {
     if (this.showShareMenu()) {
       this.showShareMenu.set(false);
+      this.shareMenuNotice.set('');
       return;
     }
 
@@ -1552,41 +1691,74 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   // --- Share & Jump Logic ---
   showShareMenu = signal(false);
-  shareMenuCopied = signal(false);
+  shareMenuNotice = signal('');
 
-  handleShare(item: Reading) {
-    // 1. Determine type and format text
-    const isJournal = this.isJournal(item);
-    let text = '';
-    
-    if (isJournal) {
-      text = `${item.title} 杂志`;
-    } else {
-      // Book: Title + Author + ISBN
-      const parts = [item.title];
-      if (item.author) parts.push(item.author);
-      if (item.identifier) parts.push(item.identifier);
-      text = parts.join(' ');
-    }
-
-    // 2. Toggle menu immediately so the click always gives visible feedback
+  handleShare() {
     const shouldOpenMenu = !this.showShareMenu();
     this.showShareMenu.set(shouldOpenMenu);
     if (shouldOpenMenu) {
+      this.shareMenuNotice.set('');
       this.scheduleShareMenuEnter();
     } else {
       this.shareMenuTl?.kill();
     }
+  }
 
-    // 3. Copy to clipboard
+  copyShareMenuText(item: Reading, target: 'wechat' | 'shopping') {
+    const text = target === 'wechat'
+      ? this.getReadingShareText(item)
+      : this.getReadingShoppingSearchText(item);
+    const notice = target === 'wechat' ? '已复制分享文案' : '已复制搜索词';
+
     navigator.clipboard.writeText(text).then(() => {
-      this.shareMenuCopied.set(true);
-      if (this.shareResetTimer) clearTimeout(this.shareResetTimer);
-      this.shareResetTimer = setTimeout(() => {
-        this.shareResetTimer = null;
-        this.shareMenuCopied.set(false);
-      }, 2000);
+      this.setShareMenuNotice(notice);
+    }).catch(() => {
+      this.dataService.displayToast('复制失败，请稍后重试');
     });
+  }
+
+  private setShareMenuNotice(message: string) {
+    this.shareMenuNotice.set(message);
+    if (this.shareResetTimer) clearTimeout(this.shareResetTimer);
+    this.shareResetTimer = setTimeout(() => {
+      this.shareResetTimer = null;
+      this.shareMenuNotice.set('');
+    }, 2000);
+  }
+
+  private getReadingShareText(item: Reading): string {
+    const isJournal = this.isJournal(item);
+    const typeLabel = isJournal ? '这本期刊' : '这本书';
+    const idLabel = isJournal ? 'ISSN/CN' : 'ISBN';
+    const meta = [
+      item.author ? `作者：${item.author}` : '',
+      item.publisher ? `出版社：${item.publisher}` : '',
+      item.identifier ? `${idLabel}：${item.identifier}` : ''
+    ].filter(Boolean).join('，');
+    const description = this.truncateShareText(item.description, 72);
+    const lines = [
+      `我在 ARCHIPEDIA.top 发现了${typeLabel}：《${item.title}》。`,
+      meta,
+      description ? `简介：${description}` : '',
+      `打开查看：${this.getReadingShareUrl(item)}`
+    ].filter(Boolean);
+
+    return lines.join('\n');
+  }
+
+  private truncateShareText(text: string, maxLength: number): string {
+    const normalized = (text || '').replace(/\s+/g, ' ').trim();
+    if (normalized.length <= maxLength) return normalized;
+    return `${normalized.slice(0, maxLength - 1)}…`;
+  }
+
+  private getReadingShareUrl(item: Reading): string {
+    return `${window.location.origin}${window.location.pathname}#/readings?reading=${encodeURIComponent(item.id ?? '')}`;
+  }
+
+  private getReadingShoppingSearchText(item: Reading): string {
+    if (this.isJournal(item)) return item.title;
+    return [item.title, item.author].map(value => value?.trim()).filter(Boolean).join(' ');
   }
 
   citationText(item: Reading) {
@@ -1611,7 +1783,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (this.isGeneratingCard()) return;
     this.isGeneratingCard.set(true);
     try {
-      const url = `${window.location.origin}${window.location.pathname}#/readings?reading=${encodeURIComponent(item.id ?? '')}`;
+      const url = this.getReadingShareUrl(item);
       const blob = await this.shareCardService.generateReadingCard(item, url);
       const result = await this.shareCardService.shareOrDownload(blob, `archipedia-reading-${item.id ?? 'card'}.png`, item.title);
       if (result === 'downloaded') this.dataService.displayToast('分享卡片已下载');
@@ -1659,22 +1831,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   getPlatformUrl(platform: string, item: Reading): string {
-    const isJournal = this.isJournal(item);
-    let keyword = '';
-    
-    if (isJournal) {
-      keyword = `${item.title} 杂志`;
-    } else {
-      // For search, Title + Author is usually good enough. ISBN is very specific.
-      // User said "copy format" is Title+Author+ISBN.
-      // For search, maybe we use the same?
-      const parts = [item.title];
-      if (item.author) parts.push(item.author);
-      // ISBN might be too specific if the platform doesn't index it well, but usually they do.
-      if (item.identifier) parts.push(item.identifier);
-      keyword = parts.join(' ');
-    }
-    
+    const keyword = this.getReadingShoppingSearchText(item);
     const encoded = encodeURIComponent(keyword);
 
     switch (platform) {

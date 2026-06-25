@@ -53,11 +53,14 @@ export interface Reading {
 export interface ReadingCitation {
   type: 'book' | 'journal';
   creators: string[];
-  publicationPlace: string;
-  publisher: string;
-  publicationYear: string;
+  publicationPlace?: string;
+  publisher?: string;
+  publicationYear?: string;
+  containerTitle?: string;
   edition?: string;
   volumeIssue?: string;
+  pages?: string;
+  accessDate?: string;
   identifier?: string;
   url?: string;
   verifiedBy: string;

@@ -92,7 +92,7 @@ function splitCreators(author: string): string[] {
     .replace(/[著编译主编]/g, '')
     .trim();
 
-  if (!normalized) return ['不详'];
+  if (!normalized) return [];
   return normalized.split(/[、，,;；/]/).map(value => value.trim()).filter(Boolean);
 }
 
@@ -108,9 +108,9 @@ export const SEED_READINGS: Reading[] = RAW_READINGS.map((reading, index) => {
     citation: {
       type: journal ? 'journal' : 'book',
       creators: splitCreators(reading.author),
-      publicationPlace: '不详',
-      publisher: reading.publisher || '不详',
-      publicationYear: reading.year?.trim() || '不详',
+      publicationPlace: '',
+      publisher: journal ? '' : reading.publisher,
+      publicationYear: reading.year?.trim() || '',
       identifier: reading.identifier ?? undefined,
       url: reading.url,
       verifiedBy: reading.identifier
