@@ -411,7 +411,7 @@ export class EntryDetailComponent implements OnDestroy {
     const current = this.entry();
     return current
       ? inferEntryRelations(current, this.dataService.entries())
-      : { architects: [], periods: [], regions: [], styles: [] };
+      : { architects: [], periods: [], regions: [], styles: [], buildingTypes: [], materials: [], systems: [], concepts: [] };
   });
   relationGroups = computed(() => {
     const relations = this.relations();
@@ -419,7 +419,11 @@ export class EntryDetailComponent implements OnDestroy {
       { label: '建筑师', values: relations.architects },
       { label: '年代', values: relations.periods },
       { label: '地区', values: relations.regions },
-      { label: '风格', values: relations.styles }
+      { label: '风格', values: relations.styles },
+      { label: '类型', values: relations.buildingTypes },
+      { label: '材料', values: relations.materials },
+      { label: '构造', values: relations.systems },
+      { label: '理论', values: relations.concepts }
     ].filter(group => group.values.length);
   });
   relatedEntries = computed(() => {

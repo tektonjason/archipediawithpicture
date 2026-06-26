@@ -1,6 +1,6 @@
 
 import { Component, inject, signal, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataService, Entry } from '../../services/data.service';
 import { NgClass } from '@angular/common';
 import pinyin from 'pinyin';
@@ -22,7 +22,7 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
       <!-- Tab Header -->
       <div class="flex border-b border-white/10 shrink-0 px-6 md:px-8">
         <button 
-          (click)="activeTab.set('favorites')"
+          (click)="selectTab('favorites')"
           class="py-4 font-bold text-sm mr-8 border-b-2 transition-all"
           [class.border-blue-500]="activeTab() === 'favorites'"
           [class.text-white]="activeTab() === 'favorites'"
@@ -31,7 +31,7 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
           [class.hover:text-gray-300]="activeTab() !== 'favorites'"
         >我的收藏</button>
         <button 
-          (click)="activeTab.set('history')"
+          (click)="selectTab('history')"
           class="py-4 font-bold text-sm border-b-2 transition-all"
           [class.border-blue-500]="activeTab() === 'history'"
           [class.text-white]="activeTab() === 'history'"
@@ -68,8 +68,7 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
              </div>
            }
         } @else {
-           <div class="flex justify-between items-center mb-6">
-              <h2 class="font-bold text-lg text-gray-300">最近访问</h2>
+           <div class="flex justify-end items-center mb-6">
               <button (click)="dataService.clearHistory()" class="text-xs text-red-400 hover:text-red-300 font-medium px-3 py-1 rounded bg-red-500/10 hover:bg-red-500/20 transition-colors">清空历史</button>
            </div>
            @if (historyEntries().length === 0) {
@@ -119,6 +118,7 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 export class UserDashboardComponent {
   dataService = inject(DataService);
   route: ActivatedRoute = inject(ActivatedRoute);
+  private router = inject(Router);
   
   activeTab = signal<'favorites' | 'history'>('favorites');
 
@@ -126,6 +126,15 @@ export class UserDashboardComponent {
     this.route.queryParams.subscribe(p => {
       if (p['tab'] === 'history') this.activeTab.set('history');
       else this.activeTab.set('favorites');
+    });
+  }
+
+  selectTab(tab: 'favorites' | 'history') {
+    this.activeTab.set(tab);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge'
     });
   }
 

@@ -40,6 +40,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   showSplash = signal(true);
   showUpdateNotice = signal(false);
   readonly updateNoticeDate = '2026.06.26';
+  readonly lastUpdatedDate = '2026.06.26';
   readonly updateNoticeItems = [
     '建筑读物新增主题书单、书籍/期刊切换与更顺手的详情浏览。',
     '支持 GB/T 7714-2015 文献引用，一键复制或下载引用文本。',
@@ -84,6 +85,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private isFirstRun = true;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   canInstallApp = signal(false);
+  currentUrl = signal('');
   private handleVisibilityChange = () => {
     if (document.hidden) {
       this.stopCarousel();
@@ -140,10 +142,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       window.addEventListener('beforeinstallprompt', this.handleBeforeInstallPrompt);
       window.addEventListener('appinstalled', this.handleAppInstalled);
     }
+    this.currentUrl.set(this.router.url);
     this.routerEventsSub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe(event => {
         const path = event.urlAfterRedirects || event.url;
+        this.currentUrl.set(path);
         this.analytics.trackPageView(path, document.title, this.hasHandledInitialNavigation);
         this.hasHandledInitialNavigation = true;
       });
@@ -296,6 +300,17 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleCarouselClick() {
     this.router.navigate(['/essentials'], { queryParams: { openQna: 'true' } });
+  }
+
+  isUserTabActive(tab: 'favorites' | 'history'): boolean {
+    const url = this.currentUrl() || this.router.url;
+    const [path, queryString = ''] = url.split('?');
+    if (!path.startsWith('/user')) return false;
+
+    const activeTab = new URLSearchParams(queryString).get('tab') === 'history'
+      ? 'history'
+      : 'favorites';
+    return activeTab === tab;
   }
 
   toggleSidebarFooter() {

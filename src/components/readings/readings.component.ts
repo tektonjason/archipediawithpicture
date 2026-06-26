@@ -403,7 +403,7 @@ interface ReadingTheme {
 
                     <div class="reading-share-wrap relative">
                       <button
-                        (click)="handleShare()"
+                        (click)="handleShare($event)"
                         class="reading-action-icon ui-btn-secondary active:scale-95"
                         title="分享"
                         aria-label="分享"
@@ -414,7 +414,7 @@ interface ReadingTheme {
 
                       <!-- Share Menu -->
                       @if (showShareMenu()) {
-                        <div #readingShareMenu class="reading-share-menu absolute bottom-full right-0 mb-3 w-52 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
+                        <div #readingShareMenu (click)="$event.stopPropagation()" class="reading-share-menu absolute bottom-full right-0 mb-3 w-52 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
                            @if (shareMenuNotice()) {
                               <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
                                 {{ shareMenuNotice() }}
@@ -1101,13 +1101,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.modalEnterFrame = 0;
     }
     this.readingModalTl?.kill();
-    this.shareMenuTl?.kill();
-    if (this.shareMenuEnterFrame) {
-      cancelAnimationFrame(this.shareMenuEnterFrame);
-      this.shareMenuEnterFrame = 0;
-    }
-    this.showShareMenu.set(false);
-    this.shareMenuNotice.set('');
+    this.closeShareMenu();
     this.isClosing.set(false);
     this.selectedReading.set(item);
     if (updateRoute && item.id) {
@@ -1130,12 +1124,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
-    this.showShareMenu.set(false);
-    this.shareMenuTl?.kill();
-    if (this.shareMenuEnterFrame) {
-      cancelAnimationFrame(this.shareMenuEnterFrame);
-      this.shareMenuEnterFrame = 0;
-    }
+    this.closeShareMenu();
     if (this.modalCloseTimer) clearTimeout(this.modalCloseTimer);
     if (this.modalEnterFrame) {
       cancelAnimationFrame(this.modalEnterFrame);
@@ -1292,8 +1281,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   @HostListener('document:keydown.escape')
   handleEscape() {
     if (this.showShareMenu()) {
-      this.showShareMenu.set(false);
-      this.shareMenuNotice.set('');
+      this.closeShareMenu();
       return;
     }
 
@@ -1305,6 +1293,18 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (this.selectedReading()) {
       this.closeModal();
     }
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent) {
+    if (!this.showShareMenu()) return;
+
+    const target = event.target as Node | null;
+    const menu = this.readingShareMenu?.nativeElement;
+    const shareWrap = menu?.closest('.reading-share-wrap');
+
+    if (target && shareWrap?.contains(target)) return;
+    this.closeShareMenu();
   }
 
   getJournalClass(level: string) {
@@ -1693,14 +1693,25 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   showShareMenu = signal(false);
   shareMenuNotice = signal('');
 
-  handleShare() {
+  handleShare(event?: MouseEvent) {
+    event?.stopPropagation();
     const shouldOpenMenu = !this.showShareMenu();
     this.showShareMenu.set(shouldOpenMenu);
     if (shouldOpenMenu) {
       this.shareMenuNotice.set('');
       this.scheduleShareMenuEnter();
     } else {
-      this.shareMenuTl?.kill();
+      this.closeShareMenu();
+    }
+  }
+
+  private closeShareMenu() {
+    this.showShareMenu.set(false);
+    this.shareMenuNotice.set('');
+    this.shareMenuTl?.kill();
+    if (this.shareMenuEnterFrame) {
+      cancelAnimationFrame(this.shareMenuEnterFrame);
+      this.shareMenuEnterFrame = 0;
     }
   }
 
