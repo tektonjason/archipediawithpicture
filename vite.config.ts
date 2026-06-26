@@ -13,7 +13,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
-        globPatterns: ['**/*.{html,css,webmanifest,ico,svg,png}'],
+        globPatterns: ['**/*.{html,css}'],
         runtimeCaching: [
           {
             urlPattern: /\/assets\/.*\.js$/,
@@ -45,32 +45,35 @@ export default defineConfig({
           }
         ]
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
+        id: '/',
         name: 'Archipedia',
         short_name: 'Archipedia',
-        description: 'A comprehensive, Bauhaus-style architectural encyclopedia and AI learning assistant.',
+        description: '面向建筑学习者的建筑百科、读物与资源知识库。',
         theme_color: '#18181b',
         background_color: '#0f0f11',
+        lang: 'zh-CN',
+        categories: ['education', 'reference', 'books'],
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: '/icon/archipediaicon.webp',
+            src: '/icon/archipedia-192.png',
             sizes: '192x192',
-            type: 'image/webp'
+            type: 'image/png'
           },
           {
-            src: '/icon/archipediaicon.webp',
+            src: '/icon/archipedia-512.png',
             sizes: '512x512',
-            type: 'image/webp'
+            type: 'image/png'
           },
           {
-            src: '/icon/archipediaicon.webp',
+            src: '/icon/archipedia-maskable-512.png',
             sizes: '512x512',
-            type: 'image/webp',
-            purpose: 'any maskable'
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }

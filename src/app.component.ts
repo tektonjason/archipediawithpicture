@@ -22,6 +22,11 @@ import { AnalyticsService } from './services/analytics.service';
 import { SplashScreenComponent } from './components/shared/splash-screen.component';
 import { APP_UI_ICONS } from './components/shared/ui-icons';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GsapHoverTooltipDirective, GsapCardHoverDirective, SplashScreenComponent, ...APP_UI_ICONS],
@@ -74,15 +79,29 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private sidebarTl!: gsap.core.Timeline;
   private mm!: gsap.MatchMedia;
   private routerEventsSub?: Subscription;
+  private deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
   private hasHandledInitialNavigation = false;
   private isFirstRun = true;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  canInstallApp = signal(false);
   private handleVisibilityChange = () => {
     if (document.hidden) {
       this.stopCarousel();
     } else {
       this.startCarousel();
     }
+  };
+  private handleBeforeInstallPrompt = (event: Event) => {
+    event.preventDefault();
+    this.deferredInstallPrompt = event as BeforeInstallPromptEvent;
+    if (!this.isRunningAsInstalledApp()) {
+      this.canInstallApp.set(true);
+    }
+  };
+  private handleAppInstalled = () => {
+    this.deferredInstallPrompt = null;
+    this.canInstallApp.set(false);
+    this.dataService.displayToast('应用已安装');
   };
 
   constructor() {
@@ -118,6 +137,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.startCarousel();
       }
       document.addEventListener('visibilitychange', this.handleVisibilityChange);
+      window.addEventListener('beforeinstallprompt', this.handleBeforeInstallPrompt);
+      window.addEventListener('appinstalled', this.handleAppInstalled);
     }
     this.routerEventsSub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
@@ -165,6 +186,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.stopCarousel();
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('beforeinstallprompt', this.handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', this.handleAppInstalled);
+    }
     this.routerEventsSub?.unsubscribe();
     if (this.sidebarTl) this.sidebarTl.kill();
     if (this.mm) this.mm.revert();
@@ -293,6 +318,24 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataService.toggleSidebar();
   }
 
+  async installApp() {
+    const promptEvent = this.deferredInstallPrompt;
+    if (!promptEvent) {
+      this.canInstallApp.set(false);
+      this.dataService.displayToast('请使用浏览器菜单添加到主屏幕');
+      return;
+    }
+
+    this.canInstallApp.set(false);
+    await promptEvent.prompt();
+    const choice = await promptEvent.userChoice;
+    this.deferredInstallPrompt = null;
+
+    if (choice.outcome === 'accepted') {
+      this.dataService.displayToast('正在安装应用');
+    }
+  }
+
   @HostListener('document:keydown.escape')
   handleEscape() {
     if (this.showUpdateNotice()) {
@@ -349,5 +392,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private canUseLocalStorage(): boolean {
     return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+  }
+
+  private isRunningAsInstalledApp(): boolean {
+    if (typeof window === 'undefined') return false;
+    const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+    return window.matchMedia('(display-mode: standalone)').matches || navigatorWithStandalone.standalone === true;
   }
 }

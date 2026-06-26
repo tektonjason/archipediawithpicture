@@ -437,7 +437,7 @@ interface ReadingTheme {
                               <a
                                 [href]="getPlatformUrl('wechat', item)"
                                 target="_blank"
-                                (click)="copyShareMenuText(item, 'wechat')"
+                                (click)="openShareTarget($event, item, 'wechat')"
                                 class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
                               >
                                 <div class="w-6 h-6 rounded bg-[#07c160] flex items-center justify-center shrink-0">
@@ -448,7 +448,7 @@ interface ReadingTheme {
                               <a
                                 [href]="getPlatformUrl('taobao', item)"
                                 target="_blank"
-                                (click)="copyShareMenuText(item, 'shopping')"
+                                (click)="openShareTarget($event, item, 'taobao')"
                                 class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
                               >
                                 <div class="w-6 h-6 rounded bg-[#ff5000] flex items-center justify-center shrink-0">
@@ -459,7 +459,7 @@ interface ReadingTheme {
                               <a
                                 [href]="getPlatformUrl('jd', item)"
                                 target="_blank"
-                                (click)="copyShareMenuText(item, 'shopping')"
+                                (click)="openShareTarget($event, item, 'jd')"
                                 class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
                               >
                                 <div class="w-6 h-6 rounded bg-[#e1251b] flex items-center justify-center shrink-0">
@@ -470,7 +470,7 @@ interface ReadingTheme {
                               <a
                                 [href]="getPlatformUrl('duozhuayu', item)"
                                 target="_blank"
-                                (click)="copyShareMenuText(item, 'shopping')"
+                                (click)="openShareTarget($event, item, 'duozhuayu')"
                                 class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
                               >
                                 <div class="w-6 h-6 rounded bg-[#499d75] flex items-center justify-center shrink-0">
@@ -481,7 +481,7 @@ interface ReadingTheme {
                               <a
                                 [href]="getPlatformUrl('zhuanzhuan', item)"
                                 target="_blank"
-                                (click)="copyShareMenuText(item, 'shopping')"
+                                (click)="openShareTarget($event, item, 'zhuanzhuan')"
                                 class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white group"
                               >
                                <div class="w-6 h-6 rounded bg-[#ff3d3d] flex items-center justify-center shrink-0">
@@ -1704,17 +1704,80 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  copyShareMenuText(item: Reading, target: 'wechat' | 'shopping') {
+  openShareTarget(event: MouseEvent, item: Reading, platform: 'wechat' | 'taobao' | 'jd' | 'duozhuayu' | 'zhuanzhuan') {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = platform === 'wechat' ? 'wechat' : 'shopping';
     const text = target === 'wechat'
       ? this.getReadingShareText(item)
       : this.getReadingShoppingSearchText(item);
     const notice = target === 'wechat' ? '已复制分享文案' : '已复制搜索词';
+    const copied = this.copyTextBeforeNavigation(text, notice);
 
-    navigator.clipboard.writeText(text).then(() => {
-      this.setShareMenuNotice(notice);
-    }).catch(() => {
-      this.dataService.displayToast('复制失败，请稍后重试');
-    });
+    if (!copied) {
+      this.dataService.displayToast('复制可能失败，请手动复制后搜索');
+    }
+
+    this.openPlatformUrl(this.getPlatformUrl(platform, item));
+  }
+
+  private copyTextBeforeNavigation(text: string, successNotice: string): boolean {
+    if (this.copyTextWithSelection(text)) {
+      this.setShareMenuNotice(successNotice);
+      return true;
+    }
+
+    const clipboard = typeof navigator !== 'undefined' ? navigator.clipboard : undefined;
+    if (clipboard?.writeText) {
+      clipboard.writeText(text).then(() => {
+        this.setShareMenuNotice(successNotice);
+      }).catch(() => {
+        this.dataService.displayToast('复制可能失败，请手动复制后搜索');
+      });
+      return true;
+    }
+
+    return false;
+  }
+
+  private copyTextWithSelection(text: string): boolean {
+    if (typeof document === 'undefined') return false;
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '-9999px';
+    textarea.style.width = '1px';
+    textarea.style.height = '1px';
+    textarea.style.opacity = '0';
+
+    document.body.appendChild(textarea);
+    textarea.focus({ preventScroll: true });
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } catch {
+      copied = false;
+    } finally {
+      document.body.removeChild(textarea);
+    }
+
+    return copied;
+  }
+
+  private openPlatformUrl(url: string) {
+    if (!url || url === '#') return;
+    if (url.startsWith('weixin://')) {
+      window.location.href = url;
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   private setShareMenuNotice(message: string) {
