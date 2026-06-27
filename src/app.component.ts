@@ -39,15 +39,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showSplash = signal(true);
   showUpdateNotice = signal(false);
-  readonly updateNoticeDate = '2026.06.26';
-  readonly lastUpdatedDate = '2026.06.26';
+  readonly updateNoticeDate = '2026.06.27';
+  readonly lastUpdatedDate = '2026.06.27';
   readonly updateNoticeItems = [
-    '建筑读物新增主题书单、书籍/期刊切换与更顺手的详情浏览。',
-    '支持 GB/T 7714-2015 文献引用，一键复制或下载引用文本。',
-    '百科和读物可生成分享卡片，方便保存与转发。',
-    '百科详情新增内容纠错反馈，发现问题可以直接提交说明。'
+    '百科首页新增建筑资讯流，汇集多个专业媒体来源，打开即可浏览最新建筑动态。',
+    '资讯内容会自动生成中文标题与摘要，日常更新后也能更顺畅地阅读。',
+    '优化首页卡片间距与悬浮动效，浏览时不再被顶部分类栏遮挡。',
+    '更新建筑读物详情、分享菜单与引用工具，查找、复制和分享更顺手。'
   ];
-  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_06_26';
+  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_06_27';
 
   // Q&A Carousel Data
   qaQuestions = [

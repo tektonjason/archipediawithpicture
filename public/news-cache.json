@@ -1,0 +1,229 @@
+{
+  "updatedAt": "2026-06-27T07:58:22.977Z",
+  "sources": [
+    {
+      "name": "ArchDaily",
+      "homeUrl": "https://www.archdaily.com",
+      "adapter": "feed"
+    },
+    {
+      "name": "Archeyes",
+      "homeUrl": "https://archeyes.com",
+      "adapter": "feed"
+    },
+    {
+      "name": "Dezeen",
+      "homeUrl": "https://www.dezeen.com",
+      "adapter": "feed"
+    },
+    {
+      "name": "designboom",
+      "homeUrl": "https://www.designboom.com",
+      "adapter": "feed"
+    },
+    {
+      "name": "Architectuul",
+      "homeUrl": "https://architectuul.com",
+      "adapter": "jinaPageLinks"
+    },
+    {
+      "name": "有方",
+      "homeUrl": "https://www.archiposition.com",
+      "adapter": "jinaPageLinks"
+    }
+  ],
+  "items": [
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Why Architecture Firms Are Outsourcing CAD Drafting to Stay Competitive",
+      "titleZh": "为什么建筑事务所为了保持竞争力，选择外包CAD绘图",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/why-architecture-firms-are-outsourcing-cad-drafting-to-stay-competitive/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Architecture firms are under pressure to produce more precise documentation while protecting the design time that gives a project its value. That tension is not new, but it has become...",
+      "summaryZh": "建筑事务所面临压力，必须制作更精确的文档，同时保护赋予项目价值的设计时间。这种紧张感并不新鲜，但已经…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/alvaro-reyes-KxVlKiqQObU-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-06-26T18:24:33.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "gehry partners’ billowing performing arts center to neighbor guggenheim abu dhabi",
+      "titleZh": "盖里合伙人那座充满活力的表演艺术中心，献给邻近的阿布扎比古根海姆",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/gehry-partners-billowing-performing-arts-center-dar-al-funoon-abu-dhabi-uae/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "planned for 2030, more than 6,000 seats will gather within the rippling, fabric-like venue by gehry partners.",
+      "summaryZh": "计划于2030年，超过6000个座位将聚集在由盖里合伙人打造的波纹状布料场馆内。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/frank-gehry-dar-al-funoon-abu-dhabi-designboom-700-1-500x400-22b08q85r947.jpg",
+      "publishedAt": "2026-06-26T14:31:39.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Piazza San Lorenzo: A Public Square by MICROSCAPE in Pistoia",
+      "titleZh": "圣劳伦佐广场：MICROSCAPE在皮斯托亚打造的公共广场",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/piazza-san-lorenzo-a-public-square-by-microscape-in-pistoia/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Piazza San Lorenzo in Pistoia by MICROSCAPE reclaims a parking-dominated historic square as a continuous civic ground, using stone paving, structured planting, water management, lighting, and accessible seating to reconnect...",
+      "summaryZh": "皮斯托亚的圣洛伦佐广场由MICROSCAPE打造，重新利用以停车为主的历史广场，通过石铺、结构化植栽、水资源管理、照明和无障碍座椅重新连接…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/santansano-facade-perennial-beds-urban-living-room-piazza-san-lorenzo-microscape-filippo-poli-archeyes.jpg?fit=850%2C638&ssl=1",
+      "publishedAt": "2026-06-26T11:30:00.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "SAM Architecture designs stepped school in Nanterre as \"village at the child's scale\"",
+      "titleZh": "SAM建筑设计公司在南泰尔的学校中被定位为“儿童尺度的村庄”",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/06/26/yvonne-kerzreho-school-complex-sam-architecture/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "French studio SAM Architecture has created the Yvonne Kerzrého School Complex in Nanterre, France, arranging classrooms around cascading terraces and courtyards that extend learning outdoors.",
+      "summaryZh": "法国事务所SAM Architecture在法国南泰尔创建了Yvonne Kerzrého学校综合体，教室围绕层叠的露台和庭院布置，将学习延伸到户外。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/06/yvonne-kerzreho-school-complex-sam-architecture-nanterre-france_dezeen_2364_col_28-sq-411x411.jpg",
+      "publishedAt": "2026-06-26T10:30:44.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "trenchs studio threads low-impact glamping among the pines of southern spain",
+      "titleZh": "Trenchs Studio在西班牙南部松林间穿梭低冲击豪华露营地",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/trenchs-studio-low-impact-glamping-pines-southern-spain-cadiz-dehesa-wecamp/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "lightweight construction, natural materials, and a palette drawn directly from the site, in pale woods, earth tones, and soft greens define the camp.",
+      "summaryZh": "轻质结构、天然材料以及直接取材于现场的色调，采用浅色木材、大地色调和柔和绿色，定义了营地的特色。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/trenchs-studio-glamping-retreat-wecamp-pine-forest-cadiz-spain-designboom-700-500x400-22b08q85r653.jpg",
+      "publishedAt": "2026-06-26T10:30:19.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Abu Dhabi reveals plans for Frank Gehry-designed performing arts venue",
+      "titleZh": "阿布扎比公布弗兰克·盖里设计的表演艺术场馆计划",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/06/26/dar-al-funoon-abu-dhabi-frank-gehry/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Construction has commenced on Dar al Funoon Abu Dhabi, a performing arts venue designed by Canadian-American architect Frank Gehry before his death, Abu Dhabi's Department of Culture and Tourism has announced.",
+      "summaryZh": "阿布扎比文化与旅游部宣布，达尔·阿尔·富农阿布扎比表演艺术场馆的建设已开始，该表演艺术场馆由加拿大裔美国建筑师弗兰克·盖里在去世前设计。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/06/dar-al-funoon-abu-dhabi-frank-gehry_dezeen_2364_sq_0-411x411.jpg",
+      "publishedAt": "2026-06-26T09:53:24.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Is Gaudí the greatest architect ever?",
+      "titleZh": "高迪是有史以来最伟大的建筑师吗？",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/06/26/gaudi-dezeen-weekly-podcast/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Why is Gaudí so widely admired? Is there a darker side to his architecture? And should he be made a saint? Listen to the latest episode of Dezeen Weekly now.",
+      "summaryZh": "为什么高第如此受到广泛赞誉？他的建筑有阴暗的一面吗？他应该被封为圣人吗？现在就收听最新一期的《Dezeen Weekly》。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/06/dezeen-weekly-podcast-26-june-2026-sq_dezeen_1704_col_0-411x411.jpg",
+      "publishedAt": "2026-06-26T09:45:37.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "\"This looks like art to me\" says commenter",
+      "titleZh": "评论者说：“这看起来像艺术品。”",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/06/26/hotel-attraction-renders-gaudi-centenary-comments/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "In this week's comments update, readers are discussing AI artist Thierry Lechanteur's digital recreation of Antoni Gaudí's speculative designs for a supertall hotel.",
+      "summaryZh": "在本周的评论更新中，读者们讨论了人工智能艺术家蒂埃里·勒尚特尔对安东尼·高第为超高层酒店设计的数字重现。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/06/hotel-attraction-gaudi-thierry-lechanteur-architecture-hotels-new-york-ai-render_dezeen_2364_col_2-square-411x411.jpg",
+      "publishedAt": "2026-06-26T09:00:54.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "inside a century-old hanok, urban sophistication seoul flagship is organized like a home",
+      "titleZh": "在一栋百年历史的韩屋内，首尔旗舰店如同一个家一样有序",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/century-old-hanok-urban-sophistication-seoul-flagship-organized-home/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "the 140-square-meter project builds its retail experience around the home’s original circulation, courtyard, and timber structure.",
+      "summaryZh": "这个140平方米的项目围绕房屋的原始流通、庭院和木结构构建了零售体验。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/century-old-hanok-urban-sophistication-seoul-flagship-logic-domestic-life-designboom-700-500x400-22b08q85r872.jpg",
+      "publishedAt": "2026-06-26T06:30:28.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Beyond Performance: Zehua Zhang’s Expanding Vision of Sustainability Through Continuity",
+      "titleZh": "超越绩效：张泽华通过连续性拓展的可持续发展愿景",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/beyond-performance-zehua-zhangs-expanding-vision-of-sustainability-through-continuity/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "In contemporary architectural discourse, sustainability is increasingly advanced through performance-based strategies such as energy efficiency, environmental analysis, material optimization, and carbon reduction.",
+      "summaryZh": "在当代建筑话语中，可持续性通过基于性能的策略日益推进，如能效、环境分析、材料优化和碳减排。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/The-Resonance_1.jpg?fit=850%2C562&ssl=1",
+      "publishedAt": "2026-06-25T20:32:28.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Dezeen Agenda features a mesh-covered Miami building by Snøhetta",
+      "titleZh": "Dezeen Agenda以Snøhetta设计的迈阿密网状建筑为特色",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/06/25/snohetta-miami-design-district-sweetbird-north-dezeen-debate/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "The latest edition of our weekly Dezeen Agenda newsletter features Snøhetta's designs for a mesh-covered office building in Miami. Subscribe to Dezeen Agenda now.",
+      "summaryZh": "我们最新一期的每周Dezeen Agenda通讯展示了Snøhetta为迈阿密一座网状办公楼设计的作品。立即订阅《Dezeen Agenda》。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/06/sweetbird-north-miami-design-district-snohetta_dezeen_2364_sq-411x411.jpg",
+      "publishedAt": "2026-06-25T18:00:14.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "underused house reconfigures into child-centered bright red preschool in india",
+      "titleZh": "印度被低估的房子改造成以儿童为中心的鲜红幼儿园",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/underused-house-child-centered-bright-red-preschool-india-gayatrilokesh-architects-llp-rooted-retrofit/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "an irregular roof profile increases interior volume and ceiling height, generating open, well-lit spaces.",
+      "summaryZh": "不规则的屋顶轮廓增加了室内空间和天花板高度，形成开阔且采光充足的空间。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/latur-maharashtra-india-preschool-reuse-gayatrilokesh-architects-llp-rooted-retrofit-designboom-700-1-500x400-22b08q85r665.jpg",
+      "publishedAt": "2026-06-25T14:00:19.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Fondazione Querini Stampalia: Carlo Scarpa in Venice",
+      "titleZh": "奎里尼斯坦帕利亚基金会：威尼斯的卡洛·斯卡尔帕",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/fondazione-querini-stampalia-carlo-scarpa-in-venice/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Fondazione Querini Stampalia in Venice is a 16th-century palazzo transformed through successive architectural interventions by Carlo Scarpa, Valeriano Pastor, Mario Botta, and Michele De Lucchi, forming a layered cultural complex...",
+      "summaryZh": "威尼斯Querini Stampalia基金会是一座16世纪的宫殿，经过卡洛·斯卡帕、瓦莱里亚诺·帕斯托尔、马里奥·博塔和米歇尔·德·卢奇的多次建筑改造，形成了一个层叠的文化复合体…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/garden-cafe-courtyard-lily-pool-concrete-wall-querini-stampalia-carlo-scarpa-trevor-patt-archeyes.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-06-25T11:30:00.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "step into frank gehry’s sweeping signature style in a new retrospective",
+      "titleZh": "在全新回顾展中，走进弗兰克·盖里那种宏大标志性的风格",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/the-century-of-gehry-serralves-foundation-pritzker-architect-career/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "the porto show exhibits models of the guggenheim bilbao, LUMA arles, the vitra design museum, and other projects that defined the pritzker-prize winning architect's career",
+      "summaryZh": "波尔图展览馆展出了毕尔巴鄂古根海姆博物馆、阿尔勒博物馆、维特拉设计博物馆等项目的模型，这些项目定义了这位普利兹克奖得主建筑师的职业生涯",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/gehry-serralves-designboom-700-500x400-22b08q85r914.jpg",
+      "publishedAt": "2026-06-25T09:30:27.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Safe Room Design in Miami Homes: What Architects and Homeowners Need to Know",
+      "titleZh": "迈阿密住宅安全室设计：建筑师和房主需要了解的事项",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/safe-room-design-in-miami-homes-what-architects-and-homeowners-need-to-know/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Safe rooms have become an increasingly important architectural element in Miami residential design. While South Florida’s vulnerability to hurricanes has long driven homeowners to incorporate storm shelters, modern safe room...",
+      "summaryZh": "安全室已成为迈阿密住宅设计中日益重要的建筑元素。虽然南佛罗里达长期以来对飓风的脆弱性一直促使房主们引入风暴避难所、现代化的安全室…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/avi-werde-HI4nq3HjImU-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-06-24T18:37:53.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "CPTED and Domestic Violence Prevention: How New Jersey Communities Are Designing Safer Neighbor…",
+      "titleZh": "CPTED与家庭暴力预防：新泽西社区如何设计更安全的邻居…",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/cpted-and-domestic-violence-prevention-how-new-jersey-communities-are-designing-safer-neighborhoods/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "The relationship between architectural design and public safety extends far beyond security cameras and reinforced doors. Across New Jersey, urban planners and architects are discovering that thoughtful environmental design can...",
+      "summaryZh": "建筑设计与公共安全的关系远远超出了监控摄像头和加固门。在新泽西州各地，城市规划师和建筑师们发现，深思熟虑的环境设计可以…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/alex-reynolds-yfn7NHjBgck-unsplash.jpg?fit=850%2C566&ssl=1",
+      "publishedAt": "2026-06-24T18:37:25.000Z"
+    }
+  ]
+}

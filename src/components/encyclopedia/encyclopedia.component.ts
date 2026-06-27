@@ -2,6 +2,7 @@ import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementR
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DataService, Entry } from '../../services/data.service';
+import { ArchitectureNewsItem, ArchitectureNewsService } from '../../services/architecture-news.service';
 import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
 import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
@@ -44,6 +45,7 @@ gsap.registerPlugin(Flip);
               placeholder="搜索百科词条..."
             ></app-animated-search-bar>
             
+            @if (!isHomePage()) {
             <!-- View Toggle Button -->
             <div class="flex bg-surface rounded-card border border-line p-1 shrink-0 z-20 shadow-lg h-12 items-center">
               <button 
@@ -71,12 +73,22 @@ gsap.registerPlugin(Flip);
                 <svg lucideLayoutList class="w-5 h-5" [strokeWidth]="2"></svg>
               </button>
             </div>
+            }
           </div>
         }
       </div>
 
       <!-- Categories Filter -->
       <div class="encyclopedia-categories flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient">
+        <button 
+          (click)="selectCategory('home')"
+          class="ui-chip flex-shrink-0 whitespace-nowrap"
+          [class.bg-white]="selectedCategory() === 'home'"
+          [class.text-black]="selectedCategory() === 'home'"
+          [class.bg-white/5]="selectedCategory() !== 'home'"
+          [class.text-gray-300]="selectedCategory() !== 'home'"
+          [class.hover:bg-white/10]="selectedCategory() !== 'home'"
+        >主页</button>
         <button 
           (click)="selectCategory('all')"
           class="ui-chip flex-shrink-0 whitespace-nowrap"
@@ -112,6 +124,71 @@ gsap.registerPlugin(Flip);
         (touchmove)="onContentTouchMove($event)"
         class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2"
       >
+        @if (isHomePage()) {
+          <section class="encyclopedia-home pb-24">
+            <div class="home-feature-grid">
+              @if (featuredNews(); as item) {
+                <button type="button" class="home-feature-card" (click)="openNewsItem(item)">
+                  <div class="home-feature-image">
+                    @if (item.imageUrl) {
+                      <img [src]="item.imageUrl" [alt]="newsTitle(item)" loading="eager" decoding="async">
+                    } @else {
+                      <div class="home-image-fallback">{{ item.source.slice(0, 1) }}</div>
+                    }
+                  </div>
+                  <div class="home-feature-content">
+                    <div class="home-news-meta">
+                      <span>{{ item.source }}</span>
+                      <span>{{ formatNewsDate(item.publishedAt) }}</span>
+                    </div>
+                    <h3>{{ newsTitle(item) }}</h3>
+                    <p>{{ newsSummary(item) }}</p>
+                    <span class="home-open-link">打开原文 <svg lucideExternalLink class="w-3.5 h-3.5" [strokeWidth]="2"></svg></span>
+                  </div>
+                </button>
+              }
+
+              <div class="home-ad-slot" aria-label="广告位">
+                <span>AD SLOT</span>
+                <strong>Google Ads Ready</strong>
+              </div>
+            </div>
+
+            <div class="home-section-head">
+              <div>
+                <h3>最新建筑资讯</h3>
+                <p>最后更新：{{ formatNewsDate(newsService.updatedAt()) }}</p>
+              </div>
+              <div class="home-source-row">
+                @for (source of newsService.sources(); track source.homeUrl) {
+                  <button type="button" (click)="openSource(source.homeUrl)">{{ source.name }}</button>
+                }
+              </div>
+            </div>
+
+            <div class="home-news-grid">
+              @for (item of secondaryNews(); track item.id) {
+                <button type="button" class="home-news-card" (click)="openNewsItem(item)">
+                  <div class="home-news-thumb">
+                    @if (item.imageUrl) {
+                      <img [src]="item.imageUrl" [alt]="newsTitle(item)" loading="lazy" decoding="async">
+                    } @else {
+                      <div class="home-image-fallback small">{{ item.source.slice(0, 1) }}</div>
+                    }
+                  </div>
+                  <div class="home-news-body">
+                    <div class="home-news-meta">
+                      <span>{{ item.source }}</span>
+                      <span>{{ formatNewsDate(item.publishedAt) }}</span>
+                    </div>
+                    <h4>{{ newsTitle(item) }}</h4>
+                    <p>{{ newsSummary(item) }}</p>
+                  </div>
+                </button>
+              }
+            </div>
+          </section>
+        } @else {
         @if (filteredEntries().length === 0) {
           <div class="ui-empty-state h-60 opacity-80">
             <div class="ui-empty-icon"><svg lucideBuilding2 class="w-8 h-8" [strokeWidth]="1.8"></svg></div>
@@ -195,6 +272,7 @@ gsap.registerPlugin(Flip);
             </a>
           }
         </div>
+        }
       </div>
 
       <!-- Admin Add Button -->
@@ -308,6 +386,244 @@ gsap.registerPlugin(Flip);
       border-radius: 2px;
       padding: 0 0.08em;
     }
+    .encyclopedia-home {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding-top: 0.85rem;
+    }
+    .home-feature-card,
+    .home-ad-slot,
+    .home-news-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    }
+    .home-feature-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.55fr);
+      gap: 1rem;
+    }
+    .home-feature-card,
+    .home-news-card {
+      text-align: left;
+      overflow: hidden;
+      border-radius: 8px;
+      color: inherit;
+      transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
+    }
+    .home-feature-card:hover,
+    .home-news-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(147, 197, 253, 0.34);
+      background: rgba(255, 255, 255, 0.065);
+    }
+    .home-feature-card {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+      min-height: 23rem;
+    }
+    .home-feature-image,
+    .home-news-thumb {
+      position: relative;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .home-feature-image img,
+    .home-news-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .home-feature-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 1rem;
+      min-width: 0;
+      padding: 1.5rem;
+    }
+    .home-feature-content h3 {
+      color: #fff;
+      font-size: clamp(1.45rem, 2vw, 2.1rem);
+      line-height: 1.15;
+      font-weight: 900;
+      letter-spacing: 0;
+      margin: 0;
+    }
+    .home-feature-content p,
+    .home-news-body p {
+      color: rgba(203, 213, 225, 0.78);
+      line-height: 1.7;
+      margin: 0;
+    }
+    .home-open-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #bfdbfe;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+    .home-ad-slot {
+      display: flex;
+      min-height: 23rem;
+      flex-direction: column;
+      justify-content: center;
+      border-radius: 8px;
+      padding: 1.5rem;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 12px),
+        rgba(255, 255, 255, 0.035);
+    }
+    .home-ad-slot span {
+      width: fit-content;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(147, 197, 253, 0.92);
+      padding: 0.3rem 0.65rem;
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+    }
+    .home-ad-slot strong {
+      color: rgba(255, 255, 255, 0.94);
+      font-size: 1.15rem;
+      line-height: 1.25;
+      margin-bottom: 0.55rem;
+    }
+    .home-section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-top: 0.25rem;
+    }
+    .home-section-head h3 {
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin: 0 0 0.25rem;
+      letter-spacing: 0;
+    }
+    .home-section-head p,
+    .home-news-meta {
+      color: rgba(148, 163, 184, 0.78);
+      font-size: 0.78rem;
+    }
+    .home-source-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.45rem;
+    }
+    .home-source-row button {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.055);
+      color: rgba(226, 232, 240, 0.86);
+      padding: 0.42rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .home-source-row button:hover {
+      background: rgba(255, 255, 255, 0.11);
+      color: #fff;
+    }
+    .home-news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .home-news-card {
+      display: grid;
+      grid-template-rows: 10rem auto;
+      min-height: 21rem;
+    }
+    .home-news-body {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem;
+    }
+    .home-news-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .home-news-body h4 {
+      color: #fff;
+      font-size: 1rem;
+      line-height: 1.35;
+      font-weight: 850;
+      letter-spacing: 0;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .home-news-body p {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 0.875rem;
+    }
+    .home-image-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 24% 20%, rgba(96, 165, 250, 0.25), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(45, 212, 191, 0.18), transparent 36%),
+        #111827;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 5rem;
+      font-weight: 900;
+    }
+    .home-image-fallback.small {
+      font-size: 3rem;
+    }
+    @media (max-width: 1180px) {
+      .home-feature-grid,
+      .home-feature-card {
+        grid-template-columns: 1fr;
+      }
+      .home-feature-image {
+        height: 18rem;
+      }
+      .home-ad-slot {
+        min-height: 12rem;
+      }
+      .home-news-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 720px) {
+      .home-section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .home-source-row {
+        justify-content: flex-start;
+      }
+      .home-news-grid {
+        grid-template-columns: 1fr;
+      }
+      .home-feature-image {
+        height: 14rem;
+      }
+      .home-news-card {
+        min-height: auto;
+      }
+    }
     .no-transition {
       transition-duration: 0ms !important;
     }
@@ -329,6 +645,7 @@ gsap.registerPlugin(Flip);
 })
 export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
+  newsService = inject(ArchitectureNewsService);
   router: Router = inject(Router);
   route: ActivatedRoute = inject(ActivatedRoute);
   searchQuery = signal('');
@@ -337,6 +654,9 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   viewMode = this.dataService.encyclopediaViewMode;
   displayLimit = this.dataService.encyclopediaDisplayLimit;
   encyclopediaChromeCompact = signal(false);
+  isHomePage = computed(() => this.selectedCategory() === 'home' && !this.debouncedQuery().trim());
+  featuredNews = computed(() => this.newsService.items()[0]);
+  secondaryNews = computed(() => this.newsService.items().slice(1, 13));
   private lastAnimatedIndex = 0;
 
   // Typewriter properties
@@ -353,7 +673,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('entriesContainer') entriesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('entriesContainer') entriesContainer?: ElementRef<HTMLDivElement>;
   @ViewChildren('.entry-card') entryCards!: QueryList<ElementRef>;
 
   private categoryOrder = [
@@ -367,9 +687,14 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   ];
 
   constructor() {
+    void this.newsService.load();
+
     this.route.queryParamMap.subscribe(params => {
       const query = params.get('q') ?? '';
       if (query !== this.searchQuery()) {
+        if (query.trim() && this.selectedCategory() === 'home') {
+          this.selectedCategory.set('all');
+        }
         this.searchQuery.set(query);
         this.debouncedQuery.set(query);
         this.displayLimit.set(50);
@@ -437,12 +762,21 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    if (this.isHomePage()) {
+      this.viewMode.set(mode);
+      return;
+    }
+
     if (this.prefersReducedMotion) {
       this.viewMode.set(mode);
       return;
     }
 
-    const container = this.entriesContainer.nativeElement;
+    const container = this.entriesContainer?.nativeElement;
+    if (!container) {
+      this.viewMode.set(mode);
+      return;
+    }
     const currentCards = Array.from(container.querySelectorAll('.entry-card'));
 
     if (currentCards.length === 0) {
@@ -556,7 +890,13 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   }
 
   private extendListNearEnd() {
-    const element = this.scrollContainer.nativeElement;
+    if (this.isHomePage()) {
+      return;
+    }
+
+    const element = this.scrollContainer?.nativeElement;
+    if (!element) return;
+
     // Buffer of 200px
     if (element.scrollHeight - element.scrollTop - element.clientHeight < 200) {
       if (this.displayLimit() < this._allFilteredEntries().length) {
@@ -565,7 +905,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
         
         // Animate newly added cards
         requestAnimationFrame(() => {
-          const container = this.entriesContainer.nativeElement;
+          const container = this.entriesContainer?.nativeElement;
+          if (!container) return;
           const newCards = Array.from(container.querySelectorAll('.entry-card')).slice(oldLimit);
           if (newCards.length > 0) {
             gsap.fromTo(newCards.slice(0, 32),
@@ -579,6 +920,9 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   }
 
   updateSearch(query: string) {
+    if (query.trim() && this.selectedCategory() === 'home') {
+      this.selectedCategory.set('all');
+    }
     this.searchQuery.set(query);
     this.displayLimit.set(50);
     this.expandEncyclopediaChrome();
@@ -618,7 +962,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     const cat = this.selectedCategory();
     return this.searchIndex()
       .filter(document => {
-        const matchCat = cat === 'all' || document.entry.category === cat;
+        const matchCat = cat === 'all' || cat === 'home' || document.entry.category === cat;
         if (!matchCat) return false;
         if (!rawQuery) return true;
         if (matchesSearch(document, rawQuery)) return true;
@@ -642,8 +986,8 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const container = this.entriesContainer.nativeElement;
-    const currentCards = Array.from(container.querySelectorAll('.entry-card'));
+    const container = this.entriesContainer?.nativeElement;
+    const currentCards = container ? Array.from(container.querySelectorAll('.entry-card')) : [];
 
     if (this.prefersReducedMotion || currentCards.length === 0) {
       this.expandEncyclopediaChrome();
@@ -684,7 +1028,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
 
         // Enter animation for new cards
         requestAnimationFrame(() => {
-          const newCards = Array.from(container.querySelectorAll('.entry-card'));
+          const newCards = container ? Array.from(container.querySelectorAll('.entry-card')) : [];
           gsap.fromTo(newCards.slice(0, 36),
             { opacity: 0, y: 12 }, // FROM these values
             { // TO these values (their natural CSS state)
@@ -702,7 +1046,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   }
 
   createNew() {
-    const currentCat = this.selectedCategory() === 'all' ? '未分类' : this.selectedCategory();
+    const currentCat = this.selectedCategory() === 'all' || this.selectedCategory() === 'home' ? '未分类' : this.selectedCategory();
     const newId = 'custom_' + Date.now();
     const newEntry = {
       id: newId,
@@ -730,6 +1074,38 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
 
   searchSnippet(entry: Entry): string {
     return createSearchSnippet(entry, this.debouncedQuery());
+  }
+
+  newsTitle(item: ArchitectureNewsItem): string {
+    return item.titleZh || item.title;
+  }
+
+  newsSummary(item: ArchitectureNewsItem): string {
+    return item.summaryZh || item.summary;
+  }
+
+  openNewsItem(item: ArchitectureNewsItem) {
+    this.dataService.openExternalModal(item.url);
+  }
+
+  openSource(url: string) {
+    this.dataService.openExternalModal(url);
+  }
+
+  refreshNews() {
+    void this.newsService.load(true);
+  }
+
+  formatNewsDate(value?: string): string {
+    if (!value) return '今日';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '今日';
+
+    return new Intl.DateTimeFormat('zh-CN', {
+      month: '2-digit',
+      day: '2-digit'
+    }).format(date);
   }
 
   private clearSearchQueryParam() {

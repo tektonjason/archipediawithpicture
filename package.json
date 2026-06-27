@@ -8,6 +8,9 @@
   },
   "scripts": {
     "dev": "vite",
+    "news:update": "node utils/update-news-cache.mjs",
+    "news:update:dist": "node utils/update-news-cache.mjs --out dist/news-cache.json",
+    "prebuild": "node utils/update-news-cache.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "content:check": "node utils/content-health.mjs"
