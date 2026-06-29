@@ -1,6 +1,6 @@
 
 
-import { Component, inject, signal, effect, computed, HostListener, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, inject, signal, effect, computed, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService, Entry } from '../../services/data.service';
 import { FormsModule } from '@angular/forms';
@@ -28,13 +28,7 @@ import {
           返回
         </button>
         <div class="flex items-center gap-2">
-           <button (click)="shareEntry()" class="ui-icon-btn" [disabled]="isSharing()" title="生成分享卡片">
-             <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
-           </button>
-           <button (click)="showFeedbackModal.set(true)" class="ui-icon-btn" title="内容纠错">
-             <svg lucideMail class="w-5 h-5" [strokeWidth]="2"></svg>
-           </button>
-           <button (click)="toggleFav()" class="ui-icon-btn transition-all active:scale-90 group border-transparent bg-transparent">
+           <button (click)="toggleFav()" class="ui-icon-btn transition-all active:scale-90 group border-transparent bg-transparent" [title]="isFav() ? '取消收藏' : '收藏词条'">
              <svg lucideStar class="w-6 h-6 transition-all" 
                 [class.text-yellow-400]="isFav()"
                 [class.text-gray-400]="!isFav()"
@@ -42,6 +36,22 @@ import {
                 [attr.fill]="isFav() ? 'currentColor' : 'none'"
                 [strokeWidth]="2"></svg>
            </button>
+           <button
+             (click)="openNoteEditor()"
+             class="ui-icon-btn transition-colors"
+             [class.text-blue-300]="hasEntryNote()"
+             title="词条笔记"
+           >
+             <svg lucideStickyNote class="w-5 h-5" [strokeWidth]="2"></svg>
+           </button>
+           <button (click)="showFeedbackModal.set(true)" class="ui-icon-btn" title="内容纠错">
+             <svg lucideMail class="w-5 h-5" [strokeWidth]="2"></svg>
+           </button>
+           <div class="entry-share-wrap relative">
+             <button (click)="shareEntry()" class="ui-icon-btn" [disabled]="isSharing()" title="生成分享卡片">
+               <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
+             </button>
+           </div>
            @if (dataService.isAdmin()) {
              <button (click)="toggleEdit()" class="ui-btn-secondary" [class.bg-blue-600]="isEditing()" [class.text-white]="isEditing()" [class.border-blue-500]="isEditing()">
                {{ isEditing() ? '保存' : '编辑' }}
@@ -280,6 +290,36 @@ import {
         </div>
       }
 
+      @if (showNoteModal()) {
+        <div class="ui-modal-shell animate-fade-in-up">
+          <div class="ui-modal-backdrop" (click)="closeNoteEditor()"></div>
+          <div class="ui-modal-panel p-6 max-w-xl">
+            <div class="flex items-center justify-between gap-4 mb-5">
+              <div>
+                <h3 class="font-bold text-xl text-white">词条笔记</h3>
+                <p class="text-xs text-gray-500 mt-1">笔记保存在本机浏览器，应用更新后通常仍会保留。</p>
+              </div>
+              <button (click)="closeNoteEditor()" class="ui-icon-btn">
+                <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
+              </button>
+            </div>
+            <textarea
+              class="ui-field min-h-40 resize-y text-sm"
+              [value]="noteDraft()"
+              (input)="noteDraft.set($any($event.target).value)"
+              placeholder="记录项目联想、审图提示、课堂笔记或自己的理解..."
+            ></textarea>
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <p class="text-xs text-gray-500">可在用户中心的“我的笔记”中统一查看。</p>
+              <div class="flex gap-2">
+                <button (click)="closeNoteEditor()" class="ui-btn-secondary">取消</button>
+                <button (click)="saveEntryNote()" class="ui-btn-primary">保存笔记</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
       @if (showImageModal()) {
         <div class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 md:p-8">
           <!-- Backdrop -->
@@ -440,20 +480,23 @@ export class EntryDetailComponent implements OnDestroy {
   showImageModal = signal(false);
   isImageModalAnimatingOut = signal(false);
   showFeedbackModal = signal(false);
+  showNoteModal = signal(false);
   isSharing = signal(false);
+  noteDraft = signal('');
   feedback = {
     type: '事实错误',
     description: '',
     suggestion: '',
     source: ''
   };
+  hasEntryNote = computed(() => this.entryId() ? this.dataService.hasEntryNote(this.entryId()) : false);
+  entryNote = computed(() => this.entryId() ? this.dataService.getEntryNote(this.entryId()) : '');
 
   constructor() {
     this.route.params.subscribe(p => {
       this.entryId.set(p['id']);
-      // Add to history when viewed
-      if (p['id'] && this.entry()) {
-        this.dataService.addToHistory(this.entry()!.term);
+      if (p['id']) {
+        this.dataService.addHistoryItem('entry', p['id']);
       }
     });
 
@@ -477,6 +520,24 @@ export class EntryDetailComponent implements OnDestroy {
 
   toggleFav() {
     if(this.entryId()) this.dataService.toggleFavorite(this.entryId());
+  }
+
+  openNoteEditor() {
+    this.noteDraft.set(this.entryNote());
+    this.showNoteModal.set(true);
+  }
+
+  closeNoteEditor() {
+    this.showNoteModal.set(false);
+    this.noteDraft.set('');
+  }
+
+  saveEntryNote() {
+    const id = this.entryId();
+    if (!id) return;
+    this.dataService.setEntryNote(id, this.noteDraft());
+    this.closeNoteEditor();
+    this.dataService.displayToast('词条笔记已保存，可前往用户中心查看');
   }
 
   toggleEdit() {
@@ -582,6 +643,11 @@ export class EntryDetailComponent implements OnDestroy {
 
     if (this.showFeedbackModal()) {
       this.showFeedbackModal.set(false);
+      return;
+    }
+
+    if (this.showNoteModal()) {
+      this.closeNoteEditor();
     }
   }
 

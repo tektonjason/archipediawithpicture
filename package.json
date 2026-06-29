@@ -10,6 +10,7 @@
     "dev": "vite",
     "news:update": "node utils/update-news-cache.mjs",
     "news:update:dist": "node utils/update-news-cache.mjs --out dist/news-cache.json",
+    "resources:previews": "node utils/generate-resource-previews.mjs",
     "prebuild": "node utils/update-news-cache.mjs",
     "build": "vite build",
     "preview": "vite preview",

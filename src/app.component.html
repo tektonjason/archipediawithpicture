@@ -41,6 +41,14 @@
           <svg lucideFolder class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>资源库</span>
         </a>
+        <a routerLink="/services" routerLinkActive #rlaServices="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaServices.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideBriefcase class="w-5 h-5" [strokeWidth]="2"></svg>
+          <span>资源服务</span>
+        </a>
+        <a routerLink="/standards" routerLinkActive #rlaStandards="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaStandards.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideList class="w-5 h-5" [strokeWidth]="2"></svg>
+          <span>规范速查</span>
+        </a>
         <a routerLink="/readings" routerLinkActive #rla4="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla4.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
           <svg lucideBookOpen class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>建筑读物</span>
@@ -53,13 +61,9 @@
           <svg lucideLayers class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>建筑干货</span>
         </a>
-        <a routerLink="/user" [queryParams]="{tab: 'favorites'}" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (isUserTabActive('favorites') ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg lucideBookmark class="w-5 h-5" [strokeWidth]="2"></svg>
-          <span>我的收藏</span>
-        </a>
-        <a routerLink="/user" [queryParams]="{tab: 'history'}" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (isUserTabActive('history') ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-           <svg lucideHistory class="w-5 h-5" [strokeWidth]="2"></svg>
-          <span>浏览历史</span>
+        <a routerLink="/user" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (isUserCenterActive() ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideUser class="w-5 h-5" [strokeWidth]="2"></svg>
+          <span>用户中心</span>
         </a>
         <a routerLink="/contact" routerLinkActive #rla7="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla7.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
            <svg lucideInfo class="w-5 h-5" [strokeWidth]="2"></svg>

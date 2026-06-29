@@ -39,15 +39,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showSplash = signal(true);
   showUpdateNotice = signal(false);
-  readonly updateNoticeDate = '2026.06.27';
-  readonly lastUpdatedDate = '2026.06.27';
+  readonly updateNoticeDate = '2026.06.29';
+  readonly lastUpdatedDate = '2026.06.29';
   readonly updateNoticeItems = [
-    '百科首页新增建筑资讯流，汇集多个专业媒体来源，打开即可浏览最新建筑动态。',
-    '资讯内容会自动生成中文标题与摘要，日常更新后也能更顺畅地阅读。',
-    '优化首页卡片间距与悬浮动效，浏览时不再被顶部分类栏遮挡。',
-    '更新建筑读物详情、分享菜单与引用工具，查找、复制和分享更顺手。'
+    '首页建筑资讯支持自动获取与刷新，内容会以中文摘要展示。',
+    '百科、读物与资源库支持分享卡片，便于保存和转发。',
+    '新增本地笔记与统一用户中心，可集中查看收藏、历史和笔记。',
+    '资源库新增卡片视图；规范速查新增常用条文、收藏、笔记与纠错反馈。'
   ];
-  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_06_27';
+  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_06_29_v2';
 
   // Q&A Carousel Data
   qaQuestions = [
@@ -302,15 +302,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/essentials'], { queryParams: { openQna: 'true' } });
   }
 
-  isUserTabActive(tab: 'favorites' | 'history'): boolean {
+  isUserCenterActive(): boolean {
     const url = this.currentUrl() || this.router.url;
-    const [path, queryString = ''] = url.split('?');
-    if (!path.startsWith('/user')) return false;
-
-    const activeTab = new URLSearchParams(queryString).get('tab') === 'history'
-      ? 'history'
-      : 'favorites';
-    return activeTab === tab;
+    const [path] = url.split('?');
+    return path.startsWith('/user');
   }
 
   toggleSidebarFooter() {

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -11,7 +12,8 @@ const files = {
   archipedia: path.join(root, 'src', 'data', 'archipedia-seed.ts'),
   resources: path.join(root, 'src', 'data', 'resources-seed.ts'),
   readings: path.join(root, 'src', 'data', 'readings-seed.ts'),
-  competitions: path.join(root, 'src', 'data', 'competitions-seed.ts')
+  competitions: path.join(root, 'src', 'data', 'competitions-seed.ts'),
+  standards: path.join(root, 'src', 'data', 'standards-seed.ts')
 };
 
 const report = {
@@ -35,7 +37,9 @@ function keyName(name) {
   return undefined;
 }
 
-function literalValue(node) {
+function literalValue(node, constants = new Map()) {
+  if (!node) return undefined;
+
   if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
     return node.text;
   }
@@ -57,7 +61,7 @@ function literalValue(node) {
   }
 
   if (ts.isArrayLiteralExpression(node)) {
-    return node.elements.map(literalValue);
+    return node.elements.map(element => literalValue(element, constants));
   }
 
   if (ts.isObjectLiteralExpression(node)) {
@@ -66,9 +70,69 @@ function literalValue(node) {
       if (!ts.isPropertyAssignment(prop)) continue;
       const name = keyName(prop.name);
       if (!name) continue;
-      value[name] = literalValue(prop.initializer);
+      value[name] = literalValue(prop.initializer, constants);
     }
     return value;
+  }
+
+  if (ts.isIdentifier(node)) {
+    return constants.get(node.text);
+  }
+
+  if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+    const fn = node.expression.text;
+    const args = node.arguments.map(argument => literalValue(argument, constants));
+
+    if (fn === 'jianbiaoku' && typeof args[0] === 'string') {
+      return `http://s.jianbiaoku.com/sou/?module=criterion&keyword=${encodeURIComponent(args[0])}`;
+    }
+
+    if (fn === 'soujianzhu' && typeof args[0] === 'string') {
+      return `https://www.soujianzhu.cn/NormAndRules/Default.aspx?key=${encodeURIComponent(args[0])}`;
+    }
+
+    if (fn === 'officialUrls' && typeof args[0] === 'string') {
+      const extra = Array.isArray(args[1]) ? args[1] : [];
+      return [
+        constants.get('OPEN_STD'),
+        constants.get('STD_PLATFORM'),
+        constants.get('MOHURD_DOCS'),
+        ...extra,
+        `http://s.jianbiaoku.com/sou/?module=criterion&keyword=${encodeURIComponent(args[0])}`,
+        `https://www.soujianzhu.cn/NormAndRules/Default.aspx?key=${encodeURIComponent(args[0])}`
+      ].filter(Boolean);
+    }
+
+    if (fn === 'clause') {
+      const [id, category, title, summary, keywords, sourceUrl, clauseNo] = args;
+      return { id, category, title, summary, keywords, sourceUrl, clauseNo };
+    }
+
+    if (fn === 'standard' && args[0] && typeof args[0] === 'object') {
+      const item = args[0];
+      return {
+        id: item.id,
+        title: item.title,
+        code: item.code,
+        status: item.status,
+        effectiveDate: item.effectiveDate,
+        category: item.category,
+        useCases: item.useCases,
+        keywords: item.keywords,
+        officialUrls: item.officialUrls,
+        verifiedAt: item.verifiedAt,
+        note: item.note,
+        clauses: (item.clauses ?? []).map(clause => ({
+          ...clause,
+          id: `${item.id}-${clause.id}`,
+          standardCode: item.code,
+          standardTitle: item.title,
+          sourceName: clause.sourceName ?? item.sourceName,
+          sourceUrl: clause.sourceUrl ?? item.sourceUrl,
+          verifiedAt: clause.verifiedAt ?? item.verifiedAt
+        }))
+      };
+    }
   }
 
   return undefined;
@@ -76,14 +140,25 @@ function literalValue(node) {
 
 function exportedConst(filePath, exportName) {
   const source = parseFile(filePath);
+  const constants = new Map();
   let result;
 
   source.forEachChild(node => {
     if (!ts.isVariableStatement(node)) return;
     for (const declaration of node.declarationList.declarations) {
       if (!ts.isIdentifier(declaration.name)) continue;
+      if (declaration.name.text === exportName) continue;
+      const value = literalValue(declaration.initializer, constants);
+      if (value !== undefined) constants.set(declaration.name.text, value);
+    }
+  });
+
+  source.forEachChild(node => {
+    if (!ts.isVariableStatement(node)) return;
+    for (const declaration of node.declarationList.declarations) {
+      if (!ts.isIdentifier(declaration.name)) continue;
       if (declaration.name.text !== exportName) continue;
-      result = literalValue(declaration.initializer);
+      result = literalValue(declaration.initializer, constants);
     }
   });
 
@@ -161,6 +236,11 @@ function checkResources() {
   const resources = exportedConst(files.resources, 'SEED_RESOURCES');
   const duplicateIds = duplicateKeys(resources, item => item?.id);
   const invalidUrls = resources.filter(item => !isValidHttpUrl(item?.url));
+  const imageDir = path.join(root, 'public', 'images', 'resources');
+  const missingImages = [];
+  const oversizedImages = [];
+  const imageHashes = new Map();
+  const duplicateImages = [];
 
   if (duplicateIds.length) {
     report.errors.push(`SEED_RESOURCES has ${duplicateIds.length} duplicate ids`);
@@ -170,8 +250,141 @@ function checkResources() {
     report.errors.push(`SEED_RESOURCES invalid url: ${item?.title ?? '(untitled)'} -> ${item?.url ?? '(empty)'}`);
   }
 
+  for (const item of resources) {
+    const imageUrl = item?.imageUrl || (item?.id ? `/images/resources/${item.id}.webp` : '');
+    const filePath = imageUrl ? path.join(root, 'public', imageUrl.replace(/^\//, '')) : '';
+    if (!item?.id || !filePath || path.extname(filePath).toLowerCase() !== '.webp' || !fs.existsSync(filePath)) {
+      missingImages.push(item);
+      continue;
+    }
+
+    const stat = fs.statSync(filePath);
+    if (stat.size > 50 * 1024) {
+      oversizedImages.push({ item, size: stat.size });
+    }
+
+    const hash = crypto.createHash('sha1').update(fs.readFileSync(filePath)).digest('hex');
+    if (imageHashes.has(hash)) {
+      duplicateImages.push(`${imageHashes.get(hash)} / ${item.id}`);
+    } else {
+      imageHashes.set(hash, item.id);
+    }
+  }
+
+  if (!fs.existsSync(path.join(imageDir, 'default.webp'))) {
+    report.errors.push('Resource preview fallback is missing: public/images/resources/default.webp');
+  }
+
+  if (missingImages.length) {
+    report.errors.push(`SEED_RESOURCES has ${missingImages.length} missing WebP preview images`);
+  }
+
+  if (oversizedImages.length) {
+    for (const { item, size } of oversizedImages.slice(0, 10)) {
+      report.errors.push(`Resource preview exceeds 50KB: ${item.id} ${item.title} (${Math.ceil(size / 1024)}KB)`);
+    }
+    if (oversizedImages.length > 10) {
+      report.errors.push(`Resource preview exceeds 50KB: ${oversizedImages.length - 10} more files`);
+    }
+  }
+
+  if (duplicateImages.length) {
+    report.warnings.push(`Resource previews have ${duplicateImages.length} duplicate image hashes`);
+  }
+
   report.notes.push(`SEED_RESOURCES: ${resources.length} links`);
+  report.notes.push(`Resource previews: ${resources.length - missingImages.length}/${resources.length} WebP files`);
   summarizeCounts('Resource categories', countBy(resources, item => item?.category));
+}
+
+function checkStandards() {
+  if (!fs.existsSync(files.standards)) {
+    report.errors.push('SEED_STANDARDS file is missing');
+    return;
+  }
+
+  const standards = exportedConst(files.standards, 'SEED_STANDARDS');
+  const duplicateIds = duplicateKeys(standards, item => item?.id);
+  const missingOfficialUrls = standards.filter(item => !Array.isArray(item?.officialUrls) || item.officialUrls.length === 0);
+  const invalidOfficialUrls = standards.flatMap(item => (item?.officialUrls ?? [])
+    .filter(url => !isValidHttpUrl(url))
+    .map(url => `${item?.id ?? '(unknown)'} -> ${url}`));
+  const missingVerification = standards.filter(item => !/^\d{4}-\d{2}-\d{2}$/.test(item?.verifiedAt ?? ''));
+  const missingFields = standards.filter(item => !item?.title || !item?.code || !item?.status || !item?.effectiveDate || !item?.category || !item?.note);
+  const missingSearchFields = standards.filter(item => !Array.isArray(item?.useCases) || item.useCases.length === 0 || !Array.isArray(item?.keywords) || item.keywords.length === 0);
+  const missingClauses = standards.filter(item => !Array.isArray(item?.clauses) || item.clauses.length === 0);
+  const allClauses = standards.flatMap(item => item?.clauses ?? []);
+  const invalidClauses = standards.flatMap(item => (item?.clauses ?? [])
+    .filter(clause => !clause?.id
+      || !clause?.standardCode
+      || !clause?.standardTitle
+      || !clause?.clauseNo
+      || !clause?.category
+      || !clause?.title
+      || !clause?.appliesTo
+      || !clause?.requirement
+      || !Array.isArray(clause?.numericValues)
+      || clause.numericValues.length === 0
+      || !Array.isArray(clause?.keywords)
+      || clause.keywords.length === 0
+      || !clause?.sourceName
+      || !isValidHttpUrl(clause?.sourceUrl ?? '')
+      || !/^\d{4}-\d{2}-\d{2}$/.test(clause?.verifiedAt ?? ''))
+    .map(clause => `${item?.id ?? '(unknown)'} -> ${clause?.id ?? '(missing clause id)'}`));
+  const duplicateClauseIds = duplicateKeys(allClauses, clause => clause?.id);
+  const vagueClauseText = allClauses.filter(clause => /需复核|应核查|回到正式条文|关键尺寸需/.test(clause?.requirement ?? ''));
+
+  if (duplicateIds.length) {
+    report.errors.push(`SEED_STANDARDS has ${duplicateIds.length} duplicate ids`);
+  }
+
+  if (missingFields.length) {
+    report.errors.push(`SEED_STANDARDS has ${missingFields.length} entries with missing required fields`);
+  }
+
+  if (missingSearchFields.length) {
+    report.errors.push(`SEED_STANDARDS has ${missingSearchFields.length} entries without use cases or keywords`);
+  }
+
+  if (missingClauses.length) {
+    report.errors.push(`SEED_STANDARDS has ${missingClauses.length} entries without clause quick references`);
+  }
+
+  if (duplicateClauseIds.length) {
+    report.errors.push(`SEED_STANDARDS has ${duplicateClauseIds.length} duplicate clause ids`);
+  }
+
+  if (allClauses.length < 150) {
+    report.warnings.push(`SEED_STANDARDS has ${allClauses.length} clause quick references; target is about 150 after more verifiable source text is provided`);
+  }
+
+  if (allClauses.length < 60) {
+    report.errors.push(`SEED_STANDARDS has only ${allClauses.length} clause quick references; expected at least 60 usable clauses`);
+  }
+
+  for (const clause of vagueClauseText) {
+    report.errors.push(`SEED_STANDARDS vague clause requirement: ${clause?.id ?? '(unknown)'}`);
+  }
+
+  for (const invalid of invalidClauses) {
+    report.errors.push(`SEED_STANDARDS invalid clause quick reference: ${invalid}`);
+  }
+
+  if (missingOfficialUrls.length) {
+    report.errors.push(`SEED_STANDARDS has ${missingOfficialUrls.length} entries without official source URLs`);
+  }
+
+  for (const invalid of invalidOfficialUrls) {
+    report.errors.push(`SEED_STANDARDS invalid official URL: ${invalid}`);
+  }
+
+  if (missingVerification.length) {
+    report.errors.push(`SEED_STANDARDS has ${missingVerification.length} entries without YYYY-MM-DD verification dates`);
+  }
+
+  report.notes.push(`SEED_STANDARDS: ${standards.length} quick references, ${allClauses.length} clauses`);
+  summarizeCounts('Standard categories', countBy(standards, item => item?.category));
+  summarizeCounts('Standard clause categories', countBy(allClauses, item => item?.category));
 }
 
 function checkReadings() {
@@ -237,6 +450,7 @@ checkArchipedia();
 checkResources();
 checkReadings();
 checkCompetitions();
+checkStandards();
 
 console.log('Content health report');
 console.log('=====================');

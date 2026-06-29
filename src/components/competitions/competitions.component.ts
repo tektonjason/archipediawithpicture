@@ -50,15 +50,15 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
       </div>
 
       <!-- Content -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2">
+      <div class="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2 py-2 md:-mx-3 md:px-3">
 
         <!-- Disclaimer & Useful Links -->
         <div class="mb-8 space-y-4 max-w-5xl mx-auto">
           <!-- Disclaimer -->
-          <div *ngIf="showDisclaimer()" class="ui-alert-warning flex gap-3 items-center pr-2 group transition-all">
-            <svg lucideAlertTriangle class="w-5 h-5 text-amber-500 shrink-0" [strokeWidth]="2"></svg>
+          <div *ngIf="showDisclaimer()" class="ui-alert-info flex gap-3 items-center pr-2 group transition-all">
+            <svg lucideInfo class="w-5 h-5 text-blue-300 shrink-0" [strokeWidth]="2"></svg>
             <p class="flex-1">相关竞赛的信息整理于2026年1月，实际情况可能与本页面内容不同，请以官方文件或学校通知为准。</p>
-            <button (click)="showDisclaimer.set(false)" class="text-amber-500/50 hover:text-amber-500 transition-colors p-1 rounded hover:bg-amber-500/10 shrink-0 flex items-center justify-center">
+            <button (click)="showDisclaimer.set(false)" class="text-blue-200/50 hover:text-blue-200 transition-colors p-1 rounded hover:bg-blue-500/10 shrink-0 flex items-center justify-center">
               <svg lucideX class="w-4 h-4" [strokeWidth]="2"></svg>
             </button>
           </div>
@@ -101,7 +101,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
           </div>
 
           <!-- Grid View -->
-          <div *ngIf="viewMode() === 'grid' && sortedCompetitions().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
+          <div *ngIf="viewMode() === 'grid' && sortedCompetitions().length > 0" class="grid grid-cols-1 gap-4 pb-20 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <div *ngFor="let comp of sortedCompetitions()" (click)="dataService.openExternalModal(comp.url)" class="ui-card ui-card-hover p-3 md:p-5 group flex flex-col h-full relative cursor-pointer" appGsapCardHover>
               <div class="flex items-start justify-between mb-2 md:mb-3">
                 <span [class]="getLevelClass(comp.level)">
@@ -140,7 +140,7 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
 
           <!-- Calendar View -->
           <div *ngIf="viewMode() === 'calendar' && sortedCompetitions().length > 0" class="flex flex-col gap-8 pb-20">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
               <div *ngFor="let m of months" 
                 class="aspect-[3/4] md:aspect-square bg-surface border rounded-card p-3 md:p-5 relative cursor-pointer transition-all hover:border-line-strong group flex flex-col overflow-hidden"
                 appGsapCardHover

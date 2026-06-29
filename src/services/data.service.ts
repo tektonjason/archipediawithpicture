@@ -32,6 +32,56 @@ export interface Link {
   category: string;
   description: string;
   tags?: string[];
+  imageUrl?: string;
+  imageAlt?: string;
+  previewSourceUrl?: string;
+  featuredTags?: string[];
+}
+
+export type FavoriteKind = 'entry' | 'reading' | 'resource' | 'standard';
+
+export interface ContentFavorite {
+  kind: FavoriteKind;
+  id: string;
+  savedAt: string;
+}
+
+export interface ContentHistoryItem {
+  kind: FavoriteKind;
+  id: string;
+  visitedAt: string;
+}
+
+export interface StandardClause {
+  id: string;
+  standardCode: string;
+  standardTitle: string;
+  clauseNo: string;
+  category: string;
+  title: string;
+  appliesTo: string;
+  requirement: string;
+  numericValues: string[];
+  keywords: string[];
+  sourceName: string;
+  sourceUrl: string;
+  verifiedAt: string;
+  note?: string;
+}
+
+export interface StandardQuickRef {
+  id: string;
+  title: string;
+  code: string;
+  status: string;
+  effectiveDate: string;
+  category: string;
+  useCases: string[];
+  keywords: string[];
+  officialUrls: string[];
+  verifiedAt: string;
+  note: string;
+  clauses: StandardClause[];
 }
 
 export interface Reading {
@@ -138,36 +188,49 @@ export class DataService {
   // --- Data Stores ---
   entries = signal<Entry[]>([]);
   favorites = signal<string[]>([]);
+  favoriteItems = signal<ContentFavorite[]>([]);
   history = signal<string[]>([]);
+  historyItems = signal<ContentHistoryItem[]>([]);
+  entryNotes = signal<Record<string, string>>({});
+  standardClauseNotes = signal<Record<string, string>>({});
   webLinks = signal<Link[]>([]);
   readings = signal<Reading[]>([]);
   competitions = signal<Competition[]>([]);
+  standards = signal<StandardQuickRef[]>([]);
   encyclopediaLoaded = signal(false);
   readingsLoaded = signal(false);
   resourcesLoaded = signal(false);
   competitionsLoaded = signal(false);
+  standardsLoaded = signal(false);
   encyclopediaLoading = signal(false);
   readingsLoading = signal(false);
   resourcesLoading = signal(false);
   competitionsLoading = signal(false);
+  standardsLoading = signal(false);
 
   private encyclopediaLoadPromise?: Promise<void>;
   private readingsLoadPromise?: Promise<void>;
   private resourcesLoadPromise?: Promise<void>;
   private competitionsLoadPromise?: Promise<void>;
+  private standardsLoadPromise?: Promise<void>;
 
   // --- Encyclopedia View State ---
   encyclopediaScrollPosition = signal<number>(0);
   encyclopediaDisplayLimit = signal<number>(50);
   encyclopediaSelectedCategory = signal<string>('home');
   encyclopediaViewMode = signal<'grid' | 'list'>('grid');
+  resourcesViewMode = signal<'list' | 'cards'>('list');
 
   constructor() {
     this.initLayout();
     this.loadPreferencesFromStorage();
 
     effect(() => localStorage.setItem('arch_favorites', JSON.stringify(this.favorites())));
+    effect(() => localStorage.setItem('arch_content_favorites', JSON.stringify(this.favoriteItems())));
     effect(() => localStorage.setItem('arch_history', JSON.stringify(this.history())));
+    effect(() => localStorage.setItem('arch_content_history', JSON.stringify(this.historyItems())));
+    effect(() => localStorage.setItem('arch_entry_notes_v1', JSON.stringify(this.entryNotes())));
+    effect(() => localStorage.setItem('arch_standard_clause_notes_v1', JSON.stringify(this.standardClauseNotes())));
     effect(() => {
       if (this.encyclopediaLoaded()) {
         localStorage.setItem('arch_entries', JSON.stringify(this.entries()));
@@ -179,6 +242,7 @@ export class DataService {
       }
     });
     effect(() => localStorage.setItem('arch_view_mode', this.encyclopediaViewMode()));
+    effect(() => localStorage.setItem('arch_resources_view_mode', this.resourcesViewMode()));
   }
 
   private initLayout() {
@@ -275,23 +339,105 @@ export class DataService {
 
   // --- Favorites ---
   toggleFavorite(id: string) {
-    this.favorites.update(favs => {
-      if (favs.includes(id)) return favs.filter(f => f !== id);
-      return [...favs, id];
-    });
+    this.toggleFavoriteItem('entry', id);
   }
 
   isFavorite(id: string) {
-    return computed(() => this.favorites().includes(id));
+    return computed(() => this.favoriteItems().some(item => item.kind === 'entry' && item.id === id));
+  }
+
+  toggleFavoriteItem(kind: FavoriteKind, id: string) {
+    if (!id) return;
+
+    let nextItems: ContentFavorite[] = [];
+    this.favoriteItems.update(items => {
+      const exists = items.some(item => item.kind === kind && item.id === id);
+      nextItems = exists
+        ? items.filter(item => !(item.kind === kind && item.id === id))
+        : [...items, { kind, id, savedAt: new Date().toISOString() }];
+      return nextItems;
+    });
+
+    this.syncLegacyEntryFavorites(nextItems);
+  }
+
+  isFavoriteItem(kind: FavoriteKind, id: string) {
+    return computed(() => this.favoriteItems().some(item => item.kind === kind && item.id === id));
+  }
+
+  // --- Entry Notes ---
+  getEntryNote(id: string): string {
+    return this.entryNotes()[id] ?? '';
+  }
+
+  hasEntryNote(id: string): boolean {
+    return this.getEntryNote(id).trim().length > 0;
+  }
+
+  setEntryNote(id: string, note: string) {
+    if (!id) return;
+    const value = note.trim();
+    this.entryNotes.update(notes => {
+      const next = { ...notes };
+      if (value) {
+        next[id] = value;
+      } else {
+        delete next[id];
+      }
+      return next;
+    });
+  }
+
+  // --- Standard Clause Notes ---
+  getStandardClauseNote(id: string): string {
+    return this.standardClauseNotes()[id] ?? '';
+  }
+
+  hasStandardClauseNote(id: string): boolean {
+    return this.getStandardClauseNote(id).trim().length > 0;
+  }
+
+  setStandardClauseNote(id: string, note: string) {
+    if (!id) return;
+    const value = note.trim();
+    this.standardClauseNotes.update(notes => {
+      const next = { ...notes };
+      if (value) {
+        next[id] = value;
+      } else {
+        delete next[id];
+      }
+      return next;
+    });
   }
 
   // --- History ---
   addToHistory(term: string) {
+    const entry = this.entries().find(item => item.term === term || item.id === term);
+    if (entry) {
+      this.addHistoryItem('entry', entry.id);
+      return;
+    }
+
     this.history.update(h => [term, ...h.filter(t => t !== term)].slice(0, 50));
+  }
+
+  addHistoryItem(kind: FavoriteKind, id: string) {
+    if (!id) return;
+    let nextItems: ContentHistoryItem[] = [];
+    this.historyItems.update(items => {
+      nextItems = [
+        { kind, id, visitedAt: new Date().toISOString() },
+        ...items.filter(item => !(item.kind === kind && item.id === id))
+      ].slice(0, 80);
+      return nextItems;
+    });
+    this.syncLegacyEntryHistory(nextItems);
   }
 
   clearHistory() {
     this.history.set([]);
+    this.historyItems.set([]);
   }
 
   // --- Links ---
@@ -305,6 +451,10 @@ export class DataService {
 
   updateLink(link: Link) {
       this.webLinks.update(l => l.map(i => i.id === link.id ? link : i));
+  }
+
+  getResourcePreview(link: Link): string {
+    return link.imageUrl || `/images/resources/${link.id}.webp`;
   }
 
   // --- Image Handling ---
@@ -360,13 +510,129 @@ export class DataService {
     try {
       localStorage.removeItem('arch_chat');
       const f = localStorage.getItem('arch_favorites');
-      if (f) this.favorites.set(JSON.parse(f));
+      const legacyFavorites = f ? this.parseStringArray(f) : [];
+      const contentFavorites = localStorage.getItem('arch_content_favorites');
+      if (contentFavorites) {
+        const parsed = this.parseContentFavorites(contentFavorites);
+        this.favoriteItems.set(parsed);
+        this.syncLegacyEntryFavorites(parsed);
+      } else if (legacyFavorites.length) {
+        const migrated = legacyFavorites.map(id => ({
+          kind: 'entry' as const,
+          id,
+          savedAt: new Date().toISOString()
+        }));
+        this.favoriteItems.set(migrated);
+        this.favorites.set(legacyFavorites);
+      }
       const h = localStorage.getItem('arch_history');
-      if (h) this.history.set(JSON.parse(h));
+      if (h) this.history.set(this.parseStringArray(h));
+      const contentHistory = localStorage.getItem('arch_content_history');
+      if (contentHistory) {
+        this.historyItems.set(this.parseContentHistory(contentHistory));
+      }
+      const entryNotes = localStorage.getItem('arch_entry_notes_v1');
+      if (entryNotes) {
+        this.entryNotes.set(this.parseNotesRecord(entryNotes));
+      }
+      const standardNotes = localStorage.getItem('arch_standard_clause_notes_v1');
+      if (standardNotes) {
+        this.standardClauseNotes.set(this.parseNotesRecord(standardNotes));
+      }
       const vm = localStorage.getItem('arch_view_mode');
       if (vm) this.encyclopediaViewMode.set(vm as 'grid' | 'list');
+      const rvm = localStorage.getItem('arch_resources_view_mode');
+      if (rvm === 'list' || rvm === 'cards') this.resourcesViewMode.set(rvm);
     } catch (err) {
       console.error('Failed to load storage', err);
+    }
+  }
+
+  private parseStringArray(value: string): string[] {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(item => typeof item === 'string') : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private parseContentFavorites(value: string): ContentFavorite[] {
+    try {
+      const parsed = JSON.parse(value);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item): item is ContentFavorite => {
+        return item &&
+          (item.kind === 'entry' || item.kind === 'reading' || item.kind === 'resource' || item.kind === 'standard') &&
+          typeof item.id === 'string' &&
+          typeof item.savedAt === 'string';
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  private parseContentHistory(value: string): ContentHistoryItem[] {
+    try {
+      const parsed = JSON.parse(value);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item): item is ContentHistoryItem => {
+        return item &&
+          (item.kind === 'entry' || item.kind === 'reading' || item.kind === 'resource' || item.kind === 'standard') &&
+          typeof item.id === 'string' &&
+          typeof item.visitedAt === 'string';
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  private syncLegacyEntryFavorites(items: ContentFavorite[]) {
+    this.favorites.set(items.filter(item => item.kind === 'entry').map(item => item.id));
+  }
+
+  private parseNotesRecord(value: string): Record<string, string> {
+    try {
+      const parsed = JSON.parse(value);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+      return Object.entries(parsed).reduce<Record<string, string>>((acc, [key, note]) => {
+        if (typeof key === 'string' && typeof note === 'string') {
+          acc[key] = note;
+        }
+        return acc;
+      }, {});
+    } catch {
+      return {};
+    }
+  }
+
+  private syncLegacyEntryHistory(items: ContentHistoryItem[]) {
+    const entries = new Map(this.entries().map(entry => [entry.id, entry.term]));
+    this.history.set(items
+      .filter(item => item.kind === 'entry')
+      .map(item => entries.get(item.id) ?? item.id));
+  }
+
+  private migrateLegacyEntryHistory() {
+    if (this.historyItems().length || !this.history().length) return;
+
+    const entries = this.entries();
+    const now = Date.now();
+    const migrated = this.history()
+      .map((term, index) => {
+        const entry = entries.find(item => item.term === term || item.id === term);
+        if (!entry) return null;
+        return {
+          kind: 'entry' as const,
+          id: entry.id,
+          visitedAt: new Date(now - index * 1000).toISOString()
+        };
+      })
+      .filter((item): item is ContentHistoryItem => !!item);
+
+    if (migrated.length) {
+      this.historyItems.set(migrated);
+      this.syncLegacyEntryHistory(migrated);
     }
   }
 
@@ -386,6 +652,7 @@ export class DataService {
           }
         }
         this.seedArchipediaData(ARCHIPEDIA_ROWS, CATEGORY_IMAGE_CONFIG);
+        this.migrateLegacyEntryHistory();
         this.encyclopediaLoaded.set(true);
       })
       .finally(() => {
@@ -458,6 +725,24 @@ export class DataService {
     return this.competitionsLoadPromise;
   }
 
+  async ensureStandardsLoaded(): Promise<void> {
+    if (this.standardsLoaded()) return;
+    if (this.standardsLoadPromise) return this.standardsLoadPromise;
+
+    this.standardsLoading.set(true);
+    this.standardsLoadPromise = import('../data/standards-seed')
+      .then(({ SEED_STANDARDS }) => {
+        this.standards.set(SEED_STANDARDS);
+        this.standardsLoaded.set(true);
+      })
+      .finally(() => {
+        this.standardsLoading.set(false);
+        this.standardsLoadPromise = undefined;
+      });
+
+    return this.standardsLoadPromise;
+  }
+
   private syncResources(seedLinks: Link[]) {
     const currentLinks = this.webLinks();
     const currentMap = new Map<string, Link>();
@@ -468,7 +753,13 @@ export class DataService {
     let hasChanges = false;
     const merged = [...currentLinks];
 
-    seedLinks.forEach(seed => {
+    seedLinks.forEach(seedLink => {
+      const seed: Link = {
+        ...seedLink,
+        imageUrl: seedLink.imageUrl ?? `/images/resources/${seedLink.id}.webp`,
+        imageAlt: seedLink.imageAlt ?? `${seedLink.title} 资源预览`,
+        previewSourceUrl: seedLink.previewSourceUrl ?? seedLink.url
+      };
       if (!currentMap.has(seed.id)) {
         merged.push(seed);
         hasChanges = true;
@@ -476,12 +767,17 @@ export class DataService {
         const existing = currentMap.get(seed.id);
         if (existing) {
           const tagsChanged = JSON.stringify(existing.tags) !== JSON.stringify(seed.tags);
+          const featuredTagsChanged = JSON.stringify(existing.featuredTags) !== JSON.stringify(seed.featuredTags);
           if (
             existing.category !== seed.category ||
             existing.url !== seed.url ||
             existing.title !== seed.title ||
             existing.description !== seed.description ||
-            tagsChanged
+            existing.imageUrl !== seed.imageUrl ||
+            existing.imageAlt !== seed.imageAlt ||
+            existing.previewSourceUrl !== seed.previewSourceUrl ||
+            tagsChanged ||
+            featuredTagsChanged
           ) {
             const idx = merged.findIndex(m => m.id === seed.id);
             if (idx > -1) {

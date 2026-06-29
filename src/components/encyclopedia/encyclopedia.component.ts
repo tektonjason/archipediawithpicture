@@ -79,10 +79,10 @@ gsap.registerPlugin(Flip);
       </div>
 
       <!-- Categories Filter -->
-      <div class="encyclopedia-categories flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient">
+      <div class="encyclopedia-categories ui-filter-rail mb-6">
         <button 
           (click)="selectCategory('home')"
-          class="ui-chip flex-shrink-0 whitespace-nowrap"
+          class="ui-filter-chip"
           [class.bg-white]="selectedCategory() === 'home'"
           [class.text-black]="selectedCategory() === 'home'"
           [class.bg-white/5]="selectedCategory() !== 'home'"
@@ -91,7 +91,7 @@ gsap.registerPlugin(Flip);
         >主页</button>
         <button 
           (click)="selectCategory('all')"
-          class="ui-chip flex-shrink-0 whitespace-nowrap"
+          class="ui-filter-chip"
           [class.bg-white]="selectedCategory() === 'all'"
           [class.text-black]="selectedCategory() === 'all'"
           [class.bg-white/5]="selectedCategory() !== 'all'"
@@ -101,7 +101,7 @@ gsap.registerPlugin(Flip);
         @for (cat of categories(); track cat) {
           <button 
             (click)="selectCategory(cat)"
-             class="ui-chip flex-shrink-0 whitespace-nowrap"
+             class="ui-filter-chip"
             [class.bg-white]="selectedCategory() === cat"
             [class.text-black]="selectedCategory() === cat"
             [class.bg-white/5]="selectedCategory() !== cat"

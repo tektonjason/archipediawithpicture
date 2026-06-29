@@ -17,8 +17,24 @@ const resourcesReady: ResolveFn<boolean> = async () => {
   return true;
 };
 
+const standardsReady: ResolveFn<boolean> = async () => {
+  await inject(DataService).ensureStandardsLoaded();
+  return true;
+};
+
 const competitionsReady: ResolveFn<boolean> = async () => {
   await inject(DataService).ensureCompetitionsLoaded();
+  return true;
+};
+
+const userReady: ResolveFn<boolean> = async () => {
+  const data = inject(DataService);
+  await Promise.all([
+    data.ensureEncyclopediaLoaded(),
+    data.ensureReadingsLoaded(),
+    data.ensureResourcesLoaded(),
+    data.ensureStandardsLoaded()
+  ]);
   return true;
 };
 
@@ -46,6 +62,17 @@ export const routes: Routes = [
     resolve: { data: resourcesReady },
     loadComponent: () => import('./components/resources/resources.component')
       .then(module => module.ResourcesComponent)
+  },
+  {
+    path: 'services',
+    loadComponent: () => import('./components/services/resource-services.component')
+      .then(module => module.ResourceServicesComponent)
+  },
+  {
+    path: 'standards',
+    resolve: { data: standardsReady },
+    loadComponent: () => import('./components/standards/standards.component')
+      .then(module => module.StandardsComponent)
   },
   {
     path: 'readings',
@@ -81,7 +108,7 @@ export const routes: Routes = [
   },
   {
     path: 'user',
-    resolve: { data: encyclopediaReady },
+    resolve: { data: userReady },
     loadComponent: () => import('./components/user/user-dashboard.component')
       .then(module => module.UserDashboardComponent)
   },

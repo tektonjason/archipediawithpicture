@@ -96,7 +96,30 @@
   }
 
   .ui-chip {
-    @apply inline-flex items-center rounded-full border border-transparent px-4 py-1.5 text-sm font-medium transition-all;
+    @apply inline-flex items-center rounded-full border border-transparent px-4 py-1.5 text-sm font-medium leading-none transition-all;
+  }
+
+  .ui-filter-rail {
+    @apply flex flex-nowrap items-start gap-2 shrink-0 overflow-x-auto overflow-y-visible custom-scrollbar;
+    min-height: 72px;
+    padding: 16px 12px 18px;
+    scrollbar-gutter: stable;
+    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 22px), transparent);
+    mask-image: linear-gradient(to right, black 0, black calc(100% - 22px), transparent);
+  }
+
+  .ui-filter-row {
+    @apply flex flex-none flex-nowrap items-center gap-2;
+    min-height: 40px;
+    padding: 2px 4px 4px 0;
+  }
+
+  .ui-filter-chip {
+    @apply ui-chip h-10 min-h-10 shrink-0 whitespace-nowrap px-4;
+  }
+
+  .ui-filter-chip-sm {
+    @apply ui-filter-chip h-9 min-h-9 px-3 text-xs;
   }
 
   .ui-chip-active {

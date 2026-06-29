@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type { Entry, Reading } from './data.service';
+import type { Entry, Link, Reading } from './data.service';
 
 const CARD_WIDTH = 1200;
 const CARD_HEIGHT = 1600;
@@ -9,8 +9,7 @@ const SITE_URL = 'www.archipedia.top';
 export class ShareCardService {
   async generateEntryCard(entry: Entry, url: string): Promise<Blob> {
     const canvas = this.createCanvas();
-    const context = canvas.getContext('2d');
-    if (!context) throw new Error('Canvas is unavailable');
+    const context = this.getContext(canvas);
 
     this.drawBackground(context);
     await this.drawHeroImage(context, entry.imageUrl, 80, 80, 1040, 650);
@@ -18,7 +17,7 @@ export class ShareCardService {
 
     context.fillStyle = '#f8fafc';
     context.font = '700 74px "Microsoft YaHei", sans-serif';
-    this.drawWrappedText(context, entry.term, 80, 850, 760, 92, 2);
+    this.drawWrappedText(context, entry.term, 80, 850, 760, 88, 2);
 
     context.fillStyle = '#94a3b8';
     context.font = 'italic 34px Georgia, serif';
@@ -30,34 +29,33 @@ export class ShareCardService {
     this.drawWrappedText(context, entry.definition, 80, 1260, 760, 52, 4);
 
     await this.drawQr(context, url, 870, 1120, 250);
-    context.fillStyle = '#64748b';
-    context.font = '24px "Microsoft YaHei", sans-serif';
-    context.textAlign = 'center';
-    context.fillText('扫码阅读完整词条', 995, 1436);
+    this.drawQrCaption(context, '扫码阅读完整词条', 1448);
 
     return this.toBlob(canvas);
   }
 
   async generateReadingCard(reading: Reading, url: string): Promise<Blob> {
     const canvas = this.createCanvas();
-    const context = canvas.getContext('2d');
-    if (!context) throw new Error('Canvas is unavailable');
+    const context = this.getContext(canvas);
 
     this.drawBackground(context);
     await this.drawBookCover(context, reading.imageUrl, 80, 120, 480, 720);
     this.drawBrand(context);
 
+    const textX = 630;
+    const textWidth = 490;
+
     context.fillStyle = '#f8fafc';
     context.font = '700 66px "Microsoft YaHei", sans-serif';
-    this.drawWrappedText(context, reading.title, 630, 220, 490, 82, 4);
+    this.drawWrappedText(context, reading.title, textX, 220, textWidth, 76, 4);
 
     context.fillStyle = '#94a3b8';
     context.font = '34px "Microsoft YaHei", sans-serif';
-    this.drawWrappedText(context, reading.author || reading.publisher, 630, 600, 490, 48, 3);
+    this.drawWrappedText(context, reading.author || reading.publisher, textX, 600, textWidth, 48, 3);
 
     context.fillStyle = '#cbd5e1';
     context.font = '28px "Microsoft YaHei", sans-serif';
-    this.drawWrappedText(context, reading.publisher, 630, 780, 490, 42, 2);
+    this.drawWrappedText(context, reading.publisher, textX, 780, textWidth, 42, 2);
 
     let tagX = 80;
     for (const tag of reading.tags.slice(0, 4)) {
@@ -69,10 +67,36 @@ export class ShareCardService {
     this.drawWrappedText(context, reading.description, 80, 1080, 720, 50, 5);
 
     await this.drawQr(context, url, 870, 1110, 250);
-    context.fillStyle = '#64748b';
-    context.font = '24px "Microsoft YaHei", sans-serif';
-    context.textAlign = 'center';
-    context.fillText('扫码打开读物详情', 995, 1426);
+    this.drawQrCaption(context, '扫码打开读物详情', 1442);
+
+    return this.toBlob(canvas);
+  }
+
+  async generateResourceCard(link: Link, url: string): Promise<Blob> {
+    const canvas = this.createCanvas();
+    const context = this.getContext(canvas);
+
+    this.drawBackground(context);
+    this.drawBrand(context);
+
+    const preview = link.imageUrl || `/images/resources/${link.id}.webp`;
+    await this.drawHeroImage(context, preview, 80, 80, 1040, 650);
+
+    context.fillStyle = '#f8fafc';
+    context.font = '700 72px "Microsoft YaHei", sans-serif';
+    this.drawWrappedText(context, link.title, 80, 850, 760, 88, 3);
+
+    this.drawPill(context, link.category, 80, 1110);
+    context.fillStyle = '#94a3b8';
+    context.font = '28px Arial, sans-serif';
+    this.drawWrappedText(context, this.cleanUrl(link.url), 80, 1195, 760, 42, 1);
+
+    context.fillStyle = '#cbd5e1';
+    context.font = '31px "Microsoft YaHei", sans-serif';
+    this.drawWrappedText(context, link.description, 80, 1275, 760, 50, 3);
+
+    await this.drawQr(context, url, 870, 1110, 250);
+    this.drawQrCaption(context, '扫码打开建筑资源', 1442);
 
     return this.toBlob(canvas);
   }
@@ -104,6 +128,12 @@ export class ShareCardService {
     return canvas;
   }
 
+  private getContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas is unavailable');
+    return context;
+  }
+
   private drawBackground(context: CanvasRenderingContext2D): void {
     context.fillStyle = '#0f1013';
     context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
@@ -123,6 +153,13 @@ export class ShareCardService {
     context.fillStyle = '#94a3b8';
     context.font = '24px Arial, sans-serif';
     context.fillText(SITE_URL, 80, 1534);
+  }
+
+  private drawQrCaption(context: CanvasRenderingContext2D, text: string, y: number): void {
+    context.fillStyle = '#64748b';
+    context.font = '24px "Microsoft YaHei", sans-serif';
+    context.textAlign = 'center';
+    context.fillText(text, 995, y);
   }
 
   private async drawHeroImage(
@@ -180,6 +217,7 @@ export class ShareCardService {
     return new Promise(resolve => {
       const image = new Image();
       image.decoding = 'async';
+      image.crossOrigin = 'anonymous';
       image.onload = () => resolve(image);
       image.onerror = () => resolve(null);
       image.src = source;
@@ -256,6 +294,7 @@ export class ShareCardService {
   }
 
   private drawPill(context: CanvasRenderingContext2D, text: string, x: number, y: number): number {
+    context.textAlign = 'left';
     context.font = '26px "Microsoft YaHei", sans-serif';
     const width = Math.ceil(context.measureText(text).width) + 40;
     context.fillStyle = '#202a3c';
@@ -263,6 +302,15 @@ export class ShareCardService {
     context.fillStyle = '#bfdbfe';
     context.fillText(text, x + 20, y);
     return width;
+  }
+
+  private cleanUrl(url: string): string {
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname.replace(/^www\./, '');
+    } catch {
+      return url;
+    }
   }
 
   private toBlob(canvas: HTMLCanvasElement): Promise<Blob> {

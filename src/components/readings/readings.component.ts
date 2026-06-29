@@ -83,10 +83,10 @@ interface ReadingTheme {
       </div>
 
       <!-- Tags Filter -->
-      <div class="readings-tags-filter flex flex-nowrap gap-2 mb-6 shrink-0 overflow-x-auto pb-2 custom-scrollbar mask-gradient justify-start px-1">
+      <div class="readings-tags-filter ui-filter-rail mb-6">
         <button 
           (click)="selectTag('all')"
-          class="ui-chip flex-shrink-0 whitespace-nowrap"
+          class="ui-filter-chip"
           [class.bg-white]="selectedTag() === 'all'"
           [class.text-black]="selectedTag() === 'all'"
           [class.bg-white/5]="selectedTag() !== 'all'"
@@ -96,7 +96,7 @@ interface ReadingTheme {
         @for (tag of allTags(); track tag) {
           <button 
             (click)="selectTag(tag)"
-            class="ui-chip flex-shrink-0 whitespace-nowrap"
+            class="ui-filter-chip"
             [class.bg-white]="selectedTag() === tag"
             [class.text-black]="selectedTag() === tag"
             [class.bg-white/5]="selectedTag() !== tag"
@@ -120,11 +120,11 @@ interface ReadingTheme {
           }
         </div>
 
-        <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 custom-scrollbar mask-gradient px-1">
+        <div class="ui-filter-rail">
           @for (theme of readingThemes; track theme.id) {
             <button
               (click)="selectTheme(theme.id)"
-              class="ui-chip flex-shrink-0 whitespace-nowrap"
+              class="ui-filter-chip"
               [class.bg-blue-500]="selectedTheme() === theme.id"
               [class.text-white]="selectedTheme() === theme.id"
               [class.border-blue-400]="selectedTheme() === theme.id"
@@ -172,10 +172,10 @@ interface ReadingTheme {
       </div>
 
       <!-- Content Area -->
-      <div class="flex-1 relative overflow-hidden">
+      <div class="flex-1 relative overflow-hidden -mx-2 px-2 md:-mx-3 md:px-3">
         <div
           #scrollContainer
-          class="h-full overflow-y-auto pb-20 hide-scrollbar"
+          class="h-full overflow-y-auto px-2 pb-20 pt-2 hide-scrollbar md:px-3"
           [class.pr-10]="filteredReadings().length > 0"
           (scroll)="onScroll()"
           (wheel)="onReadingWheel($event)"
@@ -198,7 +198,7 @@ interface ReadingTheme {
             @for (group of groupedReadings(); track group.letter) {
               <div class="relative mb-8">
                 <div [attr.data-letter]="group.letter" class="letter-anchor absolute -top-4"></div>
-                <h2 class="text-xl font-bold text-gray-500 mb-4 sticky top-0 bg-app/90 backdrop-blur-sm z-10 py-2 border-b border-line-soft">
+                <h2 class="mb-4 border-b border-line-soft py-2 text-xl font-bold text-gray-500">
                   {{ group.letter }}
                 </h2>
                 
@@ -315,7 +315,7 @@ interface ReadingTheme {
 
                <!-- Right: Content -->
                <div class="reading-modal-content flex-1 flex flex-col overflow-hidden min-h-0">
-                  <div class="reading-modal-scroll flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col min-h-0">
+                  <div #readingModalScroll class="reading-modal-scroll flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col min-h-0" (wheel)="onReadingModalWheel($event)">
                   <h2 class="reading-modal-stagger text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ item.title }}</h2>
                   <p class="reading-modal-stagger text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
                   
@@ -330,7 +330,7 @@ interface ReadingTheme {
 
                     <div class="mt-6">
                       <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细介绍</h4>
-                      <div class="reading-detail-scrollbox overflow-y-auto custom-scrollbar pr-2">
+                      <div #readingDetailScrollbox class="reading-detail-scrollbox overflow-y-auto custom-scrollbar pr-2" (wheel)="onReadingDetailWheel($event)">
                         <p class="text-sm text-gray-300 leading-relaxed font-serif whitespace-pre-wrap">{{ item.detailContent }}</p>
                       </div>
                     </div>
@@ -383,6 +383,16 @@ interface ReadingTheme {
                        <span>在线搜索</span>
                     </a>
                     <button
+                      (click)="toggleReadingFavorite(item)"
+                      class="reading-action-icon ui-btn-secondary"
+                      [class.text-yellow-300]="isReadingFavorite(item)"
+                      [title]="isReadingFavorite(item) ? '取消收藏' : '收藏读物'"
+                      [attr.aria-label]="isReadingFavorite(item) ? '取消收藏' : '收藏读物'"
+                      [appGsapTooltip]="isReadingFavorite(item) ? '取消收藏' : '收藏读物'"
+                    >
+                      <svg lucideStar class="w-5 h-5" [strokeWidth]="2" [attr.fill]="isReadingFavorite(item) ? 'currentColor' : 'none'"></svg>
+                    </button>
+                    <button
                       (click)="copyCitation(item)"
                       class="reading-action-icon ui-btn-secondary"
                       title="复制引用"
@@ -392,13 +402,13 @@ interface ReadingTheme {
                       <svg lucideCopy class="w-5 h-5" [strokeWidth]="2"></svg>
                     </button>
                     <button
-                      (click)="downloadCitation(item)"
+                      (click)="openReadingFeedback(item)"
                       class="reading-action-icon ui-btn-secondary"
-                      title="下载引用"
-                      aria-label="下载引用"
-                      appGsapTooltip="下载 GB/T 引用"
+                      title="内容纠错"
+                      aria-label="内容纠错"
+                      appGsapTooltip="内容纠错"
                     >
-                      <svg lucideDownload class="w-5 h-5" [strokeWidth]="2"></svg>
+                      <svg lucideMail class="w-5 h-5" [strokeWidth]="2"></svg>
                     </button>
 
                     <div class="reading-share-wrap relative">
@@ -422,15 +432,8 @@ interface ReadingTheme {
                             }
 
                             <div class="p-1.5 flex flex-col gap-1">
-                              <button
-                                type="button"
-                                (click)="shareReadingCard(item)"
-                                [disabled]="isGeneratingCard()"
-                                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm text-gray-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                              >
-                                <div class="w-6 h-6 rounded bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
-                                  <svg lucideImage class="w-4 h-4 text-gray-200" [strokeWidth]="2"></svg>
-                                </div>
+                              <button type="button" (click)="shareReadingCard(item)" [disabled]="isGeneratingCard()" class="reading-share-menu-item">
+                                <svg lucideImage class="w-4 h-4" [strokeWidth]="2"></svg>
                                 {{ isGeneratingCard() ? '正在生成...' : '生成分享图像' }}
                               </button>
                               <div class="h-px bg-white/10 my-1"></div>
@@ -496,6 +499,50 @@ interface ReadingTheme {
                   </div>
 
                </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (showReadingFeedbackModal()) {
+        <div class="fixed inset-0 z-[65] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/70 backdrop-blur-md" (click)="closeReadingFeedback()"></div>
+          <div class="ui-modal-panel relative z-10 w-full max-w-xl overflow-hidden">
+            <div class="ui-modal-header">
+              <div class="min-w-0">
+                <h3 class="text-lg font-black text-white">读物内容纠错</h3>
+                <p class="mt-1 truncate text-xs text-gray-500">{{ feedbackReading()?.title }}</p>
+              </div>
+              <button type="button" class="ui-icon-btn" (click)="closeReadingFeedback()" aria-label="关闭">
+                <svg lucideX class="h-5 w-5" [strokeWidth]="2"></svg>
+              </button>
+            </div>
+            <div class="ui-modal-body space-y-4">
+              <div>
+                <label class="ui-label">问题类型</label>
+                <select class="ui-field" [value]="readingFeedbackType()" (change)="readingFeedbackType.set($any($event.target).value)">
+                  <option value="基础信息有误">基础信息有误</option>
+                  <option value="引用格式有误">引用格式有误</option>
+                  <option value="简介或详情有误">简介或详情有误</option>
+                  <option value="封面或链接有误">封面或链接有误</option>
+                </select>
+              </div>
+              <div>
+                <label class="ui-label">问题说明</label>
+                <textarea class="ui-field min-h-24 resize-y" [value]="readingFeedbackDescription()" (input)="readingFeedbackDescription.set($any($event.target).value)" placeholder="请说明你发现的问题"></textarea>
+              </div>
+              <div>
+                <label class="ui-label">建议改法</label>
+                <textarea class="ui-field min-h-20 resize-y" [value]="readingFeedbackSuggestion()" (input)="readingFeedbackSuggestion.set($any($event.target).value)" placeholder="可填写正确作者、出版社、ISBN、引用或说明"></textarea>
+              </div>
+              <div>
+                <label class="ui-label">参考来源</label>
+                <input class="ui-field" [value]="readingFeedbackSource()" (input)="readingFeedbackSource.set($any($event.target).value)" placeholder="ISBN 页面、出版社链接、馆藏截图等">
+              </div>
+              <div class="flex justify-end gap-3 border-t border-line pt-4">
+                <button type="button" class="ui-btn-secondary" (click)="closeReadingFeedback()">取消</button>
+                <button type="button" class="ui-btn-primary" (click)="submitReadingFeedback()">生成邮件</button>
+              </div>
             </div>
           </div>
         </div>
@@ -701,7 +748,7 @@ interface ReadingTheme {
     }
     .reading-modal-actions {
       display: grid;
-      grid-template-columns: minmax(12rem, 1fr) repeat(3, 3rem);
+      grid-template-columns: minmax(12rem, 1fr) repeat(4, 3rem);
       gap: 0.75rem;
       align-items: stretch;
       padding: 1.25rem 2rem 1.5rem;
@@ -733,6 +780,25 @@ interface ReadingTheme {
     .reading-share-menu {
       transform-origin: bottom right;
     }
+    .reading-share-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-radius: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      color: rgb(209 213 219);
+      font-size: 0.875rem;
+      text-align: left;
+      transition: color 160ms ease, background-color 160ms ease;
+    }
+    .reading-share-menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+    .reading-share-menu-item:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
     @media (max-height: 780px) and (min-width: 768px) {
       .reading-detail-scrollbox {
         max-height: clamp(6.5rem, 15svh, 10rem);
@@ -760,7 +826,7 @@ interface ReadingTheme {
         max-height: clamp(7.5rem, 22svh, 13rem);
       }
       .reading-modal-actions {
-        grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(3.25rem, 0.55fr));
+        grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(2.75rem, 0.55fr));
         gap: 0.75rem;
         padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
       }
@@ -818,6 +884,12 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   selectedReading = signal<Reading | null>(null);
   isClosing = signal(false);
   isGeneratingCard = signal(false);
+  showReadingFeedbackModal = signal(false);
+  feedbackReading = signal<Reading | null>(null);
+  readingFeedbackType = signal('基础信息有误');
+  readingFeedbackDescription = signal('');
+  readingFeedbackSuggestion = signal('');
+  readingFeedbackSource = signal('');
 
   failedImages = signal<Set<string>>(new Set());
 
@@ -894,6 +966,8 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   @ViewChild('readingModalPanel') readingModalPanel?: ElementRef<HTMLDivElement>;
   @ViewChild('readingModalCover') readingModalCover?: ElementRef<HTMLDivElement>;
   @ViewChild('readingModalActions') readingModalActions?: ElementRef<HTMLDivElement>;
+  @ViewChild('readingModalScroll') readingModalScroll?: ElementRef<HTMLDivElement>;
+  @ViewChild('readingDetailScrollbox') readingDetailScrollbox?: ElementRef<HTMLDivElement>;
   @ViewChild('readingShareMenu') readingShareMenu?: ElementRef<HTMLDivElement>;
   alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   currentLetter = signal('#');
@@ -1104,6 +1178,9 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     this.closeShareMenu();
     this.isClosing.set(false);
     this.selectedReading.set(item);
+    if (item.id) {
+      this.dataService.addHistoryItem('reading', item.id);
+    }
     if (updateRoute && item.id) {
       this.router.navigate([], {
         relativeTo: this.route,
@@ -1280,6 +1357,11 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   handleEscape() {
+    if (this.showReadingFeedbackModal()) {
+      this.closeReadingFeedback();
+      return;
+    }
+
     if (this.showShareMenu()) {
       this.closeShareMenu();
       return;
@@ -1367,6 +1449,50 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       }
       event.preventDefault();
     }
+  }
+
+  onReadingDetailWheel(event: WheelEvent) {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) return;
+
+    if (this.scrollElementByWheel(target, event)) {
+      event.stopPropagation();
+    }
+  }
+
+  onReadingModalWheel(event: WheelEvent) {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) return;
+
+    if (this.scrollElementByWheel(target, event)) {
+      event.stopPropagation();
+      return;
+    }
+
+    event.stopPropagation();
+  }
+
+  private scrollElementByWheel(element: HTMLElement, event: WheelEvent): boolean {
+    const maxScrollTop = element.scrollHeight - element.clientHeight;
+    if (maxScrollTop <= 1) return false;
+
+    const delta = this.normalizeWheelDelta(event);
+    if (!delta) return false;
+
+    const atTop = element.scrollTop <= 1;
+    const atBottom = element.scrollTop >= maxScrollTop - 1;
+    const canScroll = (delta < 0 && !atTop) || (delta > 0 && !atBottom);
+    if (!canScroll) return false;
+
+    element.scrollTop = Math.max(0, Math.min(maxScrollTop, element.scrollTop + delta));
+    event.preventDefault();
+    return true;
+  }
+
+  private normalizeWheelDelta(event: WheelEvent): number {
+    if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) return event.deltaY * 16;
+    if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) return event.deltaY * window.innerHeight;
+    return event.deltaY;
   }
 
   onReadingTouchStart(event: TouchEvent) {
@@ -1839,6 +1965,17 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     return formatGbT7714(item);
   }
 
+  isReadingFavorite(item: Reading) {
+    return Boolean(item.id && this.dataService.favoriteItems().some(favorite => favorite.kind === 'reading' && favorite.id === item.id));
+  }
+
+  toggleReadingFavorite(item: Reading) {
+    if (!item.id) return;
+    const wasFavorite = this.isReadingFavorite(item);
+    this.dataService.toggleFavoriteItem('reading', item.id);
+    this.dataService.displayToast(wasFavorite ? '已取消收藏' : '读物已收藏');
+  }
+
   async copyCitation(item: Reading) {
     try {
       await navigator.clipboard.writeText(formatGbT7714(item));
@@ -1846,11 +1983,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     } catch {
       this.dataService.displayToast('复制失败，请手动选择引用文本');
     }
-  }
-
-  downloadCitation(item: Reading) {
-    downloadTextFile(formatGbT7714(item), `${item.title}-GB-T-7714.txt`);
-    this.dataService.displayToast('引用文件已下载');
   }
 
   async shareReadingCard(item: Reading) {
@@ -1866,6 +1998,59 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.dataService.displayToast('分享卡片生成失败，请稍后重试');
     } finally {
       this.isGeneratingCard.set(false);
+    }
+  }
+
+  openReadingFeedback(item: Reading) {
+    this.feedbackReading.set(item);
+    this.readingFeedbackType.set('基础信息有误');
+    this.readingFeedbackDescription.set('');
+    this.readingFeedbackSuggestion.set('');
+    this.readingFeedbackSource.set('');
+    this.showReadingFeedbackModal.set(true);
+    this.closeShareMenu();
+  }
+
+  closeReadingFeedback() {
+    this.showReadingFeedbackModal.set(false);
+    this.feedbackReading.set(null);
+  }
+
+  async submitReadingFeedback() {
+    const item = this.feedbackReading();
+    if (!item) return;
+    const body = [
+      'ARCHIPEDIA 建筑读物纠错',
+      '',
+      `读物 ID：${item.id ?? '未设置'}`,
+      `题名：${item.title}`,
+      `作者/责任者：${item.author || '未设置'}`,
+      `出版社/来源：${item.publisher || '未设置'}`,
+      `ISBN/ISSN：${item.identifier || '未设置'}`,
+      `页面：${this.getReadingShareUrl(item)}`,
+      '',
+      `问题类型：${this.readingFeedbackType()}`,
+      `问题说明：${this.readingFeedbackDescription() || '未填写'}`,
+      `建议改法：${this.readingFeedbackSuggestion() || '未填写'}`,
+      `参考来源：${this.readingFeedbackSource() || '未填写'}`,
+      '',
+      `当前引用：${formatGbT7714(item)}`
+    ].join('\n');
+    const subject = `[Archipedia 读物纠错] ${item.title}`;
+    const mailto = `mailto:tektonjason@163.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    try {
+      window.location.href = mailto;
+      this.dataService.displayToast('已打开邮件客户端');
+    } catch {
+      try {
+        await navigator.clipboard.writeText(body);
+        this.dataService.displayToast('无法打开邮件客户端，纠错内容已复制');
+      } catch {
+        this.dataService.displayToast('无法打开邮件客户端，请手动复制纠错内容');
+      }
+    } finally {
+      this.closeReadingFeedback();
     }
   }
 
