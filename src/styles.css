@@ -41,6 +41,30 @@
     @apply text-sm md:text-base text-gray-400 leading-relaxed max-w-2xl;
   }
 
+  .ui-section-title {
+    @apply text-2xl font-black leading-tight text-white md:text-3xl;
+  }
+
+  .ui-section-summary {
+    @apply text-xs leading-relaxed text-gray-500 md:text-sm;
+  }
+
+  .ui-card-title {
+    @apply text-base font-black leading-snug text-white;
+  }
+
+  .ui-card-text {
+    @apply text-sm leading-relaxed text-gray-400;
+  }
+
+  .ui-card-meta {
+    @apply text-xs font-medium leading-relaxed text-gray-500;
+  }
+
+  .ui-panel-title {
+    @apply text-lg font-black leading-snug text-white;
+  }
+
   .ui-topbar {
     @apply p-4 pl-24 border-b border-line-soft flex items-center gap-4 bg-surface shrink-0;
   }
@@ -196,6 +220,77 @@
 
   .ui-alert-danger {
     @apply ui-alert border-red-500/25 bg-red-500/10 text-red-300;
+  }
+
+  .ui-notice {
+    @apply rounded-card border px-4 py-3 text-xs leading-relaxed md:text-sm;
+  }
+
+  .ui-notice-info {
+    @apply ui-notice border-blue-500/25 bg-blue-500/10 text-blue-100/85;
+  }
+
+  .ui-notice-title {
+    @apply mb-1.5 flex items-center gap-2 text-xs font-bold leading-none text-blue-200 md:text-xs;
+  }
+
+  .ui-notice-text {
+    @apply text-xs leading-relaxed text-blue-100/80 md:text-sm;
+  }
+
+  .services-nav-entry {
+    isolation: isolate;
+  }
+
+  .services-nav-highlight {
+    @apply pointer-events-none absolute opacity-0;
+    inset: -4px -5px;
+    z-index: 0;
+    visibility: hidden;
+  }
+
+  .services-nav-entry > svg:not(.services-nav-comet),
+  .services-nav-entry > span:not(.services-nav-highlight) {
+    @apply relative;
+    z-index: 1;
+  }
+
+  .services-nav-comet {
+    @apply block h-full w-full;
+    overflow: visible;
+  }
+
+  .services-nav-comet-glow,
+  .services-nav-comet-trail,
+  .services-nav-comet-head {
+    fill: none;
+    opacity: 0;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .services-nav-comet-glow {
+    stroke: rgba(56, 189, 248, 0.56);
+    stroke-width: 9.5;
+    filter: url(#servicesCometGlow);
+  }
+
+  .services-nav-comet-trail {
+    stroke: url(#servicesCometStroke);
+    stroke-width: 4.2;
+    filter: url(#servicesCometGlow);
+  }
+
+  .services-nav-comet-head {
+    stroke: #e0f2fe;
+    stroke-width: 6.6;
+    filter: url(#servicesCometGlow);
+  }
+
+  .services-nav-entry-active {
+    background:
+      radial-gradient(circle at 16% 50%, rgba(56, 189, 248, 0.16), transparent 52%),
+      rgba(59, 130, 246, 0.08);
   }
 
   .ui-toast {

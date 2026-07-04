@@ -39,15 +39,18 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showSplash = signal(true);
   showUpdateNotice = signal(false);
-  readonly updateNoticeDate = '2026.06.29';
-  readonly lastUpdatedDate = '2026.06.29';
+  readonly updateNoticeDate = '2026.07.01';
+  readonly lastUpdatedDate = '2026.07.01';
   readonly updateNoticeItems = [
     '首页建筑资讯支持自动获取与刷新，内容会以中文摘要展示。',
     '百科、读物与资源库支持分享卡片，便于保存和转发。',
     '新增本地笔记与统一用户中心，可集中查看收藏、历史和笔记。',
     '资源库新增卡片视图；规范速查新增常用条文、收藏、笔记与纠错反馈。'
   ];
-  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_06_29_v2';
+  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_07_01_services_v1';
+  private readonly servicesNavCometStorageKey = 'arch_services_nav_comet_seen_2026_07_03_v1';
+
+  @ViewChild('servicesNavItem', { read: ElementRef }) private servicesNavItem?: ElementRef<HTMLElement>;
 
   // Q&A Carousel Data
   qaQuestions = [
@@ -78,11 +81,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   isFooterVisible = signal(true);
 
   private sidebarTl!: gsap.core.Timeline;
+  private servicesNavCometTl?: gsap.core.Timeline;
   private mm!: gsap.MatchMedia;
   private routerEventsSub?: Subscription;
   private deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
   private hasHandledInitialNavigation = false;
   private isFirstRun = true;
+  private pendingServicesNavComet = false;
+  private servicesNavCometAttempts = 0;
+  private servicesNavCometRetryTimer?: ReturnType<typeof window.setTimeout>;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   canInstallApp = signal(false);
   currentUrl = signal('');
@@ -185,6 +192,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         gsap.set(".bar-bot", { attr: { x1: 3, y1: 14, x2: 17, y2: 14 } });
       }
     });
+
+    window.setTimeout(() => this.requestServicesNavComet(), 300);
   }
 
   ngOnDestroy() {
@@ -196,6 +205,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.routerEventsSub?.unsubscribe();
     if (this.sidebarTl) this.sidebarTl.kill();
+    this.servicesNavCometTl?.kill();
+    if (this.servicesNavCometRetryTimer) window.clearTimeout(this.servicesNavCometRetryTimer);
     if (this.mm) this.mm.revert();
   }
 
@@ -238,7 +249,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           duration: itemDuration,
           ease: "power2.out"
         }, 0)
-        .call(() => this.notifyLayoutShift());
+        .call(() => {
+          this.notifyLayoutShift();
+          this.requestServicesNavComet();
+        });
         
     } else {
       // Close Menu
@@ -376,6 +390,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   onSplashEnter() {
     this.showSplash.set(false);
     this.scheduleUpdateNotice();
+    const delay = this.prefersReducedMotion ? 80 : 720;
+    window.setTimeout(() => this.requestServicesNavComet(), delay);
   }
 
   dismissUpdateNotice() {
@@ -383,6 +399,121 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.canUseLocalStorage()) {
       localStorage.setItem(this.updateNoticeStorageKey, 'true');
     }
+    window.setTimeout(() => this.requestServicesNavComet(), 180);
+  }
+
+  private requestServicesNavComet() {
+    if (typeof window === 'undefined') return;
+    this.pendingServicesNavComet = true;
+    this.servicesNavCometAttempts = 0;
+    this.queueServicesNavCometCheck(this.prefersReducedMotion ? 20 : 80);
+  }
+
+  private queueServicesNavCometCheck(delay: number) {
+    if (this.servicesNavCometRetryTimer) window.clearTimeout(this.servicesNavCometRetryTimer);
+    this.servicesNavCometRetryTimer = window.setTimeout(() => this.playServicesNavCometIfReady(), delay);
+  }
+
+  private retryServicesNavComet() {
+    if (!this.pendingServicesNavComet) return;
+    this.servicesNavCometAttempts += 1;
+
+    if (this.servicesNavCometAttempts > 40) {
+      this.pendingServicesNavComet = false;
+      return;
+    }
+
+    this.queueServicesNavCometCheck(this.prefersReducedMotion ? 80 : 140);
+  }
+
+  private playServicesNavCometIfReady() {
+    if (!this.pendingServicesNavComet || !this.canUseLocalStorage()) return;
+    if (localStorage.getItem(this.servicesNavCometStorageKey) === 'true') {
+      this.pendingServicesNavComet = false;
+      return;
+    }
+    if (this.showSplash() || this.showUpdateNotice() || !this.dataService.isSidebarOpen()) {
+      this.retryServicesNavComet();
+      return;
+    }
+
+    const navItem = this.servicesNavItem?.nativeElement;
+    if (!navItem || navItem.offsetParent === null) {
+      this.retryServicesNavComet();
+      return;
+    }
+
+    if (this.prefersReducedMotion) {
+      this.pendingServicesNavComet = false;
+      localStorage.setItem(this.servicesNavCometStorageKey, 'true');
+      return;
+    }
+
+    const highlight = navItem.querySelector<HTMLElement>('.services-nav-highlight');
+    const cometParts = Array.from(navItem.querySelectorAll<SVGGeometryElement>(
+      '.services-nav-comet-glow, .services-nav-comet-trail, .services-nav-comet-head'
+    ));
+    if (!highlight || cometParts.length === 0) {
+      this.retryServicesNavComet();
+      return;
+    }
+
+    this.pendingServicesNavComet = false;
+    localStorage.setItem(this.servicesNavCometStorageKey, 'true');
+
+    const orbitLength = cometParts[0].getTotalLength();
+    const [glowPath, trailPath, headPath] = cometParts;
+
+    this.servicesNavCometTl?.kill();
+    navItem.classList.add('services-nav-entry-active');
+
+    gsap.set(highlight, { autoAlpha: 1 });
+    gsap.set(glowPath, {
+      strokeDasharray: `${orbitLength * 0.42} ${orbitLength}`,
+      strokeDashoffset: orbitLength,
+      autoAlpha: 0.7
+    });
+    gsap.set(trailPath, {
+      strokeDasharray: `${orbitLength * 0.26} ${orbitLength}`,
+      strokeDashoffset: orbitLength,
+      autoAlpha: 1
+    });
+    gsap.set(headPath, {
+      strokeDasharray: `${Math.max(orbitLength * 0.025, 10)} ${orbitLength}`,
+      strokeDashoffset: orbitLength,
+      autoAlpha: 1
+    });
+
+    this.servicesNavCometTl = gsap.timeline({
+      defaults: { ease: 'power2.inOut' },
+      onComplete: () => {
+        navItem.classList.remove('services-nav-entry-active');
+        gsap.set(highlight, { autoAlpha: 0 });
+        gsap.set(cometParts, { clearProps: 'strokeDasharray,strokeDashoffset,opacity,visibility' });
+      }
+    });
+
+    this.servicesNavCometTl
+      .fromTo(navItem, {
+        boxShadow: '0 0 0 rgba(56, 189, 248, 0)'
+      }, {
+        boxShadow: '0 0 34px rgba(56, 189, 248, 0.22)',
+        duration: 0.18
+      }, 0)
+      .to(cometParts, {
+        strokeDashoffset: -orbitLength,
+        duration: 1.85
+      }, 0.02)
+      .to(navItem, {
+        boxShadow: '0 0 0 rgba(56, 189, 248, 0)',
+        duration: 0.45,
+        ease: 'power1.out'
+      }, 1.35)
+      .to(highlight, {
+        autoAlpha: 0,
+        duration: 0.38,
+        ease: 'power1.out'
+      }, 1.52);
   }
 
   private scheduleUpdateNotice() {

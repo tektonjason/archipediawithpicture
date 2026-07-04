@@ -182,12 +182,14 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
                 <div class="resource-panel-clip">
                   <div class="border-t border-white/5 p-4 md:p-6">
                     @if (group.category === '院校展览') {
-                      <div class="ui-alert-info mb-6 flex gap-3">
-                        <svg lucideInfo class="h-5 w-5 shrink-0 text-blue-400" [strokeWidth]="2"></svg>
-                        <div>
-                          <strong class="mb-1 block text-blue-400">为什么要看这些院校的作品？</strong>
-                          顶尖院校的学生作品能系统呈现从概念到方案的完整思路、批判性方法与国际教学趋势，更利于提升设计视野与方法论。
+                      <div class="ui-notice-info mb-6">
+                        <div class="ui-notice-title">
+                          <svg lucideInfo class="h-4 w-4 shrink-0 text-blue-300" [strokeWidth]="2"></svg>
+                          为什么要看这些院校的作品？
                         </div>
+                        <p class="ui-notice-text">
+                          顶尖院校的学生作品能系统呈现从概念到方案的完整思路、批判性方法与国际教学趋势，更利于提升设计视野与方法论。
+                        </p>
                       </div>
                     }
 

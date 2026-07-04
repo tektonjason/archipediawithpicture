@@ -41,10 +41,6 @@
           <svg lucideFolder class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>资源库</span>
         </a>
-        <a routerLink="/services" routerLinkActive #rlaServices="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaServices.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
-          <svg lucideBriefcase class="w-5 h-5" [strokeWidth]="2"></svg>
-          <span>资源服务</span>
-        </a>
         <a routerLink="/standards" routerLinkActive #rlaStandards="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaStandards.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
           <svg lucideList class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>规范速查</span>
@@ -64,6 +60,32 @@
         <a routerLink="/user" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (isUserCenterActive() ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
           <svg lucideUser class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>用户中心</span>
+        </a>
+        <a #servicesNavItem routerLink="/services" routerLinkActive #rlaServices="routerLinkActive" [class]="'nav-item services-nav-entry relative overflow-visible px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaServices.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <span class="services-nav-highlight" aria-hidden="true">
+            <svg class="services-nav-comet" viewBox="0 0 232 44" preserveAspectRatio="none" focusable="false">
+              <defs>
+                <filter id="servicesCometGlow" x="-18%" y="-80%" width="136%" height="260%">
+                  <feGaussianBlur stdDeviation="3.6" result="blur"></feGaussianBlur>
+                  <feMerge>
+                    <feMergeNode in="blur"></feMergeNode>
+                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                  </feMerge>
+                </filter>
+                <linearGradient id="servicesCometStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0"></stop>
+                  <stop offset="34%" stop-color="#38bdf8" stop-opacity="0.45"></stop>
+                  <stop offset="76%" stop-color="#93c5fd" stop-opacity="1"></stop>
+                  <stop offset="100%" stop-color="#e0f2fe" stop-opacity="1"></stop>
+                </linearGradient>
+              </defs>
+              <rect class="services-nav-comet-glow" x="3" y="3" width="226" height="38" rx="8"></rect>
+              <rect class="services-nav-comet-trail" x="3" y="3" width="226" height="38" rx="8"></rect>
+              <rect class="services-nav-comet-head" x="3" y="3" width="226" height="38" rx="8"></rect>
+            </svg>
+          </span>
+          <svg lucideBriefcase class="w-5 h-5" [strokeWidth]="2"></svg>
+          <span>资源服务</span>
         </a>
         <a routerLink="/contact" routerLinkActive #rla7="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rla7.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
            <svg lucideInfo class="w-5 h-5" [strokeWidth]="2"></svg>

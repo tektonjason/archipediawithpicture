@@ -55,9 +55,9 @@ import { APP_UI_ICONS } from '../shared/ui-icons';
         <!-- Disclaimer & Useful Links -->
         <div class="mb-8 space-y-4 max-w-5xl mx-auto">
           <!-- Disclaimer -->
-          <div *ngIf="showDisclaimer()" class="ui-alert-info flex gap-3 items-center pr-2 group transition-all">
-            <svg lucideInfo class="w-5 h-5 text-blue-300 shrink-0" [strokeWidth]="2"></svg>
-            <p class="flex-1">相关竞赛的信息整理于2026年1月，实际情况可能与本页面内容不同，请以官方文件或学校通知为准。</p>
+          <div *ngIf="showDisclaimer()" class="ui-notice-info group flex items-center gap-3 pr-2 transition-all">
+            <svg lucideInfo class="h-4 w-4 shrink-0 text-blue-300" [strokeWidth]="2"></svg>
+            <p class="ui-notice-text flex-1">相关竞赛的信息整理于2026年1月，实际情况可能与本页面内容不同，请以官方文件或学校通知为准。</p>
             <button (click)="showDisclaimer.set(false)" class="text-blue-200/50 hover:text-blue-200 transition-colors p-1 rounded hover:bg-blue-500/10 shrink-0 flex items-center justify-center">
               <svg lucideX class="w-4 h-4" [strokeWidth]="2"></svg>
             </button>

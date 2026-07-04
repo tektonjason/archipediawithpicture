@@ -45,12 +45,12 @@ const CATEGORY_ORDER = [
         </div>
       </div>
 
-      <section class="mb-4 shrink-0 rounded-card border border-blue-400/15 bg-blue-500/10 px-3.5 py-3 text-xs leading-relaxed text-blue-100/80 md:px-4 md:text-sm">
-        <div class="mb-1.5 flex items-center gap-2 font-bold text-blue-200">
+      <section class="ui-notice-info mb-4 shrink-0">
+        <div class="ui-notice-title">
           <svg lucideInfo class="h-4 w-4 shrink-0" [strokeWidth]="2"></svg>
           使用说明
         </div>
-        <p>
+        <p class="ui-notice-text">
           用于方案初查，可按关键词、类别或规范来源定位常用条文；涉及地方规定、专项论证或审图意见时，以正式文本为准。
         </p>
       </section>
