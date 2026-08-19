@@ -1,18 +1,30 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, NgZone } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, CommonModule } from '@angular/common';
 import { DataService, Reading } from '../../services/data.service';
-import pinyin from 'pinyin';
+import { LocaleService } from '../../services/locale.service';
 import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
 import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 import { APP_UI_ICONS } from '../shared/ui-icons';
-import { gsap } from 'gsap';
 import { ShareCardService } from '../../services/share-card.service';
 import { downloadTextFile, formatCitationList, formatGbT7714 } from './citation';
+import { ModalA11yDirective } from '../shared/modal-a11y.directive';
+import {
+  createEmptyStudentVerificationForm,
+  validateStudentResourceIdentity,
+} from '../shared/student-resource-verification';
 
 type ReadingType = 'all' | 'books' | 'journals';
+
+const PINYIN_COLLATOR = new Intl.Collator('zh-Hans-CN-u-co-pinyin');
+const PINYIN_INITIAL_BOUNDARIES: ReadonlyArray<readonly [string, string]> = [
+  ['A', '阿'], ['B', '八'], ['C', '嚓'], ['D', '咑'], ['E', '妸'], ['F', '发'],
+  ['G', '旮'], ['H', '哈'], ['J', '讥'], ['K', '咔'], ['L', '垃'], ['M', '呣'],
+  ['N', '拏'], ['O', '噢'], ['P', '妑'], ['Q', '七'], ['R', '呥'], ['S', '仨'],
+  ['T', '他'], ['W', '哇'], ['X', '夕'], ['Y', '丫'], ['Z', '帀']
+];
 
 interface ReadingTheme {
   id: string;
@@ -23,10 +35,10 @@ interface ReadingTheme {
 
 @Component({
   selector: 'app-readings',
-  imports: [FormsModule, CommonModule, NgClass, RouterLink, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
+  imports: [FormsModule, CommonModule, NgClass, RouterLink, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ModalA11yDirective, ...APP_UI_ICONS],
   standalone: true,
   template: `
-    <div class="ui-page ui-page-pad text-white" (wheel)="onPageWheel($event)">
+    <div class="ui-page ui-page-pad text-white">
       <div class="readings-chrome" [class.is-compact]="readingChromeCompact()">
       
       <!-- Header Section -->
@@ -103,7 +115,7 @@ interface ReadingTheme {
             [class.text-gray-300]="selectedTag() !== tag"
             [class.hover:bg-white/10]="selectedTag() !== tag"
           >
-            {{ tag }}
+            {{ displayText(tag) }}
           </button>
         }
       </div>
@@ -132,7 +144,7 @@ interface ReadingTheme {
               [class.text-gray-300]="selectedTheme() !== theme.id"
               [class.hover:bg-white/10]="selectedTheme() !== theme.id"
             >
-              {{ theme.title }}
+            {{ displayText(theme.title) }}
               <span class="ml-1 text-[10px] opacity-60">{{ themeCount(theme) }}</span>
             </button>
           }
@@ -143,10 +155,10 @@ interface ReadingTheme {
             <div class="min-w-0">
               <div class="flex items-center gap-2">
                 <svg lucideBookOpen class="w-4 h-4 text-blue-300 shrink-0" [strokeWidth]="2"></svg>
-                <h3 class="text-sm font-semibold text-blue-100 truncate">{{ theme.title }}</h3>
+                <h3 class="text-sm font-semibold text-blue-100 truncate">{{ displayText(theme.title) }}</h3>
                 <span class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-blue-100">{{ filteredReadings().length }} 项</span>
               </div>
-              <p class="mt-1 text-xs text-blue-100/70 leading-relaxed">{{ theme.description }}</p>
+              <p class="mt-1 text-xs text-blue-100/70 leading-relaxed">{{ displayText(theme.description) }}</p>
             </div>
             <div class="flex gap-2 shrink-0">
               <button
@@ -178,9 +190,6 @@ interface ReadingTheme {
           class="h-full overflow-y-auto px-2 pb-20 pt-2 hide-scrollbar md:px-3"
           [class.pr-10]="filteredReadings().length > 0"
           (scroll)="onScroll()"
-          (wheel)="onReadingWheel($event)"
-          (touchstart)="onReadingTouchStart($event)"
-          (touchmove)="onReadingTouchMove($event)"
         >
           @if (filteredReadings().length === 0) {
             <div class="ui-empty-state h-60 opacity-80">
@@ -204,35 +213,36 @@ interface ReadingTheme {
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   @for (item of group.readings; track item.title; let i = $index) {
-                    <div 
+                    <button
+                       type="button"
                        (click)="openModal(item)" 
-                       class="group cursor-pointer flex flex-col gap-3 animate-fade-in-up" 
-                       [style.animation-delay]="(i % 21 * 30) + 'ms'" 
+                       class="group ui-card-hover reading-list-item cursor-pointer flex flex-col gap-3 animate-fade-in-up text-left"
                        appGsapCardHover
+                       [style.animation-delay]="(i % 21 * 30) + 'ms'"
                      >
                       <!-- Book Cover -->
                       <div class="entry-image aspect-[2/3] bg-surface rounded-control border border-line-soft overflow-hidden relative shadow-lg">
                         @if (item.imageUrl && !failedImages().has(item.id)) {
-                          <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" decoding="async" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
+                          <img [src]="item.imageUrl" [alt]="displayReadingTitle(item)" loading="lazy" decoding="async" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                         } @else {
                           <div class="absolute inset-0 bg-gradient-to-br from-[#2a2a2e] to-[#18181b] flex items-center justify-center p-4 text-center">
                              <div class="absolute inset-x-4 top-0 h-[1px] bg-white/10"></div>
                              <div class="absolute inset-y-0 left-3 w-[2px] bg-black/20 h-full"></div>
-                             <h3 class="font-serif font-bold text-gray-300 text-sm line-clamp-3 leading-snug">{{ item.title }}</h3>
+                             <h3 class="font-serif font-bold text-gray-300 text-sm line-clamp-3 leading-snug">{{ displayReadingTitle(item) }}</h3>
                           </div>
                         }
                         @if(item.journalLevel) {
                           <div class="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold rounded shadow-sm" [ngClass]="getJournalClass(item.journalLevel)">
-                            {{ item.journalLevel }}
+                            {{ displayText(item.journalLevel) }}
                           </div>
                         }
                       </div>
                       
                       <div class="entry-content">
-                        <h3 class="font-medium text-sm text-gray-200 line-clamp-1 group-hover:text-blue-400 transition-colors">{{ item.title }}</h3>
-                        <p class="text-xs text-gray-500 truncate">{{ item.author || item.publisher }}</p>
+                        <h3 class="font-medium text-sm text-gray-200 line-clamp-1 group-hover:text-blue-400 transition-colors">{{ displayReadingTitle(item) }}</h3>
+                        <p class="text-xs text-gray-500 truncate">{{ displayReadingMeta(item) }}</p>
                       </div>
-                    </div>
+                    </button>
                   }
                 </div>
               </div>
@@ -255,7 +265,7 @@ interface ReadingTheme {
             >
               @for (letter of alphabet; track letter) {
                 <button 
-                  class="w-4 h-4 text-[9px] font-bold rounded-full transition-all duration-150 flex items-center justify-center relative z-10"
+                  class="w-4 h-4 text-[9px] font-bold rounded-full transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out flex items-center justify-center relative z-10"
                   [class.text-gray-600]="!availableLetters().has(letter)"
                   [class.pointer-events-none]="!availableLetters().has(letter)"
                   [class.bg-white]="letter === (isScrubbing() ? scrubbingLetter() : currentLetter())"
@@ -277,15 +287,18 @@ interface ReadingTheme {
       @if (selectedReading(); as item) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-            #readingModalBackdrop
             class="absolute inset-0 bg-black/80 backdrop-blur-md"
+            animate.enter="ui-backdrop-enter"
+            animate.leave="ui-backdrop-leave"
             (click)="closeModal()"
           ></div>
           
           <div 
-            #readingModalPanel
+            appModalA11y
+            (modalClose)="closeModal()"
+            animate.enter="ui-modal-enter"
+            animate.leave="ui-modal-leave"
             class="reading-modal-panel ui-modal-panel w-full max-w-4xl flex overflow-hidden"
-            [class.pointer-events-none]="isClosing()"
           >
             <button (click)="closeModal()" class="absolute top-4 right-4 z-20 ui-icon-btn bg-black/50 active:scale-90">
               <svg lucideX class="w-5 h-5" [strokeWidth]="2"></svg>
@@ -300,14 +313,14 @@ interface ReadingTheme {
                   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
                   
                   <!-- Book Cover Mockup -->
-                  <div #readingModalCover class="reading-cover-preview relative w-full max-w-[320px] aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col items-center justify-center overflow-hidden">
+                  <div class="reading-cover-preview relative w-full max-w-[320px] aspect-[2/3] bg-gradient-to-br from-[#2a2a2e] to-[#121214] shadow-2xl rounded-sm border-l-4 border-white/5 flex flex-col items-center justify-center overflow-hidden">
                      @if (item.imageUrl && !failedImages().has(item.id)) {
-                       <img [src]="item.imageUrl" [alt]="item.title" loading="lazy" decoding="async" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
+                       <img [src]="item.imageUrl" [alt]="displayReadingTitle(item)" loading="lazy" decoding="async" class="w-full h-full object-cover" (error)="handleImageError(item.id)">
                      } @else {
                        <div class="flex flex-col p-4 md:p-6 text-center justify-center h-full w-full relative">
                          <div class="absolute inset-y-0 left-2 w-[1px] bg-white/5"></div>
-                         <h2 class="font-serif font-bold text-gray-200 text-lg md:text-xl leading-tight mb-2">{{ item.title }}</h2>
-                         <p class="text-xs text-gray-500 uppercase tracking-widest">{{ item.author }}</p>
+                         <h2 class="font-serif font-bold text-gray-200 text-lg md:text-xl leading-tight mb-2">{{ displayReadingTitle(item) }}</h2>
+                         <p class="text-xs text-gray-500 uppercase tracking-widest">{{ displayReadingAuthor(item) }}</p>
                        </div>
                      }
                   </div>
@@ -315,30 +328,30 @@ interface ReadingTheme {
 
                <!-- Right: Content -->
                <div class="reading-modal-content flex-1 flex flex-col overflow-hidden min-h-0">
-                  <div #readingModalScroll class="reading-modal-scroll flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col min-h-0" (wheel)="onReadingModalWheel($event)">
-                  <h2 class="reading-modal-stagger text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ item.title }}</h2>
-                  <p class="reading-modal-stagger text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ item.author || item.publisher }}</p>
+                  <div #readingModalScroll class="reading-modal-scroll flex-1 p-5 md:p-8 overflow-y-auto custom-scrollbar flex flex-col min-h-0">
+                  <h2 class="reading-modal-stagger text-2xl md:text-3xl font-bold text-white leading-tight mb-2 pr-8 md:pr-0">{{ displayReadingTitle(item) }}</h2>
+                  <p class="reading-modal-stagger text-base md:text-lg text-gray-400 font-medium mb-4 md:mb-6">{{ displayReadingMeta(item) }}</p>
                   
                   <div class="reading-modal-stagger space-y-4 md:space-y-6 flex-1">
                     <div>
                       <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">内容简介</h4>
                       <p class="text-sm text-gray-300 leading-relaxed font-serif">
-                        {{ item.description }}
+                        {{ displayReadingDescription(item) }}
                       </p>
 
                     </div>
 
                     <div class="mt-6">
                       <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细介绍</h4>
-                      <div #readingDetailScrollbox class="reading-detail-scrollbox overflow-y-auto custom-scrollbar pr-2" (wheel)="onReadingDetailWheel($event)">
-                        <p class="text-sm text-gray-300 leading-relaxed font-serif whitespace-pre-wrap">{{ item.detailContent }}</p>
+                      <div #readingDetailScrollbox class="reading-detail-scrollbox overflow-y-auto custom-scrollbar pr-2">
+                        <p class="text-sm text-gray-300 leading-relaxed font-serif whitespace-pre-wrap">{{ displayReadingDetail(item) }}</p>
                       </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-6 border-t border-white/10">
                        <div>
                           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">出版社</label>
-                          <span class="text-sm text-white font-medium">{{ item.publisher }}</span>
+                          <span class="text-sm text-white font-medium">{{ displayReadingPublisher(item) }}</span>
                        </div>
                        <div>
                           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">ISBN</label>
@@ -348,14 +361,14 @@ interface ReadingTheme {
                           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">分类</label>
                           <div class="flex flex-wrap gap-1 mt-1">
                             @for(t of item.tags; track $index) {
-                                <span class="text-xs text-gray-400 bg-white/5 px-2 py-0.5 rounded">{{ t }}</span>
+                                <span class="text-xs text-gray-400 bg-white/5 px-2 py-0.5 rounded">{{ displayText(t) }}</span>
                             }
                           </div>
                        </div>
                        @if(item.journalLevel) {
                          <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">等级</label>
-                            <span class="px-2 py-0.5 text-xs font-bold rounded" [ngClass]="getJournalClass(item.journalLevel)">{{ item.journalLevel }}</span>
+                            <span class="px-2 py-0.5 text-xs font-bold rounded" [ngClass]="getJournalClass(item.journalLevel)">{{ displayText(item.journalLevel) }}</span>
                          </div>
                        }
                     </div>
@@ -372,15 +385,15 @@ interface ReadingTheme {
                   </div>
                   </div>
 
-                  <div #readingModalActions class="reading-modal-actions bg-surface border-t border-line z-10 shrink-0">
+                  <div class="reading-modal-actions bg-surface border-t border-line z-10 shrink-0">
                     <a
                       (click)="dataService.openExternalModal(getSearchUrl(item))"
                       class="reading-action-primary ui-btn-primary cursor-pointer active:scale-[0.98]"
-                      title="在线搜索"
-                      appGsapTooltip="在线搜索"
+                      [title]="displayText('在线搜索')"
+                      [appGsapTooltip]="displayText('在线搜索')"
                     >
                        <svg lucideSearch class="w-5 h-5" [strokeWidth]="2"></svg>
-                       <span>在线搜索</span>
+                       <span>{{ displayText('在线搜索') }}</span>
                     </a>
                     <button
                       (click)="toggleReadingFavorite(item)"
@@ -395,18 +408,18 @@ interface ReadingTheme {
                     <button
                       (click)="copyCitation(item)"
                       class="reading-action-icon ui-btn-secondary"
-                      title="复制引用"
-                      aria-label="复制引用"
-                      appGsapTooltip="复制 GB/T 引用"
+                      [title]="displayText('复制引用')"
+                      [attr.aria-label]="displayText('复制引用')"
+                      [appGsapTooltip]="displayText('复制 GB/T 引用')"
                     >
                       <svg lucideCopy class="w-5 h-5" [strokeWidth]="2"></svg>
                     </button>
                     <button
                       (click)="openReadingFeedback(item)"
                       class="reading-action-icon ui-btn-secondary"
-                      title="内容纠错"
-                      aria-label="内容纠错"
-                      appGsapTooltip="内容纠错"
+                      [title]="displayText('内容纠错')"
+                      [attr.aria-label]="displayText('内容纠错')"
+                      [appGsapTooltip]="displayText('内容纠错')"
                     >
                       <svg lucideMail class="w-5 h-5" [strokeWidth]="2"></svg>
                     </button>
@@ -415,18 +428,18 @@ interface ReadingTheme {
                       <button
                         (click)="handleShare($event)"
                         class="reading-action-icon ui-btn-secondary active:scale-95"
-                        title="分享"
-                        aria-label="分享"
-                        appGsapTooltip="打开分享菜单"
+                        [title]="displayText('分享')"
+                        [attr.aria-label]="displayText('分享')"
+                        [appGsapTooltip]="displayText('打开分享菜单')"
                       >
                          <svg lucideShare2 class="w-5 h-5" [strokeWidth]="2"></svg>
                       </button>
 
                       <!-- Share Menu -->
                       @if (showShareMenu()) {
-                        <div #readingShareMenu (click)="$event.stopPropagation()" class="reading-share-menu absolute bottom-full right-0 mb-3 w-52 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
+                        <div #readingShareMenu animate.enter="ui-popover-enter" animate.leave="ui-popover-leave" (click)="$event.stopPropagation()" class="reading-share-menu absolute bottom-full right-0 mb-3 w-52 ui-card shadow-panel overflow-hidden z-30 flex flex-col">
                            @if (shareMenuNotice()) {
-                              <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20">
+                              <div class="bg-green-500/10 text-green-400 text-[10px] font-bold text-center py-1.5 border-b border-green-500/20" role="status" aria-live="polite">
                                 {{ shareMenuNotice() }}
                               </div>
                             }
@@ -434,7 +447,7 @@ interface ReadingTheme {
                             <div class="p-1.5 flex flex-col gap-1">
                               <button type="button" (click)="shareReadingCard(item)" [disabled]="isGeneratingCard()" class="reading-share-menu-item">
                                 <svg lucideImage class="w-4 h-4" [strokeWidth]="2"></svg>
-                                {{ isGeneratingCard() ? '正在生成...' : '生成分享图像' }}
+                                {{ displayText(isGeneratingCard() ? '正在生成...' : '生成分享图像') }}
                               </button>
                               <div class="h-px bg-white/10 my-1"></div>
                               <a
@@ -446,7 +459,7 @@ interface ReadingTheme {
                                 <div class="w-6 h-6 rounded bg-[#07c160] flex items-center justify-center shrink-0">
                                   <span class="text-[10px] font-bold text-white">微</span>
                                </div>
-                               微信
+                               {{ displayText('微信') }}
                              </a>
                               <a
                                 [href]="getPlatformUrl('taobao', item)"
@@ -457,7 +470,7 @@ interface ReadingTheme {
                                 <div class="w-6 h-6 rounded bg-[#ff5000] flex items-center justify-center shrink-0">
                                   <span class="text-[10px] font-bold text-white">淘</span>
                                 </div>
-                                淘宝
+                                {{ displayText('淘宝') }}
                               </a>
                               <a
                                 [href]="getPlatformUrl('jd', item)"
@@ -468,7 +481,7 @@ interface ReadingTheme {
                                 <div class="w-6 h-6 rounded bg-[#e1251b] flex items-center justify-center shrink-0">
                                   <span class="text-[10px] font-bold text-white">JD</span>
                                 </div>
-                                京东
+                                {{ displayText('京东') }}
                               </a>
                               <a
                                 [href]="getPlatformUrl('duozhuayu', item)"
@@ -479,7 +492,7 @@ interface ReadingTheme {
                                 <div class="w-6 h-6 rounded bg-[#499d75] flex items-center justify-center shrink-0">
                                   <svg lucideBookOpen class="w-4 h-4 text-white" [strokeWidth]="2"></svg>
                                 </div>
-                                多抓鱼
+                                {{ displayText('多抓鱼') }}
                               </a>
                               <a
                                 [href]="getPlatformUrl('zhuanzhuan', item)"
@@ -490,7 +503,7 @@ interface ReadingTheme {
                                <div class="w-6 h-6 rounded bg-[#ff3d3d] flex items-center justify-center shrink-0">
                                  <span class="text-[10px] font-bold text-white">转</span>
                                </div>
-                               转转
+                               {{ displayText('转转') }}
                              </a>
                            </div>
                         </div>
@@ -506,42 +519,42 @@ interface ReadingTheme {
 
       @if (showReadingFeedbackModal()) {
         <div class="fixed inset-0 z-[65] flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/70 backdrop-blur-md" (click)="closeReadingFeedback()"></div>
-          <div class="ui-modal-panel relative z-10 w-full max-w-xl overflow-hidden">
+          <div class="absolute inset-0 bg-black/70 backdrop-blur-md" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="closeReadingFeedback()"></div>
+          <div appModalA11y (modalClose)="closeReadingFeedback()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel relative z-10 w-full max-w-xl overflow-hidden">
             <div class="ui-modal-header">
               <div class="min-w-0">
-                <h3 class="text-lg font-black text-white">读物内容纠错</h3>
-                <p class="mt-1 truncate text-xs text-gray-500">{{ feedbackReading()?.title }}</p>
+                <h3 class="text-lg font-black text-white">{{ displayText('读物内容纠错') }}</h3>
+                <p class="mt-1 truncate text-xs text-gray-500">{{ feedbackReading() ? displayReadingTitle(feedbackReading()!) : '' }}</p>
               </div>
-              <button type="button" class="ui-icon-btn" (click)="closeReadingFeedback()" aria-label="关闭">
+              <button type="button" class="ui-icon-btn" (click)="closeReadingFeedback()" [attr.aria-label]="displayText('关闭')">
                 <svg lucideX class="h-5 w-5" [strokeWidth]="2"></svg>
               </button>
             </div>
             <div class="ui-modal-body space-y-4">
               <div>
-                <label class="ui-label">问题类型</label>
+                <label class="ui-label">{{ displayText('问题类型') }}</label>
                 <select class="ui-field" [value]="readingFeedbackType()" (change)="readingFeedbackType.set($any($event.target).value)">
-                  <option value="基础信息有误">基础信息有误</option>
-                  <option value="引用格式有误">引用格式有误</option>
-                  <option value="简介或详情有误">简介或详情有误</option>
-                  <option value="封面或链接有误">封面或链接有误</option>
+                  <option value="基础信息有误">{{ displayText('基础信息有误') }}</option>
+                  <option value="引用格式有误">{{ displayText('引用格式有误') }}</option>
+                  <option value="简介或详情有误">{{ displayText('简介或详情有误') }}</option>
+                  <option value="封面或链接有误">{{ displayText('封面或链接有误') }}</option>
                 </select>
               </div>
               <div>
-                <label class="ui-label">问题说明</label>
-                <textarea class="ui-field min-h-24 resize-y" [value]="readingFeedbackDescription()" (input)="readingFeedbackDescription.set($any($event.target).value)" placeholder="请说明你发现的问题"></textarea>
+                <label class="ui-label">{{ displayText('问题说明') }}</label>
+                <textarea class="ui-field min-h-24 resize-y" [value]="readingFeedbackDescription()" (input)="readingFeedbackDescription.set($any($event.target).value)" [placeholder]="displayText('请说明你发现的问题')"></textarea>
               </div>
               <div>
-                <label class="ui-label">建议改法</label>
-                <textarea class="ui-field min-h-20 resize-y" [value]="readingFeedbackSuggestion()" (input)="readingFeedbackSuggestion.set($any($event.target).value)" placeholder="可填写正确作者、出版社、ISBN、引用或说明"></textarea>
+                <label class="ui-label">{{ displayText('建议改法') }}</label>
+                <textarea class="ui-field min-h-20 resize-y" [value]="readingFeedbackSuggestion()" (input)="readingFeedbackSuggestion.set($any($event.target).value)" [placeholder]="displayText('可填写正确作者、出版社、ISBN、引用或说明')"></textarea>
               </div>
               <div>
-                <label class="ui-label">参考来源</label>
-                <input class="ui-field" [value]="readingFeedbackSource()" (input)="readingFeedbackSource.set($any($event.target).value)" placeholder="ISBN 页面、出版社链接、馆藏截图等">
+                <label class="ui-label">{{ displayText('参考来源') }}</label>
+                <input class="ui-field" [value]="readingFeedbackSource()" (input)="readingFeedbackSource.set($any($event.target).value)" [placeholder]="displayText('ISBN 页面、出版社链接、馆藏截图等')">
               </div>
               <div class="flex justify-end gap-3 border-t border-line pt-4">
-                <button type="button" class="ui-btn-secondary" (click)="closeReadingFeedback()">取消</button>
-                <button type="button" class="ui-btn-primary" (click)="submitReadingFeedback()">生成邮件</button>
+                <button type="button" class="ui-btn-secondary" (click)="closeReadingFeedback()">{{ displayText('取消') }}</button>
+                <button type="button" class="ui-btn-primary" (click)="submitReadingFeedback()">{{ displayText('生成邮件') }}</button>
               </div>
             </div>
           </div>
@@ -551,20 +564,16 @@ interface ReadingTheme {
       <!-- E-Resource Access Modals (Dark Mode) -->
       @if (eResourceFlowStep() !== 'closed') {
         <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" (click)="closeEResourceFlow()"></div>
+          <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="closeEResourceFlow()"></div>
           
-          <div class="ui-modal-panel w-full max-w-md flex flex-col animate-modal-pop-in overflow-hidden">
+          <div appModalA11y (modalClose)="closeEResourceFlow()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel w-full max-w-md flex flex-col overflow-hidden">
              
              <!-- Modal Header -->
              <div class="ui-modal-header block">
-               <h3 class="font-bold text-lg text-white text-center">
-                 @switch(eResourceFlowStep()) {
-                   @case('verification') { 学生身份验证 }
-                   @case('declaration') { 资源使用声明 }
-                   @case('resources') { 获取电子资源 }
-                 }
-               </h3>
-             </div>
+                <h3 class="font-bold text-lg text-white text-center">
+                  {{ eResourceFlowTitle() }}
+                </h3>
+              </div>
 
              <!-- Content -->
              <div class="ui-modal-body">
@@ -572,20 +581,20 @@ interface ReadingTheme {
                   @case('verification') {
                     <div class="flex flex-col gap-4">
                       <div>
-                        <label class="ui-label">学校</label>
-                        <input [(ngModel)]="verificationForm().school" type="text" placeholder="请输入学校全称" class="ui-field">
+                        <label class="ui-label">{{ displayText('学校') }}</label>
+                        <input [(ngModel)]="verificationForm().school" type="text" [placeholder]="displayText('请输入学校全称')" class="ui-field">
                       </div>
                       <div>
-                        <label class="ui-label">学院</label>
-                        <input [(ngModel)]="verificationForm().college" type="text" placeholder="请输入学院全称" class="ui-field">
+                        <label class="ui-label">{{ displayText('学院') }}</label>
+                        <input [(ngModel)]="verificationForm().college" type="text" [placeholder]="displayText('请输入学院全称')" class="ui-field">
                       </div>
                       <div>
-                        <label class="ui-label">专业</label>
-                        <input [(ngModel)]="verificationForm().major" type="text" placeholder="请输入专业全称" class="ui-field">
+                        <label class="ui-label">{{ displayText('专业') }}</label>
+                        <input [(ngModel)]="verificationForm().major" type="text" [placeholder]="displayText('请输入专业全称')" class="ui-field">
                       </div>
                       <div>
-                        <label class="ui-label">学号</label>
-                        <input [(ngModel)]="verificationForm().studentId" type="text" placeholder="请输入学号" class="ui-field">
+                        <label class="ui-label">{{ displayText('学号') }}</label>
+                        <input [(ngModel)]="verificationForm().studentId" type="text" [placeholder]="displayText('请输入学号')" class="ui-field">
                       </div>
 
                       @if (verificationStatus() !== 'idle' && verificationMessage()) {
@@ -595,17 +604,17 @@ interface ReadingTheme {
                           [class.text-red-400]="verificationStatus() === 'error'"
                           [class.border-red-500/30]="verificationStatus() === 'error'"
                         >
-                           {{ verificationMessage() }}
+                           {{ displayText(verificationMessage()) }}
                         </div>
                       }
                     </div>
                   }
                   @case('declaration') {
                     <div class="text-sm text-gray-300 space-y-4 leading-relaxed max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
-                      <p><strong class="text-white">本人确认：</strong><br>本人为宁夏大学建筑学院{{ verificationForm().major }}专业学生，学号 {{ verificationForm().studentId }}。</p>
-                      <p><strong class="text-white">本人已知晓：</strong><br>本应用所提供的电子读物资源仅限宁夏大学建筑学院校内教学与学习使用，不具备对外传播、商业使用或二次分发授权。</p>
-                      <p><strong class="text-white">本人承诺：</strong><br>不对上述电子资源进行传播、转卖、公开分享或任何形式的非法使用。</p>
-                      <p>若因本人违反上述约定而产生任何版权纠纷或法律责任，均由本人自行承担，与平台及资源整理方无关。</p>
+                      <p><strong class="text-white">{{ displayText('本人确认：') }}</strong><br>{{ displayStudentDeclarationLine() }}</p>
+                      <p><strong class="text-white">{{ displayText('本人已知晓：') }}</strong><br>{{ displayText('本应用所提供的电子读物资源仅限宁夏大学建筑学院校内教学与学习使用，不具备对外传播、商业使用或二次分发授权。') }}</p>
+                      <p><strong class="text-white">{{ displayText('本人承诺：') }}</strong><br>{{ displayText('不对上述电子资源进行传播、转卖、公开分享或任何形式的非法使用。') }}</p>
+                      <p>{{ displayText('若因本人违反上述约定而产生任何版权纠纷或法律责任，均由本人自行承担，与平台及资源整理方无关。') }}</p>
                     </div>
                   }
                   @case('resources') {
@@ -619,19 +628,19 @@ interface ReadingTheme {
              <!-- Footer -->
              <div class="ui-modal-footer">
                 @switch(eResourceFlowStep()) {
-                  @case('verification') {
-                    <button (click)="closeEResourceFlow()" class="ui-btn-ghost">取消</button>
+                   @case('verification') {
+                    <button (click)="closeEResourceFlow()" class="ui-btn-ghost">{{ displayText('取消') }}</button>
                     <button (click)="handleVerification()" class="ui-btn-primary">
-                      {{ verificationStatus() === 'verifying' ? '核验中...' : '核验' }}
+                      {{ verificationStatus() === 'verifying' ? displayText('核验中...') : displayText('核验') }}
                     </button>
                   }
                   @case('declaration') {
                     <button (click)="goToResourcesStep()" [disabled]="declarationCountdown() > 0" class="ui-btn-primary">
-                      {{ declarationCountdown() > 0 ? '请等待 ' + declarationCountdown() + 's' : '确认并继续' }}
+                      {{ declarationCountdown() > 0 ? displayWaitCountdown() : displayText('确认并继续') }}
                     </button>
                   }
                   @case('resources') {
-                    <button (click)="copyResourceInfo()" class="ui-btn-primary">{{ copyButtonText() }}</button>
+                    <button (click)="copyResourceInfo()" class="ui-btn-primary">{{ displayText(copyButtonText()) }}</button>
                   }
                 }
              </div>
@@ -873,7 +882,7 @@ interface ReadingTheme {
 })
 export class ReadingsComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
-  private zone = inject(NgZone);
+  locale = inject(LocaleService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private shareCardService = inject(ShareCardService);
@@ -882,7 +891,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   readingType = signal<ReadingType>('all');
   selectedTheme = signal('all');
   selectedReading = signal<Reading | null>(null);
-  isClosing = signal(false);
   isGeneratingCard = signal(false);
   showReadingFeedbackModal = signal(false);
   feedbackReading = signal<Reading | null>(null);
@@ -937,7 +945,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
 
   // E-Resource Flow State
   eResourceFlowStep = signal<'closed' | 'verification' | 'declaration' | 'resources'>('closed');
-  verificationForm = signal({ school: '', college: '', major: '', studentId: '' });
+  verificationForm = signal(createEmptyStudentVerificationForm());
   verificationStatus = signal<'idle' | 'verifying' | 'success' | 'error'>('idle');
   verificationMessage = signal('');
   declarationCountdown = signal(0);
@@ -945,27 +953,15 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   private countdownInterval: any;
   private scrollFrame = 0;
   private tagResetFrame = 0;
-  private modalCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private verificationTimer: ReturnType<typeof setTimeout> | null = null;
   private declarationTimer: ReturnType<typeof setTimeout> | null = null;
   private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
   private shareResetTimer: ReturnType<typeof setTimeout> | null = null;
-  private modalEnterFrame = 0;
-  private shareMenuEnterFrame = 0;
-  private lastReadingScrollTop = 0;
-  private lastReadingTouchY = 0;
-  private readingModalTl?: gsap.core.Timeline;
-  private shareMenuTl?: gsap.core.Tween;
-  private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private lastScrubScrollTarget = '';
 
   // Scrubber State
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('scrubber') scrubber!: ElementRef<HTMLElement>;
-  @ViewChild('readingModalBackdrop') readingModalBackdrop?: ElementRef<HTMLDivElement>;
-  @ViewChild('readingModalPanel') readingModalPanel?: ElementRef<HTMLDivElement>;
-  @ViewChild('readingModalCover') readingModalCover?: ElementRef<HTMLDivElement>;
-  @ViewChild('readingModalActions') readingModalActions?: ElementRef<HTMLDivElement>;
   @ViewChild('readingModalScroll') readingModalScroll?: ElementRef<HTMLDivElement>;
   @ViewChild('readingDetailScrollbox') readingDetailScrollbox?: ElementRef<HTMLDivElement>;
   @ViewChild('readingShareMenu') readingShareMenu?: ElementRef<HTMLDivElement>;
@@ -983,14 +979,129 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       if (reading) this.openModal(reading, false);
     });
   }
+
+  displayText(value: string | null | undefined, fallback?: string): string {
+    return this.locale.translateData(value, fallback);
+  }
+
+  displayWaitCountdown(): string {
+    return this.locale.isEnglish()
+      ? `Please wait ${this.declarationCountdown()}s`
+      : `请等待 ${this.declarationCountdown()}s`;
+  }
+
+  displayStudentDeclarationLine(): string {
+    const form = this.verificationForm();
+    if (this.locale.isEnglish()) {
+      const major = this.displayText(form.major || '建筑学');
+      return `I am a Ningxia University School of Architecture student majoring in ${major}. Student ID: ${form.studentId}.`;
+    }
+    return `本人为宁夏大学建筑学院${form.major}专业学生，学号 ${form.studentId}。`;
+  }
+
+  eResourceFlowTitle(): string {
+    switch (this.eResourceFlowStep()) {
+      case 'verification':
+        return this.displayText('学生身份验证');
+      case 'declaration':
+        return this.displayText('资源使用声明');
+      case 'resources':
+        return this.displayText('获取电子资源');
+      default:
+        return '';
+    }
+  }
+
+  displayReadingTitle(item: Reading): string {
+    if (this.locale.isEnglish() && item.title === '建筑实践') return 'Architectural Practice';
+    const translated = this.displayText(item.title);
+    if (!this.locale.isEnglish() || !this.locale.hasCjk(translated)) return translated;
+
+    return this.readingFallbackTitle(item);
+  }
+
+  displayReadingAuthor(item: Reading): string {
+    const translated = this.displayText(item.author);
+    if (!this.locale.isEnglish()) return translated;
+    if (!translated || translated === 'Architecture Reference' || this.locale.hasCjk(translated)) return '';
+    return translated;
+  }
+
+  displayReadingPublisher(item: Reading): string {
+    const translated = this.displayText(item.publisher);
+    if (!this.locale.isEnglish()) return translated;
+    if (!translated) return '';
+    if (translated === 'Architecture Reference' || this.locale.hasCjk(translated)) return '';
+    return translated;
+  }
+
+  displayReadingMeta(item: Reading): string {
+    return [this.displayReadingAuthor(item), this.displayReadingPublisher(item)]
+      .map(value => value.trim())
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  displayReadingDescription(item: Reading): string {
+    const translated = this.displayText(item.description);
+    if (!this.locale.isEnglish() || !this.locale.hasCjk(translated)) return translated;
+
+    return this.buildReadingSummary(item);
+  }
+
+  displayReadingDetail(item: Reading): string {
+    const detail = item.detailContent || item.description || '';
+    const translated = this.displayText(detail);
+    if (!this.locale.isEnglish() || !this.locale.hasCjk(translated)) return translated;
+
+    const title = this.displayReadingTitle(item);
+    const tags = this.displayReadingTags(item);
+    const author = this.displayReadingAuthor(item);
+    const tagPhrase = tags.length ? tags.join(', ') : 'architecture study';
+    const authorPhrase = author ? ` by ${author}` : '';
+
+    return [
+      `${title}${authorPhrase} is included as a curated reference for ${tagPhrase}.`,
+      this.buildReadingSummary(item),
+      'It is useful for building conceptual vocabulary, finding precedent directions, and supporting early design or research work.'
+    ].join('\n\n');
+  }
+
+  displayReadingTags(item: Reading): string[] {
+    return item.tags.map(tag => this.displayText(tag));
+  }
+
+  private readingFallbackTitle(item: Reading): string {
+    const tags = this.displayReadingTags(item);
+    const primaryTag = tags[0] || 'Architecture';
+    const compact = item.title
+      .replace(/[《》]/g, '')
+      .replace(/（.+?）/g, '')
+      .replace(/\(.+?\)/g, '')
+      .replace(/[：:·]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!this.locale.hasCjk(compact)) return compact;
+    return `${primaryTag} Reference`;
+  }
+
+  private buildReadingSummary(item: Reading): string {
+    const title = this.displayReadingTitle(item);
+    const tags = this.displayReadingTags(item);
+    const primary = tags[0] || 'architecture';
+    const secondary = tags[1] ? ` and ${tags[1].toLowerCase()}` : '';
+    const type = this.isJournal(item) ? 'periodical' : 'book';
+
+    return `${title} is a curated ${type} reference for ${primary.toLowerCase()}${secondary}, selected for architecture learning, precedent reading, and design research.`;
+  }
   
   // Cache available letters for visual feedback
   availableLetters = computed(() => {
     const letters = new Set<string>();
     // Use filteredReadings() instead of all readings to match current category context
     this.filteredReadings().forEach(r => {
-      const pinyinResult = pinyin(r.title, { style: pinyin.STYLE_FIRST_LETTER })[0][0];
-      const firstChar = pinyinResult.charAt(0).toUpperCase();
+      const firstChar = this.readingFirstLetter(r);
       const letter = /^[A-Z]/.test(firstChar) ? firstChar : '#';
       letters.add(letter);
     });
@@ -1013,7 +1124,19 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     const type = this.readingType();
     const theme = this.activeTheme();
     return this.dataService.readings().filter(r => {
-      const matchSearch = !q || r.title.toLowerCase().includes(q) || (r.author || '').toLowerCase().includes(q) || r.publisher.toLowerCase().includes(q);
+      const searchText = [
+        r.title,
+        this.displayReadingTitle(r),
+        r.author,
+        this.displayReadingAuthor(r),
+        r.publisher,
+        this.displayReadingPublisher(r),
+        r.description,
+        this.displayReadingDescription(r),
+        ...r.tags,
+        ...this.displayReadingTags(r)
+      ].join(' ').toLowerCase();
+      const matchSearch = !q || searchText.includes(q);
       const matchTag = tag === 'all' || r.tags.includes(tag);
       const matchType = this.matchesReadingType(r, type);
       const matchTheme = !theme || this.matchesTheme(r, theme);
@@ -1026,8 +1149,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     const map = new Map<string, Reading[]>();
     
     this.filteredReadings().forEach(r => {
-      const pinyinResult = pinyin(r.title, { style: pinyin.STYLE_FIRST_LETTER })[0][0];
-      const firstChar = pinyinResult.charAt(0).toUpperCase();
+      const firstChar = this.readingFirstLetter(r);
       const letter = /^[A-Z]/.test(firstChar) ? firstChar : '#';
       if (!map.has(letter)) map.set(letter, []);
       map.get(letter)!.push(r);
@@ -1048,6 +1170,22 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     return groups;
   });
 
+  private readingFirstLetter(item: Reading): string {
+    const title = this.displayReadingTitle(item).trim();
+    const latin = title.match(/[A-Za-z]/)?.[0];
+    if (latin) return latin.toUpperCase();
+
+    const firstCharacter = item.title.trim().charAt(0);
+    if (!firstCharacter) return '#';
+
+    let initial = '#';
+    for (const [letter, boundary] of PINYIN_INITIAL_BOUNDARIES) {
+      if (PINYIN_COLLATOR.compare(firstCharacter, boundary) < 0) break;
+      initial = letter;
+    }
+    return initial;
+  }
+
   ngAfterViewInit() {
     // Scroll listener is attached in template
   }
@@ -1057,19 +1195,13 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);
     if (this.tagResetFrame) cancelAnimationFrame(this.tagResetFrame);
-    if (this.modalEnterFrame) cancelAnimationFrame(this.modalEnterFrame);
-    if (this.shareMenuEnterFrame) cancelAnimationFrame(this.shareMenuEnterFrame);
-    this.readingModalTl?.kill();
-    this.shareMenuTl?.kill();
   }
 
   private clearDeferredTimers() {
-    if (this.modalCloseTimer) clearTimeout(this.modalCloseTimer);
     if (this.verificationTimer) clearTimeout(this.verificationTimer);
     if (this.declarationTimer) clearTimeout(this.declarationTimer);
     if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
     if (this.shareResetTimer) clearTimeout(this.shareResetTimer);
-    this.modalCloseTimer = null;
     this.verificationTimer = null;
     this.declarationTimer = null;
     this.copyResetTimer = null;
@@ -1124,7 +1256,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       this.tagResetFrame = 0;
       if (this.scrollContainer) {
         this.scrollContainer.nativeElement.scrollTo({ top: 0, behavior: 'auto' });
-        this.lastReadingScrollTop = 0;
         
         // Reset current letter to the first available letter in the new list
         const available = Array.from(this.availableLetters()).sort((a, b) => {
@@ -1166,17 +1297,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   openModal(item: Reading, updateRoute = true) {
-    if (this.modalCloseTimer) {
-      clearTimeout(this.modalCloseTimer);
-      this.modalCloseTimer = null;
-    }
-    if (this.modalEnterFrame) {
-      cancelAnimationFrame(this.modalEnterFrame);
-      this.modalEnterFrame = 0;
-    }
-    this.readingModalTl?.kill();
     this.closeShareMenu();
-    this.isClosing.set(false);
     this.selectedReading.set(item);
     if (item.id) {
       this.dataService.addHistoryItem('reading', item.id);
@@ -1189,12 +1310,10 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
         replaceUrl: true
       });
     }
-    this.scheduleReadingModalEnter();
   }
 
   closeModal() {
-    if (!this.selectedReading() || this.isClosing()) return;
-    this.isClosing.set(true);
+    if (!this.selectedReading()) return;
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { reading: null },
@@ -1202,157 +1321,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
       replaceUrl: true
     });
     this.closeShareMenu();
-    if (this.modalCloseTimer) clearTimeout(this.modalCloseTimer);
-    if (this.modalEnterFrame) {
-      cancelAnimationFrame(this.modalEnterFrame);
-      this.modalEnterFrame = 0;
-    }
-
-    const targets = this.getReadingModalTargets();
-    if (this.prefersReducedMotion || !targets.backdrop || !targets.panel) {
-      this.modalCloseTimer = setTimeout(() => this.finishReadingModalClose(), 0);
-      return;
-    }
-
-    this.readingModalTl?.kill();
-    this.zone.runOutsideAngular(() => {
-      this.setReadingModalWillChange(true, targets);
-      this.readingModalTl = gsap.timeline({
-        defaults: { overwrite: 'auto', force3D: true },
-        onComplete: () => this.zone.run(() => this.finishReadingModalClose())
-      });
-
-      const contentTargets = [...targets.contentItems].reverse();
-      this.readingModalTl
-        .to([...contentTargets, targets.actions].filter((target): target is HTMLElement => !!target), {
-          autoAlpha: 0,
-          y: 8,
-          duration: 0.16,
-          stagger: 0.018,
-          ease: 'power2.in'
-        }, 0)
-        .to(targets.cover, {
-          autoAlpha: 0,
-          y: 12,
-          scale: 0.98,
-          rotationY: -4,
-          duration: 0.22,
-          ease: 'power2.in'
-        }, 0)
-        .to(targets.panel, {
-          autoAlpha: 0,
-          y: 16,
-          scale: 0.97,
-          duration: 0.24,
-          ease: 'power2.inOut'
-        }, 0.04)
-        .to(targets.backdrop, {
-          autoAlpha: 0,
-          duration: 0.22,
-          ease: 'power2.in'
-        }, 0.04);
-    });
-  }
-
-  private scheduleReadingModalEnter() {
-    if (this.prefersReducedMotion) return;
-
-    this.modalEnterFrame = requestAnimationFrame(() => {
-      this.modalEnterFrame = 0;
-      this.animateReadingModalEnter();
-    });
-  }
-
-  private animateReadingModalEnter() {
-    if (!this.selectedReading() || this.isClosing()) return;
-
-    const targets = this.getReadingModalTargets();
-    if (!targets.backdrop || !targets.panel) return;
-
-    this.readingModalTl?.kill();
-    this.zone.runOutsideAngular(() => {
-      this.setReadingModalWillChange(true, targets);
-      this.readingModalTl = gsap.timeline({
-        defaults: { overwrite: 'auto', force3D: true },
-        onComplete: () => this.clearReadingModalAnimationProps(targets)
-      });
-
-      this.readingModalTl
-        .fromTo(targets.backdrop,
-          { autoAlpha: 0 },
-          { autoAlpha: 1, duration: 0.28, ease: 'power2.out' },
-          0
-        )
-        .fromTo(targets.panel,
-          { autoAlpha: 0, y: 24, scale: 0.965 },
-          { autoAlpha: 1, y: 0, scale: 1, duration: 0.46, ease: 'power3.out' },
-          0.02
-        )
-        .fromTo(targets.cover,
-          { autoAlpha: 0, y: 18, scale: 0.96, rotationY: -7 },
-          { autoAlpha: 1, y: 0, scale: 1, rotationY: 0, duration: 0.52, ease: 'power3.out' },
-          0.12
-        )
-        .fromTo(targets.contentItems,
-          { autoAlpha: 0, y: 14 },
-          { autoAlpha: 1, y: 0, duration: 0.36, stagger: 0.045, ease: 'power2.out' },
-          0.16
-        )
-        .fromTo(targets.actions,
-          { autoAlpha: 0, y: 12 },
-          { autoAlpha: 1, y: 0, duration: 0.34, ease: 'power2.out' },
-          0.24
-        );
-    });
-  }
-
-  private getReadingModalTargets() {
-    const panel = this.readingModalPanel?.nativeElement ?? null;
-    return {
-      backdrop: this.readingModalBackdrop?.nativeElement ?? null,
-      panel,
-      cover: this.readingModalCover?.nativeElement ?? null,
-      actions: this.readingModalActions?.nativeElement ?? null,
-      contentItems: panel ? Array.from(panel.querySelectorAll<HTMLElement>('.reading-modal-stagger')) : []
-    };
-  }
-
-  private setReadingModalWillChange(active: boolean, targets = this.getReadingModalTargets()) {
-    const animatedTargets = [
-      targets.backdrop,
-      targets.panel,
-      targets.cover,
-      targets.actions,
-      ...targets.contentItems
-    ].filter((target): target is HTMLElement => !!target);
-
-    animatedTargets.forEach(target => {
-      target.style.willChange = active ? 'transform, opacity' : '';
-    });
-  }
-
-  private clearReadingModalAnimationProps(targets = this.getReadingModalTargets()) {
-    const animatedTargets = [
-      targets.backdrop,
-      targets.panel,
-      targets.cover,
-      targets.actions,
-      ...targets.contentItems
-    ].filter((target): target is HTMLElement => !!target);
-
-    gsap.set(animatedTargets, { clearProps: 'transform,opacity,visibility' });
-    this.setReadingModalWillChange(false, targets);
-  }
-
-  private finishReadingModalClose() {
-    if (this.modalCloseTimer) {
-      clearTimeout(this.modalCloseTimer);
-      this.modalCloseTimer = null;
-    }
-    this.readingModalTl?.kill();
-    this.setReadingModalWillChange(false);
     this.selectedReading.set(null);
-    this.isClosing.set(false);
   }
 
   @HostListener('document:keydown.escape')
@@ -1422,107 +1391,16 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  onReadingWheel(event: WheelEvent) {
-    const container = this.scrollContainer?.nativeElement;
-    if (!container) return;
-
-    if (event.deltaY > 8) {
-      this.collapseReadingChrome();
-    } else if (event.deltaY < -8 && container.scrollTop <= 1) {
-      this.expandReadingChrome();
-    }
-  }
-
-  onPageWheel(event: WheelEvent) {
-    const container = this.scrollContainer?.nativeElement;
-    if (!container || container.contains(event.target as Node)) return;
-
-    if (event.deltaY > 8) {
-      this.collapseReadingChrome();
-      container.scrollBy({ top: event.deltaY, behavior: 'auto' });
-      event.preventDefault();
-    } else if (event.deltaY < -8) {
-      if (container.scrollTop <= 1) {
-        this.expandReadingChrome();
-      } else {
-        container.scrollBy({ top: event.deltaY, behavior: 'auto' });
-      }
-      event.preventDefault();
-    }
-  }
-
-  onReadingDetailWheel(event: WheelEvent) {
-    const target = event.currentTarget as HTMLElement | null;
-    if (!target) return;
-
-    if (this.scrollElementByWheel(target, event)) {
-      event.stopPropagation();
-    }
-  }
-
-  onReadingModalWheel(event: WheelEvent) {
-    const target = event.currentTarget as HTMLElement | null;
-    if (!target) return;
-
-    if (this.scrollElementByWheel(target, event)) {
-      event.stopPropagation();
-      return;
-    }
-
-    event.stopPropagation();
-  }
-
-  private scrollElementByWheel(element: HTMLElement, event: WheelEvent): boolean {
-    const maxScrollTop = element.scrollHeight - element.clientHeight;
-    if (maxScrollTop <= 1) return false;
-
-    const delta = this.normalizeWheelDelta(event);
-    if (!delta) return false;
-
-    const atTop = element.scrollTop <= 1;
-    const atBottom = element.scrollTop >= maxScrollTop - 1;
-    const canScroll = (delta < 0 && !atTop) || (delta > 0 && !atBottom);
-    if (!canScroll) return false;
-
-    element.scrollTop = Math.max(0, Math.min(maxScrollTop, element.scrollTop + delta));
-    event.preventDefault();
-    return true;
-  }
-
-  private normalizeWheelDelta(event: WheelEvent): number {
-    if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) return event.deltaY * 16;
-    if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) return event.deltaY * window.innerHeight;
-    return event.deltaY;
-  }
-
-  onReadingTouchStart(event: TouchEvent) {
-    this.lastReadingTouchY = event.touches[0]?.clientY ?? 0;
-  }
-
-  onReadingTouchMove(event: TouchEvent) {
-    const container = this.scrollContainer?.nativeElement;
-    const currentY = event.touches[0]?.clientY ?? this.lastReadingTouchY;
-    const deltaY = this.lastReadingTouchY - currentY;
-    this.lastReadingTouchY = currentY;
-
-    if (!container) return;
-    if (deltaY > 8) {
-      this.collapseReadingChrome();
-    } else if (deltaY < -8 && container.scrollTop <= 1) {
-      this.expandReadingChrome();
-    }
-  }
-
   private updateReadingChromeFromScroll() {
     const container = this.scrollContainer?.nativeElement;
     if (!container) return;
 
     const currentTop = container.scrollTop;
-    const delta = currentTop - this.lastReadingScrollTop;
-    if (currentTop > 24 && delta > 1) {
+    if (currentTop > 48) {
       this.collapseReadingChrome();
+    } else if (currentTop <= 8) {
+      this.expandReadingChrome();
     }
-    this.lastReadingScrollTop = currentTop;
   }
 
   private collapseReadingChrome() {
@@ -1681,7 +1559,7 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     this.eResourceFlowStep.set('verification');
     this.verificationStatus.set('idle');
     this.verificationMessage.set('');
-    this.verificationForm.set({ school: '', college: '', major: '', studentId: '' });
+    this.verificationForm.set(createEmptyStudentVerificationForm());
   }
 
   closeEResourceFlow() {
@@ -1693,70 +1571,26 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
   }
 
-  private readonly allowedEResourceMajors = ['建筑学', '城乡规划', '智能建造'];
-
-  private normalizeVerificationValue(value: string): string {
-    return value.replace(/\s+/g, '').trim();
-  }
-
   private hasValidEResourceVerification(): boolean {
-    const { school, college, major, studentId } = this.verificationForm();
-    const normalizedSchool = this.normalizeVerificationValue(school);
-    const normalizedCollege = this.normalizeVerificationValue(college);
-    const normalizedMajor = this.normalizeVerificationValue(major);
-    const normalizedStudentId = this.normalizeVerificationValue(studentId);
-
-    return (
-      normalizedSchool === '宁夏大学' &&
-      normalizedCollege === '建筑学院' &&
-      this.allowedEResourceMajors.includes(normalizedMajor) &&
-      /^120\d{8}$/.test(normalizedStudentId)
-    );
+    return validateStudentResourceIdentity(this.verificationForm()).result === 'valid';
   }
 
   handleVerification() {
-    const { school, college, major, studentId } = this.verificationForm();
-    const normalizedSchool = this.normalizeVerificationValue(school);
-    const normalizedCollege = this.normalizeVerificationValue(college);
-    const normalizedMajor = this.normalizeVerificationValue(major);
-    const normalizedStudentId = this.normalizeVerificationValue(studentId);
+    const verification = validateStudentResourceIdentity(this.verificationForm());
 
-    if (!normalizedSchool || !normalizedCollege || !normalizedMajor || !normalizedStudentId) {
+    if (verification.result === 'incomplete') {
       this.verificationStatus.set('error');
       this.verificationMessage.set('请填写所有必填项。');
       return;
     }
 
-    if (normalizedSchool !== '宁夏大学') {
+    if (verification.result !== 'valid') {
       this.verificationStatus.set('error');
       this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
       return;
     }
 
-    if (normalizedCollege !== '建筑学院') {
-      this.verificationStatus.set('error');
-      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
-      return;
-    }
-
-    if (!this.allowedEResourceMajors.includes(normalizedMajor)) {
-      this.verificationStatus.set('error');
-      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
-      return;
-    }
-
-    if (!/^120\d{8}$/.test(normalizedStudentId)) {
-      this.verificationStatus.set('error');
-      this.verificationMessage.set('身份信息核验未通过，请确认填写信息。');
-      return;
-    }
-
-    this.verificationForm.set({
-      school: normalizedSchool,
-      college: normalizedCollege,
-      major: normalizedMajor,
-      studentId: normalizedStudentId,
-    });
+    this.verificationForm.set(verification.normalized);
 
     this.verificationStatus.set('verifying');
     if (this.verificationTimer) clearTimeout(this.verificationTimer);
@@ -1801,6 +1635,9 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   resourceLinkText = computed(() => {
+    if (this.locale.isEnglish()) {
+      return `Baidu Netdisk shared file: 1 Architecture E-books\nLink: https://pan.baidu.com/s/1cwPl4KV6UiiGxm47Q0DyLw\nExtraction code: book\nCopy this text and open the Baidu Netdisk app to access the files.`;
+    }
     return `通过百度网盘分享的文件：1建筑类电子书\n链接: https://pan.baidu.com/s/1cwPl4KV6UiiGxm47Q0DyLw \n提取码: book\n复制这段内容打开「百度网盘APP 即可获取」`;
   });
 
@@ -1825,7 +1662,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     this.showShareMenu.set(shouldOpenMenu);
     if (shouldOpenMenu) {
       this.shareMenuNotice.set('');
-      this.scheduleShareMenuEnter();
     } else {
       this.closeShareMenu();
     }
@@ -1834,11 +1670,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   private closeShareMenu() {
     this.showShareMenu.set(false);
     this.shareMenuNotice.set('');
-    this.shareMenuTl?.kill();
-    if (this.shareMenuEnterFrame) {
-      cancelAnimationFrame(this.shareMenuEnterFrame);
-      this.shareMenuEnterFrame = 0;
-    }
   }
 
   openShareTarget(event: MouseEvent, item: Reading, platform: 'wechat' | 'taobao' | 'jd' | 'duozhuayu' | 'zhuanzhuan') {
@@ -1962,6 +1793,13 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
   }
 
   citationText(item: Reading) {
+    if (this.locale.isEnglish()) {
+      const creators = this.displayReadingAuthor(item) || 'Unknown author';
+      const publisher = this.displayReadingPublisher(item) || 'Unknown publisher';
+      const idLabel = this.isJournal(item) ? 'ISSN/CN' : 'ISBN';
+      const identifier = item.identifier ? ` ${idLabel}: ${item.identifier}.` : '';
+      return `${creators}. ${this.displayReadingTitle(item)}. ${publisher}.${identifier}`;
+    }
     return formatGbT7714(item);
   }
 
@@ -2052,41 +1890,6 @@ export class ReadingsComponent implements AfterViewInit, OnDestroy {
     } finally {
       this.closeReadingFeedback();
     }
-  }
-
-  private scheduleShareMenuEnter() {
-    if (this.prefersReducedMotion) return;
-
-    if (this.shareMenuEnterFrame) {
-      cancelAnimationFrame(this.shareMenuEnterFrame);
-    }
-
-    this.shareMenuEnterFrame = requestAnimationFrame(() => {
-      this.shareMenuEnterFrame = 0;
-      const menu = this.readingShareMenu?.nativeElement;
-      if (!menu || !this.showShareMenu()) return;
-
-      this.shareMenuTl?.kill();
-      this.zone.runOutsideAngular(() => {
-        menu.style.willChange = 'transform, opacity';
-        this.shareMenuTl = gsap.fromTo(menu,
-          { autoAlpha: 0, y: 10, scale: 0.96 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.22,
-            ease: 'power3.out',
-            overwrite: 'auto',
-            force3D: true,
-            onComplete: () => {
-              menu.style.willChange = '';
-              gsap.set(menu, { clearProps: 'transform,opacity,visibility' });
-            }
-          }
-        );
-      });
-    });
   }
 
   getPlatformUrl(platform: string, item: Reading): string {

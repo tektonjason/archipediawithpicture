@@ -3,10 +3,12 @@
 import { Component, inject, signal, effect, computed, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService, Entry } from '../../services/data.service';
+import { LocaleService } from '../../services/locale.service';
 import { FormsModule } from '@angular/forms';
 import { Location as NgLocation } from '@angular/common';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { ShareCardService } from '../../services/share-card.service';
+import { ModalA11yDirective } from '../shared/modal-a11y.directive';
 import {
   EntryRelations,
   getRelatedEntries,
@@ -14,10 +16,17 @@ import {
   inferEntryRelations,
   splitHighlight
 } from './encyclopedia-tools';
+import {
+  displayableEnglish,
+  entryDefinitionFallback,
+  entryDetailsFallback,
+  translateRelationValue,
+  tryTranslateRelationValue
+} from './entry-english';
 
 @Component({
   selector: 'app-entry-detail',
-  imports: [FormsModule, ...APP_UI_ICONS],
+  imports: [FormsModule, ModalA11yDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page relative">
       <!-- Top Bar -->
@@ -28,8 +37,8 @@ import {
           返回
         </button>
         <div class="flex items-center gap-2">
-           <button (click)="toggleFav()" class="ui-icon-btn transition-all active:scale-90 group border-transparent bg-transparent" [title]="isFav() ? '取消收藏' : '收藏词条'">
-             <svg lucideStar class="w-6 h-6 transition-all" 
+           <button (click)="toggleFav()" class="ui-icon-btn group border-transparent bg-transparent" [title]="isFav() ? '取消收藏' : '收藏词条'">
+             <svg lucideStar class="w-6 h-6 transition-[color,fill,transform] duration-fast ease-ui-out"
                 [class.text-yellow-400]="isFav()"
                 [class.text-gray-400]="!isFav()"
                 [class.group-hover:text-yellow-300]="true"
@@ -127,23 +136,25 @@ import {
               <!-- Header Info -->
               <div class="mb-10 text-center md:text-left">
                 <div class="flex flex-wrap gap-2 mb-4 justify-center md:justify-start">
-                  <span class="ui-badge bg-white/10 text-white border-line-soft">{{ e.category }}</span>
-                  <span class="ui-badge bg-surface text-gray-400 border-line">{{ e.subcategory }}</span>
+                  <span class="ui-badge bg-white/10 text-white border-line-soft">{{ displayEntryCategory(e) }}</span>
+                  @if (displayEntrySubcategory(e); as subcategory) {
+                    <span class="ui-badge bg-surface text-gray-400 border-line">{{ subcategory }}</span>
+                  }
                 </div>
                 <h1 class="text-4xl md:text-6xl font-bold mb-2 text-white tracking-wide">
-                  @for (segment of highlightSegments(e.term); track $index) {
+                  @for (segment of highlightSegments(displayEntryTitle(e)); track $index) {
                     <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
                   }
                 </h1>
                 <h2 class="text-xl md:text-2xl font-serif italic text-gray-500 mb-8">
-                  @for (segment of highlightSegments(e.termEn); track $index) {
+                  @for (segment of highlightSegments(displayEntrySubtitle(e)); track $index) {
                     <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
                   }
                 </h2>
                 
                 <div class="p-6 ui-card border-l-4 border-blue-500/50 shadow-lg">
                   <p class="font-medium text-lg lg:text-xl leading-relaxed text-gray-200">
-                    @for (segment of highlightSegments(e.definition); track $index) {
+                    @for (segment of highlightSegments(displayEntryDefinition(e)); track $index) {
                       <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
                     }
                   </p>
@@ -157,9 +168,9 @@ import {
                   [class.cursor-pointer]="e.imageUrl"
                   (click)="openImageModal()">
                   @if(e.imageUrl) {
-                    <img [src]="e.imageUrl" decoding="async" fetchpriority="high" class="w-full h-full object-contain md:object-cover transition-transform duration-700 group-hover/image:scale-105" [style.object-position]="e.imagePosition || 'center'" alt="{{e.term}}">
-                    <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-all duration-300">
-                      <div class="bg-white/10 p-3 rounded-full backdrop-blur-md border border-white/20 text-white transform translate-y-4 group-hover/image:translate-y-0 transition-transform">
+                    <img [src]="e.imageUrl" decoding="async" fetchpriority="high" class="w-full h-full object-contain md:object-cover transition-transform duration-ui ease-ui-out group-hover/image:scale-[1.03]" [style.object-position]="e.imagePosition || 'center'" alt="{{displayEntryTitle(e)}}">
+                    <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-ui ease-ui-out">
+                      <div class="bg-white/10 p-3 rounded-full backdrop-blur-md border border-white/20 text-white transform translate-y-3 group-hover/image:translate-y-0 transition-transform duration-ui ease-ui-out">
                         <svg lucideZoomIn class="h-8 w-8" [strokeWidth]="2"></svg>
                       </div>
                     </div>
@@ -169,7 +180,7 @@ import {
                     </div>
                   }
                 </div>
-                <div class="p-3 text-xs font-mono text-center bg-[#202024] text-gray-500 border-t border-white/5 uppercase tracking-wider">Figure 1.1 - {{ e.term }} 示意图</div>
+                <div class="p-3 text-xs font-mono text-center bg-[#202024] text-gray-500 border-t border-white/5 uppercase tracking-wider">{{ displayFigureCaption(e) }}</div>
               </div>
 
               <!-- Details -->
@@ -179,7 +190,7 @@ import {
                   详细解析
                 </h3>
                 <p class="whitespace-pre-wrap leading-relaxed text-gray-300 font-sans tracking-wide text-lg text-left">
-                  @for (segment of highlightSegments(e.details); track $index) {
+                  @for (segment of highlightSegments(displayEntryDetails(e)); track $index) {
                     <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
                   }
                 </p>
@@ -194,11 +205,11 @@ import {
                   <div class="space-y-4">
                     @for (group of relationGroups(); track group.label) {
                       <div class="flex flex-col md:flex-row md:items-start gap-2 md:gap-4">
-                        <span class="w-16 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wider pt-2">{{ group.label }}</span>
+                        <span class="w-16 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wider pt-2">{{ displayRelationLabel(group.label) }}</span>
                         <div class="flex flex-wrap gap-2">
                           @for (value of group.values; track value) {
                             <button (click)="openRelation(value)" class="ui-chip bg-white/5 text-gray-300 hover:bg-blue-500/20 hover:text-blue-100">
-                              {{ value }}
+                              {{ displayRelationValue(value) }}
                             </button>
                           }
                         </div>
@@ -214,8 +225,8 @@ import {
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     @for (related of relatedEntries(); track related.id) {
                       <button (click)="openRelatedEntry(related)" class="ui-card p-4 text-left hover:border-blue-500/40 transition-colors">
-                        <div class="font-semibold text-white">{{ related.term }}</div>
-                        <div class="text-xs text-gray-500 mt-1">{{ related.category }} · {{ related.subcategory }}</div>
+                        <div class="font-semibold text-white">{{ displayEntryTitle(related) }}</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ displayEntrySubtitle(related) }}</div>
                       </button>
                     }
                   </div>
@@ -232,9 +243,9 @@ import {
       </div>
 
       @if (showDeleteModal()) {
-        <div class="ui-modal-shell animate-fade-in-up">
-            <div class="ui-modal-backdrop" (click)="showDeleteModal.set(false)"></div>
-            <div class="ui-modal-panel p-8 max-w-sm">
+        <div class="ui-modal-shell">
+            <div class="ui-modal-backdrop" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="showDeleteModal.set(false)"></div>
+            <div appModalA11y (modalClose)="showDeleteModal.set(false)" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel p-8 max-w-sm">
                 <h3 class="font-bold text-xl mb-2 text-center text-white">确认删除</h3>
                 <p class="my-6 text-center text-gray-400">确定要删除条目 “<strong class="text-red-400">{{ entry()?.term }}</strong>” 吗？<br>此操作不可恢复。</p>
                 <div class="flex justify-center gap-3">
@@ -246,9 +257,9 @@ import {
       }
 
       @if (showFeedbackModal()) {
-        <div class="ui-modal-shell animate-fade-in-up">
-          <div class="ui-modal-backdrop" (click)="showFeedbackModal.set(false)"></div>
-          <div class="ui-modal-panel p-6 max-w-xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="ui-modal-shell">
+          <div class="ui-modal-backdrop" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="showFeedbackModal.set(false)"></div>
+          <div appModalA11y (modalClose)="showFeedbackModal.set(false)" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel p-6 max-w-xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between gap-4 mb-5">
               <div>
                 <h3 class="font-bold text-xl text-white">内容纠错</h3>
@@ -291,9 +302,9 @@ import {
       }
 
       @if (showNoteModal()) {
-        <div class="ui-modal-shell animate-fade-in-up">
-          <div class="ui-modal-backdrop" (click)="closeNoteEditor()"></div>
-          <div class="ui-modal-panel p-6 max-w-xl">
+        <div class="ui-modal-shell">
+          <div class="ui-modal-backdrop" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="closeNoteEditor()"></div>
+          <div appModalA11y (modalClose)="closeNoteEditor()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel p-6 max-w-xl">
             <div class="flex items-center justify-between gap-4 mb-5">
               <div>
                 <h3 class="font-bold text-xl text-white">词条笔记</h3>
@@ -332,6 +343,8 @@ import {
           
           <!-- Modal Content -->
           <div 
+            appModalA11y
+            (modalClose)="closeImageModal()"
             class="relative z-10 w-full h-full flex flex-col gap-6"
             [class.animate-modal-pop-in]="!isImageModalAnimatingOut()"
             [class.animate-modal-pop-out]="isImageModalAnimatingOut()">
@@ -340,7 +353,7 @@ import {
             <div class="flex-1 flex items-center justify-center overflow-hidden" (click)="closeImageModal()">
               <img 
                 [src]="entry()?.imageUrl" 
-                alt="{{entry()?.term}}" 
+                alt="{{entry() ? displayEntryTitle(entry()!) : ''}}"
                 decoding="async"
                 (load)="onImageLoad($event)"
                 class="modal-image object-contain shadow-2xl rounded-lg transition-transform duration-300"
@@ -389,7 +402,7 @@ import {
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in-up {
-      animation: fadeInUp 0.5s ease-out backwards;
+      animation: fadeInUp 280ms var(--ease-out) backwards;
     }
     @keyframes backdropIn {
       from { opacity: 0; }
@@ -408,16 +421,16 @@ import {
       to { opacity: 0; transform: scale(0.95); }
     }
     .animate-backdrop-in {
-      animation: backdropIn 0.3s ease-out forwards;
+      animation: backdropIn 220ms var(--ease-out) forwards;
     }
     .animate-backdrop-out {
-      animation: backdropOut 0.25s ease-in forwards;
+      animation: backdropOut 160ms var(--ease-out) forwards;
     }
     .animate-modal-pop-in {
-      animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: modalPopIn var(--duration-modal) var(--ease-out) forwards;
     }
     .animate-modal-pop-out {
-      animation: modalPopOut 0.25s ease-in forwards;
+      animation: modalPopOut 180ms var(--ease-out) forwards;
     }
   `]
 })
@@ -426,6 +439,7 @@ export class EntryDetailComponent implements OnDestroy {
   router: Router = inject(Router);
   location: NgLocation = inject(NgLocation);
   dataService = inject(DataService);
+  locale = inject(LocaleService);
   shareCardService = inject(ShareCardService);
 
   private resizeObserver: ResizeObserver | null = null;
@@ -668,6 +682,78 @@ export class EntryDetailComponent implements OnDestroy {
 
   highlightSegments(text: string | undefined): HighlightSegment[] {
     return splitHighlight(text, this.query());
+  }
+
+  displayText(value: string | null | undefined, fallback?: string): string {
+    return this.locale.translateData(value, fallback);
+  }
+
+  displayEntryTitle(entry: Entry): string {
+    if (this.locale.isEnglish()) {
+      return entry.termEn?.trim() || this.displayText(entry.term, 'Architecture Entry');
+    }
+    return entry.term;
+  }
+
+  displayEntrySubtitle(entry: Entry): string {
+    if (this.locale.isEnglish()) {
+      return [this.displayEntryCategory(entry), this.displayEntrySubcategory(entry)]
+        .filter(Boolean)
+        .join(' · ');
+    }
+    return entry.termEn;
+  }
+
+  displayEntryCategory(entry: Entry): string {
+    if (!this.locale.isEnglish()) return this.displayText(entry.category);
+    return tryTranslateRelationValue(entry.category, value => this.displayText(value)) || 'Architecture';
+  }
+
+  displayEntrySubcategory(entry: Entry): string {
+    if (!this.locale.isEnglish()) return this.displayText(entry.subcategory);
+    return tryTranslateRelationValue(entry.subcategory, value => this.displayText(value)) || '';
+  }
+
+  displayEntryDefinition(entry: Entry): string {
+    const translated = this.displayText(entry.definition);
+    if (!this.locale.isEnglish()) return translated;
+    if (displayableEnglish(translated)) return translated;
+
+    return entryDefinitionFallback(
+      entry,
+      this.displayEntryCategory(entry),
+      this.displayEntrySubcategory(entry)
+    );
+  }
+
+  displayEntryDetails(entry: Entry): string {
+    const translated = this.displayText(entry.details);
+    if (!this.locale.isEnglish()) return translated;
+    if (displayableEnglish(translated)) return translated;
+
+    return entryDetailsFallback(
+      entry,
+      this.displayEntryCategory(entry),
+      this.displayEntrySubcategory(entry)
+    );
+  }
+
+  displayRelationLabel(value: string): string {
+    return this.locale.isEnglish()
+      ? translateRelationValue(value, text => this.displayText(text))
+      : this.displayText(value);
+  }
+
+  displayRelationValue(value: string): string {
+    return this.locale.isEnglish()
+      ? translateRelationValue(value, text => this.displayText(text))
+      : this.displayText(value);
+  }
+
+  displayFigureCaption(entry: Entry): string {
+    return this.locale.isEnglish()
+      ? `Figure 1.1 - ${this.displayEntryTitle(entry)} reference image`
+      : `Figure 1.1 - ${entry.term} 示意图`;
   }
 
   openRelation(value: string) {

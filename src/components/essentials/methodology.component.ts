@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data.service';
+import { LocaleService } from '../../services/locale.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
@@ -22,10 +23,10 @@ interface MethodColumn {
       <div class="ui-topbar">
         <a routerLink="/essentials" class="ui-btn-secondary">
           <svg lucideArrowLeft class="w-4 h-4" [strokeWidth]="2"></svg>
-          返回
+          {{ displayText('返回') }}
         </a>
         <div>
-          <h2 class="text-xl font-bold">设计方法图谱</h2>
+          <h2 class="text-xl font-bold">{{ displayText('设计方法图谱') }}</h2>
           <p class="text-xs text-gray-500 mt-0.5">Design Methodology Graph</p>
         </div>
       </div>
@@ -43,28 +44,28 @@ interface MethodColumn {
               <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
 
               <div class="flex items-start justify-between relative z-10">
-                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all">
+                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
                   <svg lucideExternalLink class="w-5 h-5" [strokeWidth]="1.8"></svg>
                 </div>
                 
-                <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:border-blue-500/50 group-hover:text-blue-400 transition-all">
+                <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:border-blue-500/50 group-hover:text-blue-400 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
                   <svg lucideChevronRight class="w-3 h-3" [strokeWidth]="2"></svg>
                 </div>
               </div>
 
               <div class="relative z-10">
-                <h3 class="text-lg font-bold text-gray-200 group-hover:text-white transition-colors">{{ col.title }}</h3>
+                <h3 class="text-lg font-bold text-gray-200 group-hover:text-white transition-colors">{{ displayText(col.title) }}</h3>
                 <p class="text-xs text-gray-500 mt-1 group-hover:text-gray-400 transition-colors line-clamp-2">
-                  {{ col.description || '点击查看详细内容与方法论' }}
+                  {{ displayText(col.description || '点击查看详细内容与方法论') }}
                 </p>
               </div>
             </a>
           }
           
           <!-- Add New Placeholder (Visual cue for extensibility) -->
-          <div class="border border-dashed border-white/10 rounded-xl p-5 flex flex-col items-center justify-center text-gray-600 gap-2 min-h-[140px] opacity-50 hover:opacity-100 hover:border-white/20 transition-all cursor-default">
+          <div class="border border-dashed border-white/10 rounded-xl p-5 flex flex-col items-center justify-center text-gray-600 gap-2 min-h-[140px] opacity-50 hover:opacity-100 hover:border-white/20 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out cursor-default">
              <svg lucidePlus class="w-6 h-6" [strokeWidth]="1.8"></svg>
-             <span class="text-xs">更多栏目建设中...</span>
+             <span class="text-xs">{{ displayText('更多栏目建设中...') }}</span>
           </div>
         </div>
       </div>
@@ -89,6 +90,7 @@ interface MethodColumn {
 })
 export class MethodologyComponent {
   private dataService = inject(DataService);
+  private locale = inject(LocaleService);
 
   // Define columns here for easy extensibility
   methodologyColumns: MethodColumn[] = [
@@ -110,5 +112,9 @@ export class MethodologyComponent {
     } else {
       console.warn('Invalid URL:', url);
     }
+  }
+
+  displayText(value: string | null | undefined): string {
+    return this.locale.translateData(value);
   }
 }

@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { gsap } from 'gsap';
+import { LocaleService } from '../../services/locale.service';
 
 @Component({
   selector: 'app-animated-search-bar',
@@ -13,16 +14,19 @@ import { gsap } from 'gsap';
       <!-- Island Container -->
       <div 
         #island 
-        class="island absolute left-0 top-0 bg-surface border border-line shadow-panel flex items-center overflow-hidden z-20"
-        style="width: 48px; height: 48px; border-radius: 24px;"
+        class="island pointer-events-none absolute left-0 top-0 flex h-12 items-center z-20"
+        style="width: 400px;"
       >
+        <div #closedSurface class="closed-surface absolute left-0 top-0 h-12 w-12 rounded-full border border-line bg-surface shadow-panel"></div>
+        <div #islandSurface class="island-surface absolute inset-0 origin-left rounded-full border border-line bg-surface shadow-panel"></div>
+
         <!-- Toggle Button -->
         <button 
           #toggleBtn 
           (click)="toggle()" 
-          class="absolute left-0 w-12 h-12 flex items-center justify-center text-gray-400 hover:text-white transition-colors z-20 focus:outline-none"
+          class="pointer-events-auto absolute left-0 w-12 h-12 rounded-full flex items-center justify-center text-gray-400 hover:text-white transition-colors z-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70"
           [attr.aria-expanded]="isOpen"
-          aria-label="Toggle search"
+          [attr.aria-label]="displayText(isOpen ? '关闭搜索' : '打开搜索')"
         >
           <!-- SVG for Search / Close -->
           <svg class="w-5 h-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -37,13 +41,13 @@ import { gsap } from 'gsap';
         </button>
 
         <!-- Search Input -->
-        <div #menuPanel class="menu-panel absolute left-12 right-0 h-full flex items-center">
+        <div #menuPanel class="menu-panel pointer-events-auto absolute left-12 right-0 h-full flex items-center">
           <input 
             #searchInput
             type="text" 
             [ngModel]="query"
             (ngModelChange)="onQueryChange($event)"
-            [placeholder]="placeholder" 
+            [placeholder]="displayText(placeholder)"
             class="w-full h-full bg-transparent text-white text-base placeholder-gray-500 pr-4 focus:outline-none"
             (keydown.enter)="onEnter()"
             tabindex="-1"
@@ -51,7 +55,7 @@ import { gsap } from 'gsap';
           
           <!-- Clear Button -->
           @if (query) {
-            <button (click)="clearQuery(); $event.stopPropagation()" class="absolute right-4 text-lg leading-none text-gray-500 hover:text-white transition-colors" aria-label="清除搜索">
+            <button (click)="clearQuery(); $event.stopPropagation()" class="absolute right-4 text-lg leading-none text-gray-500 hover:text-white transition-colors" [attr.aria-label]="displayText('清除搜索')">
               ×
             </button>
           }
@@ -68,7 +72,13 @@ import { gsap } from 'gsap';
   `,
   styles: [`
     .island {
-      will-change: width, transform;
+      will-change: transform;
+    }
+    .island-surface {
+      will-change: transform;
+    }
+    .closed-surface {
+      will-change: opacity;
     }
     .menu-panel {
       will-change: transform, opacity;
@@ -76,12 +86,15 @@ import { gsap } from 'gsap';
   `]
 })
 export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
+  private locale = inject(LocaleService);
   @Input() query: string = '';
   @Input() placeholder: string = '搜索...';
   @Output() queryChange = new EventEmitter<string>();
 
   @ViewChild('islandContainer') islandContainer!: ElementRef;
   @ViewChild('island') island!: ElementRef;
+  @ViewChild('closedSurface') closedSurface!: ElementRef;
+  @ViewChild('islandSurface') islandSurface!: ElementRef;
   @ViewChild('toggleBtn') toggleBtn!: ElementRef;
   @ViewChild('searchInput') searchInput!: ElementRef;
   @ViewChild('backdrop') backdrop!: ElementRef;
@@ -100,6 +113,7 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
   private scrollListenerOptions: AddEventListenerOptions = { capture: true, passive: true };
   private layoutSyncFrame = 0;
   private layoutSyncUntil = 0;
+  private expandedWidth = 400;
   private handleLayoutShift = () => this.trackPositionDuringLayoutChange();
 
   onQueryChange(val: string) {
@@ -115,6 +129,10 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
 
   onEnter() {
     // Optionally close on enter, or just leave it
+  }
+
+  displayText(value: string | null | undefined): string {
+    return this.locale.translateData(value);
   }
 
   updatePosition = () => {
@@ -153,27 +171,33 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
   }
 
   private pinIslandToAnchor() {
+    this.expandedWidth = Math.min(window.innerWidth * 0.9, 400);
     gsap.set(this.island.nativeElement, {
       position: 'absolute',
       left: 0,
       top: 0,
-      width: 48,
-      xPercent: 0,
-      yPercent: 0,
-      clearProps: 'transform'
+      width: this.expandedWidth,
+      x: 0
+    });
+    gsap.set(this.islandSurface.nativeElement, {
+      scaleX: 48 / this.expandedWidth,
+      transformOrigin: 'left center'
     });
   }
 
   private floatIslandFromAnchor() {
     const rect = this.islandContainer.nativeElement.getBoundingClientRect();
+    this.expandedWidth = Math.min(window.innerWidth * 0.9, 400);
     gsap.set(this.island.nativeElement, {
       position: 'fixed',
       left: rect.left,
       top: rect.top,
-      width: 48,
-      xPercent: 0,
-      yPercent: 0,
-      clearProps: 'transform'
+      width: this.expandedWidth,
+      x: 0
+    });
+    gsap.set(this.islandSurface.nativeElement, {
+      scaleX: 48 / this.expandedWidth,
+      transformOrigin: 'left center'
     });
   }
 
@@ -196,7 +220,9 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
     window.addEventListener('archipedia:layout-shift', this.handleLayoutShift);
     this.observePositionSources();
     
-    gsap.set(this.menuPanel.nativeElement, { autoAlpha: 0, yPercent: -10, scale: 0.6 });
+    gsap.set(this.closedSurface.nativeElement, { autoAlpha: 1 });
+    gsap.set(this.islandSurface.nativeElement, { autoAlpha: 0 });
+    gsap.set(this.menuPanel.nativeElement, { autoAlpha: 0, x: -8 });
   }
 
   toggle() {
@@ -207,15 +233,10 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
       this.searchInput.nativeElement.setAttribute('tabindex', '0');
       this.isAnimating = true;
       this.floatIslandFromAnchor();
-      
-      const expandedWidth = Math.min(window.innerWidth * 0.9, 400);
-      const openDuration = this.prefersReducedMotion ? 0.01 : 0.36;
-      
-      // Calculate how much we need to shift to center the island on the screen
-      const screenCenterX = window.innerWidth / 2;
-      const targetLeft = screenCenterX - (expandedWidth / 2);
-      
-      // we are using fixed positioning, so we just animate left
+
+      const anchorRect = this.islandContainer.nativeElement.getBoundingClientRect();
+      const openDuration = this.prefersReducedMotion ? 0.01 : 0.22;
+      const targetX = (window.innerWidth - this.expandedWidth) / 2 - anchorRect.left;
       
       if (this.tl) this.tl.kill();
       
@@ -226,59 +247,79 @@ export class AnimatedSearchBarComponent implements AfterViewInit, OnDestroy {
         }
       })
       .set(this.backdrop.nativeElement, { pointerEvents: 'auto' })
+      .set(this.islandSurface.nativeElement, { autoAlpha: 1 })
       .to(this.island.nativeElement, { 
-        width: expandedWidth, 
-        left: targetLeft,
+        x: targetX,
         duration: openDuration,
         ease: 'power3.out'
       }, 0)
-      .to(this.searchCircle.nativeElement, { opacity: 0, duration: 0.15, ease: 'power2.in' }, 0)
+      .to(this.islandSurface.nativeElement, {
+        scaleX: 1,
+        duration: openDuration,
+        ease: 'power3.out'
+      }, 0)
+      .to(this.closedSurface.nativeElement, {
+        autoAlpha: 0,
+        duration: Math.min(0.1, openDuration * 0.55),
+        ease: 'power2.out'
+      }, 0.025)
+      .to(this.searchCircle.nativeElement, { opacity: 0, duration: 0.12, ease: 'power2.out' }, 0)
       .to(this.barTop.nativeElement, { opacity: 1, attr: { x1: 3, y1: 3, x2: 13, y2: 13 }, duration: 0.18, ease: 'power2.out' }, 0)
       .to(this.barBot.nativeElement, { attr: { x1: 13, y1: 3, x2: 3, y2: 13 }, duration: 0.18, ease: 'power2.out' }, 0)
-      .to(this.backdrop.nativeElement, { opacity: 1, duration: openDuration * 0.7, ease: 'power2.out' }, 0)
+      .to(this.backdrop.nativeElement, { autoAlpha: 1, duration: openDuration, ease: 'power2.out' }, 0)
       .fromTo(this.menuPanel.nativeElement, 
-        { autoAlpha: 0, yPercent: -10, scale: 0.6 },
-        { autoAlpha: 1, yPercent: 0, scale: 1, duration: openDuration, transformOrigin: 'left center', ease: 'power3.out' },
-      0.06);
+        { autoAlpha: 0, x: -8 },
+        { autoAlpha: 1, x: 0, duration: openDuration * 0.8, ease: 'power3.out' },
+      0.04);
       
     } else {
       this.searchInput.nativeElement.setAttribute('tabindex', '-1');
       this.isAnimating = true;
       
       if (this.tl) this.tl.kill();
-      const closedRect = this.islandContainer.nativeElement.getBoundingClientRect();
-      const closeDuration = this.prefersReducedMotion ? 0.01 : 0.24;
+      const closeDuration = this.prefersReducedMotion ? 0.01 : 0.16;
+      const anchorRect = this.islandContainer.nativeElement.getBoundingClientRect();
+      const fixedLeft = Number.parseFloat(getComputedStyle(this.island.nativeElement).left) || anchorRect.left;
+      const targetX = anchorRect.left - fixedLeft;
       
       this.tl = gsap.timeline({
         onComplete: () => {
           gsap.set(this.backdrop.nativeElement, { pointerEvents: 'none' });
-          gsap.set(this.island.nativeElement, { width: 48 });
           gsap.set(this.searchCircle.nativeElement, { opacity: 1 });
           gsap.set(this.barTop.nativeElement, { opacity: 0, attr: { x1: 14, y1: 2, x2: 14, y2: 2 } });
           gsap.set(this.barBot.nativeElement, { attr: { x1: 10.5, y1: 10.5, x2: 14, y2: 14 } });
-          gsap.set(this.menuPanel.nativeElement, { autoAlpha: 0, yPercent: -10, scale: 0.6 });
+          gsap.set(this.closedSurface.nativeElement, { autoAlpha: 1 });
+          gsap.set(this.islandSurface.nativeElement, { autoAlpha: 0 });
+          gsap.set(this.menuPanel.nativeElement, { autoAlpha: 0, x: -8 });
           this.isAnimating = false;
           this.pinIslandToAnchor();
           this.trackPositionDuringLayoutChange(140);
         }
       })
       .to(this.island.nativeElement, { 
-        width: 48, 
-        left: closedRect.left,
-        top: closedRect.top,
+        x: targetX,
         duration: closeDuration,
         ease: 'power2.inOut' 
       }, 0)
+      .to(this.islandSurface.nativeElement, {
+        scaleX: 48 / this.expandedWidth,
+        duration: closeDuration,
+        ease: 'power2.inOut'
+      }, 0)
+      .to(this.closedSurface.nativeElement, {
+        autoAlpha: 1,
+        duration: Math.min(0.09, closeDuration * 0.6),
+        ease: 'power2.out'
+      }, closeDuration * 0.4)
       .to(this.searchCircle.nativeElement, { opacity: 1, duration: 0.15, ease: 'power2.out' }, 0)
-      .to(this.barTop.nativeElement, { opacity: 0, attr: { x1: 14, y1: 2, x2: 14, y2: 2 }, duration: 0.18, ease: 'power2.inOut' }, 0)
-      .to(this.barBot.nativeElement, { attr: { x1: 10.5, y1: 10.5, x2: 14, y2: 14 }, duration: 0.18, ease: 'power2.inOut' }, 0)
-      .to(this.backdrop.nativeElement, { opacity: 0, duration: closeDuration * 0.75, ease: 'power2.in' }, 0)
+      .to(this.barTop.nativeElement, { opacity: 0, attr: { x1: 14, y1: 2, x2: 14, y2: 2 }, duration: 0.16, ease: 'power2.out' }, 0)
+      .to(this.barBot.nativeElement, { attr: { x1: 10.5, y1: 10.5, x2: 14, y2: 14 }, duration: 0.16, ease: 'power2.out' }, 0)
+      .to(this.backdrop.nativeElement, { autoAlpha: 0, duration: closeDuration, ease: 'power2.out' }, 0)
       .to(this.menuPanel.nativeElement, { 
         autoAlpha: 0, 
-        yPercent: -10, 
-        scale: 0.6, 
+        x: -8,
         duration: closeDuration,
-        ease: 'power2.inOut' 
+        ease: 'power2.out'
       }, 0);
     }
   }

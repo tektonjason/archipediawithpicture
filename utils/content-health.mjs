@@ -236,6 +236,19 @@ function checkResources() {
   const resources = exportedConst(files.resources, 'SEED_RESOURCES');
   const duplicateIds = duplicateKeys(resources, item => item?.id);
   const invalidUrls = resources.filter(item => !isValidHttpUrl(item?.url));
+  const invalidCollections = resources.filter(item => item?.collection && !['resources', 'inspiration'].includes(item.collection));
+  const invalidActions = resources.flatMap(item => (item?.actions ?? [])
+    .filter(action => !action?.id || !action?.label || !isValidHttpUrl(action?.url) || !['external', 'verified-download'].includes(action?.type))
+    .map(action => `${item?.id ?? '(unknown)'} -> ${action?.id ?? '(missing action id)'}`));
+  const invalidVerifiedDownloads = resources.flatMap(item => (item?.actions ?? [])
+    .filter(action => action?.type === 'verified-download'
+      && (!['nus-gradbook', 'project-material'].includes(action?.policy)
+        || !['dropbox', 'baidu-pan'].includes(action?.provider)))
+    .map(action => `${item?.id ?? '(unknown)'} -> ${action?.id ?? '(missing action id)'}`));
+  const recommendedResources = resources.filter(item => item?.recommended);
+  const projectMaterials = resources.filter(item => item?.category === '项目资料');
+  const projectMaterialGroups = ['规划与导则', '建筑构造与技术', '事务所与项目案例', '考研与快题', '表达与申请'];
+  const invalidProjectMaterialGroups = projectMaterials.filter(item => !projectMaterialGroups.includes(item?.subcategory));
   const imageDir = path.join(root, 'public', 'images', 'resources');
   const missingImages = [];
   const oversizedImages = [];
@@ -248,6 +261,26 @@ function checkResources() {
 
   for (const item of invalidUrls) {
     report.errors.push(`SEED_RESOURCES invalid url: ${item?.title ?? '(untitled)'} -> ${item?.url ?? '(empty)'}`);
+  }
+
+  if (invalidCollections.length) {
+    report.errors.push(`SEED_RESOURCES has ${invalidCollections.length} invalid collection values`);
+  }
+
+  for (const action of invalidActions) {
+    report.errors.push(`SEED_RESOURCES invalid action: ${action}`);
+  }
+
+  for (const action of invalidVerifiedDownloads) {
+    report.errors.push(`SEED_RESOURCES invalid verified download policy/provider: ${action}`);
+  }
+
+  if (recommendedResources.length !== 9) {
+    report.errors.push(`SEED_RESOURCES has ${recommendedResources.length} recommended entries; expected exactly 9`);
+  }
+
+  if (projectMaterials.length !== 20 || invalidProjectMaterialGroups.length) {
+    report.errors.push(`SEED_RESOURCES project materials must contain 20 entries assigned to valid subcategories`);
   }
 
   for (const item of resources) {
@@ -294,7 +327,10 @@ function checkResources() {
 
   report.notes.push(`SEED_RESOURCES: ${resources.length} links`);
   report.notes.push(`Resource previews: ${resources.length - missingImages.length}/${resources.length} WebP files`);
+  report.notes.push(`Recommended resources: ${recommendedResources.length}`);
+  summarizeCounts('Project material groups', countBy(projectMaterials, item => item?.subcategory));
   summarizeCounts('Resource categories', countBy(resources, item => item?.category));
+  summarizeCounts('Resource collections', countBy(resources, item => item?.collection ?? 'resources'));
 }
 
 function checkStandards() {

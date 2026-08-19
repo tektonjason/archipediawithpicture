@@ -1,11 +1,12 @@
 ﻿@if (showSplash()) {
-  <app-splash-screen (enter)="onSplashEnter()"></app-splash-screen>
+  <app-splash-screen appLocalizeText (enter)="onSplashEnter()"></app-splash-screen>
 }
 
-<div class="flex h-screen w-screen bg-app overflow-hidden relative text-gray-300 font-sans">
+<div appLocalizeText class="flex h-screen w-screen bg-app overflow-hidden relative text-gray-300 font-sans">
   
   <!-- Sidebar -->
   <aside 
+    #sidebarPanel
     id="sidebar-panel"
     class="bg-surface flex flex-col h-full overflow-hidden fixed inset-y-0 left-0 z-50 border-r border-line-soft md:relative md:z-auto"
   >
@@ -41,6 +42,10 @@
           <svg lucideFolder class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>资源库</span>
         </a>
+        <a routerLink="/inspiration" routerLinkActive #rlaInspiration="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaInspiration.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
+          <svg lucideSparkles class="w-5 h-5" [strokeWidth]="2"></svg>
+          <span>灵感库</span>
+        </a>
         <a routerLink="/standards" routerLinkActive #rlaStandards="routerLinkActive" [class]="'nav-item px-3 py-2.5 rounded-lg flex items-center gap-3 transition-colors ' + (rlaStandards.isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200')">
           <svg lucideList class="w-5 h-5" [strokeWidth]="2"></svg>
           <span>规范速查</span>
@@ -66,22 +71,55 @@
             <svg class="services-nav-comet" viewBox="0 0 232 44" preserveAspectRatio="none" focusable="false">
               <defs>
                 <filter id="servicesCometGlow" x="-18%" y="-80%" width="136%" height="260%">
-                  <feGaussianBlur stdDeviation="3.6" result="blur"></feGaussianBlur>
+                  <feGaussianBlur stdDeviation="3.2" result="blur"></feGaussianBlur>
                   <feMerge>
                     <feMergeNode in="blur"></feMergeNode>
                     <feMergeNode in="SourceGraphic"></feMergeNode>
                   </feMerge>
                 </filter>
-                <linearGradient id="servicesCometStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0"></stop>
-                  <stop offset="34%" stop-color="#38bdf8" stop-opacity="0.45"></stop>
-                  <stop offset="76%" stop-color="#93c5fd" stop-opacity="1"></stop>
-                  <stop offset="100%" stop-color="#e0f2fe" stop-opacity="1"></stop>
-                </linearGradient>
+                <filter id="servicesCometDust" x="-24%" y="-120%" width="148%" height="340%">
+                  <feGaussianBlur stdDeviation="1.05" result="dustBlur"></feGaussianBlur>
+                  <feMerge>
+                    <feMergeNode in="dustBlur"></feMergeNode>
+                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                  </feMerge>
+                </filter>
               </defs>
-              <rect class="services-nav-comet-glow" x="3" y="3" width="226" height="38" rx="8"></rect>
-              <rect class="services-nav-comet-trail" x="3" y="3" width="226" height="38" rx="8"></rect>
-              <rect class="services-nav-comet-head" x="3" y="3" width="226" height="38" rx="8"></rect>
+              <path class="services-nav-comet-guide" d="M 13 3 H 219 Q 229 3 229 13 V 31 Q 229 41 219 41 H 13 Q 3 41 3 31 V 13 Q 3 3 13 3 Z"></path>
+              <path class="services-nav-comet-orbit-path" d="M 13 3 H 219 Q 229 3 229 13 V 31 Q 229 41 219 41 H 13 Q 3 41 3 31 V 13 Q 3 3 13 3 Z"></path>
+              <polyline class="services-nav-comet-smear"></polyline>
+              <g class="services-nav-comet-tail">
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+                <circle class="services-nav-comet-particle"></circle>
+              </g>
+              <circle class="services-nav-comet-head-halo" r="7.2"></circle>
+              <circle class="services-nav-comet-head-core" r="3.2"></circle>
             </svg>
           </span>
           <svg lucideBriefcase class="w-5 h-5" [strokeWidth]="2"></svg>
@@ -96,17 +134,18 @@
       <!-- Sidebar Footer (Disclaimer & Copyright) -->
       <div class="bg-surface relative z-20">
         <!-- Q&A Carousel -->
-        <div 
+        <button
+          type="button"
           (click)="handleCarouselClick()"
-          class="px-4 pb-3 cursor-pointer group relative z-30"
+          class="w-full px-4 pb-3 cursor-pointer group relative z-30 text-left"
         >
           <div class="ui-card ui-card-hover p-3 relative overflow-hidden" appGsapCardHover>
             <div class="flex items-center gap-2 mb-1.5">
               <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></div>
               <span class="text-[10px] text-emerald-500 font-bold tracking-wider uppercase">Q&A</span>
             </div>
-            <p class="text-xs text-gray-300 line-clamp-2 min-h-[2.5em] transition-all duration-500 leading-relaxed">
-              {{ currentQuestion() }}
+            <p class="text-xs text-gray-300 line-clamp-2 min-h-[2.5em] transition-[color,opacity] duration-ui ease-ui-out leading-relaxed">
+              {{ displayText(currentQuestion()) }}
             </p>
             
             <!-- Decorative arrow -->
@@ -114,7 +153,7 @@
                <svg lucideChevronRight class="w-4 h-4 text-gray-400" [strokeWidth]="2"></svg>
             </div>
           </div>
-        </div>
+        </button>
 
         <div class="border-t border-white/5">
           <button 
@@ -130,7 +169,7 @@
         </div>
         
         <div 
-          class="overflow-hidden transition-all duration-300 ease-in-out px-4"
+          class="overflow-hidden transition-[max-height,padding-bottom] duration-ui ease-ui-in-out px-4"
           [class.max-h-0]="isSidebarFooterCollapsed()"
           [class.max-h-60]="!isSidebarFooterCollapsed()"
           [class.pb-0]="isSidebarFooterCollapsed()"
@@ -161,8 +200,8 @@
          class="ui-icon-btn shadow-lg"
        >
          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-           <line class="bar-top" x1="3" y1="6" x2="17" y2="6" />
-           <line class="bar-bot" x1="3" y1="14" x2="17" y2="14" />
+           <line #menuBarTop class="bar-top" x1="3" y1="6" x2="17" y2="6" />
+           <line #menuBarBottom class="bar-bot" x1="3" y1="14" x2="17" y2="14" />
          </svg>
        </button>
        @if (canInstallApp()) {
@@ -182,7 +221,9 @@
     @if (dataService.isSidebarOpen()) {
       <div 
         (click)="dataService.toggleSidebar()" 
-        class="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-[fadeIn_0.2s_ease-out]"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+        animate.enter="ui-backdrop-enter"
+        animate.leave="ui-backdrop-leave"
         aria-hidden="true"
       ></div>
     }
@@ -196,39 +237,43 @@
   <!-- Modals (Login/Logout) -->
   @if (showUpdateNotice()) {
     <div class="fixed inset-0 z-[65] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/35 backdrop-blur-[2px]" (click)="dismissUpdateNotice()"></div>
+      <div class="absolute inset-0 bg-black/35 backdrop-blur-[2px]" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="dismissUpdateNotice()"></div>
       <section
-        class="relative w-full max-w-[26rem] overflow-hidden rounded-card border border-white/10 bg-[#17181c]/80 shadow-panel backdrop-blur-xl animate-modal-pop-in"
+        appModalA11y
+        (modalClose)="dismissUpdateNotice()"
+        animate.enter="ui-modal-enter"
+        animate.leave="ui-modal-leave"
+        class="relative flex max-h-[min(34rem,calc(100dvh-2rem))] w-full max-w-[26rem] flex-col overflow-hidden rounded-card border border-white/10 bg-[#17181c]/80 shadow-panel backdrop-blur-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="update-notice-title"
       >
         <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
 
-        <div class="p-5 sm:p-6">
-          <div class="mb-4 flex items-center gap-3">
+        <div class="flex min-h-0 flex-1 flex-col p-5 sm:p-6">
+          <div class="mb-4 flex shrink-0 items-center gap-3">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-control border border-blue-400/20 bg-blue-500/10 text-blue-300">
               <svg lucideCheckCircle class="h-5 w-5" [strokeWidth]="2"></svg>
             </div>
             <div>
               <p class="text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Update · {{ updateNoticeDate }}</p>
-              <h2 id="update-notice-title" class="text-lg font-bold text-white">近期更新</h2>
+              <h2 id="update-notice-title" class="text-lg font-bold text-white">{{ displayText('近期更新') }}</h2>
             </div>
           </div>
 
-          <ul class="space-y-2.5 text-sm leading-relaxed text-gray-300">
+          <ul class="custom-scrollbar min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain pr-2 text-sm leading-relaxed text-gray-300">
             @for (item of updateNoticeItems; track item) {
               <li class="flex gap-2.5">
                 <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-300/80"></span>
-                <span>{{ item }}</span>
+                <span>{{ displayText(item) }}</span>
               </li>
             }
           </ul>
 
-          <div class="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
-            <span class="text-xs text-gray-500">此提示仅显示一次</span>
+          <div class="mt-5 flex shrink-0 items-center justify-between gap-3 border-t border-white/10 pt-4">
+            <span class="text-xs text-gray-500">{{ displayText('此提示仅显示一次') }}</span>
             <button (click)="dismissUpdateNotice()" class="ui-btn-primary min-w-24 px-4 py-2 text-sm">
-              知道了
+              {{ displayText('知道了') }}
             </button>
           </div>
         </div>
@@ -238,8 +283,8 @@
 
   @if (dataService.showLoginModal()) {
     <div class="ui-modal-shell">
-      <div class="ui-modal-backdrop" (click)="dataService.closeLoginModal()"></div>
-      <div class="ui-modal-panel max-w-sm p-6 flex flex-col gap-4 animate-modal-pop-in">
+      <div class="ui-modal-backdrop" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="dataService.closeLoginModal()"></div>
+      <div appModalA11y (modalClose)="dataService.closeLoginModal()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel max-w-sm p-6 flex flex-col gap-4">
         <h2 class="text-xl font-bold text-white mb-2">管理员登录</h2>
         <div class="flex flex-col gap-2">
           <label class="ui-label">邮箱账号</label>
@@ -264,8 +309,8 @@
 
   @if (dataService.showLogoutModal()) {
     <div class="ui-modal-shell">
-      <div class="ui-modal-backdrop" (click)="dataService.showLogoutModal.set(false)"></div>
-      <div class="ui-modal-panel max-w-sm p-6 flex flex-col gap-4 animate-modal-pop-in">
+      <div class="ui-modal-backdrop" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="dataService.showLogoutModal.set(false)"></div>
+      <div appModalA11y (modalClose)="dataService.showLogoutModal.set(false)" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel max-w-sm p-6 flex flex-col gap-4">
         <h2 class="text-xl font-bold text-white mb-1">管理员登出</h2>
         <p class="text-gray-400 text-sm">确定要退出管理员模式吗？<br>您的所有修改已自动保存。</p>
         <div class="flex gap-3 mt-4">
@@ -279,21 +324,21 @@
   <!-- External Link Warning Modal -->
   @if (dataService.showExternalModal()) {
     <div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div class="ui-modal-backdrop bg-black/70" (click)="dataService.closeExternalModal()"></div>
-      <div class="ui-modal-panel p-6 max-w-md animate-modal-pop-in">
-        <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><svg lucideExternalLink class="w-5 h-5 text-blue-400" [strokeWidth]="2"></svg>外部网站跳转提示</h3>
-        <p class="text-gray-400 mb-6 text-sm leading-relaxed">您即将跳转到外部网站，请注意您的账号和财产安全。</p>
+      <div class="ui-modal-backdrop bg-black/70" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" (click)="dataService.closeExternalModal()"></div>
+      <div appModalA11y (modalClose)="dataService.closeExternalModal()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel p-6 max-w-md">
+        <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><svg lucideExternalLink class="w-5 h-5 text-blue-400" [strokeWidth]="2"></svg>{{ displayText('外部网站跳转提示') }}</h3>
+        <p class="text-gray-400 mb-6 text-sm leading-relaxed">{{ displayText('您即将跳转到外部网站，请注意您的账号和财产安全。') }}</p>
         <div class="flex flex-col gap-3">
           <div class="flex gap-3">
             <button (click)="dataService.closeExternalModal()" class="ui-btn-secondary flex-1">
-              取消
+              {{ displayText('取消') }}
             </button>
             <button (click)="dataService.confirmExternalNavigation()" class="ui-btn-accent flex-1">
-              继续访问
+              {{ displayText('继续访问') }}
             </button>
           </div>
-          <button (click)="dataService.confirmExternalNavigation(true)" class="w-full rounded-control border border-line-soft py-2 text-xs text-gray-500 transition-all hover:bg-white/5 hover:text-gray-300">
-            本次使用不再提醒
+          <button (click)="dataService.confirmExternalNavigation(true)" class="w-full rounded-control border border-line-soft py-2 text-xs text-gray-500 transition-[transform,background-color,color,border-color] duration-fast ease-ui-out hover:bg-white/5 hover:text-gray-300 active:scale-[0.97]">
+            {{ displayText('本次使用不再提醒') }}
           </button>
         </div>
       </div>
@@ -302,7 +347,7 @@
 
   <!-- Toast Notification -->
   @if (dataService.showToast()) {
-    <div class="ui-toast animate-fade-in-up">
+    <div class="ui-toast" role="status" aria-live="polite" aria-atomic="true" animate.enter="ui-toast-enter" animate.leave="ui-toast-leave">
       {{ dataService.toastMessage() }}
     </div>
   }

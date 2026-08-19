@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy, signal, computed, HostListener, inject } 
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data.service';
+import { LocaleService } from '../../services/locale.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 
 interface CareerNode {
@@ -16,6 +17,61 @@ interface CareerNode {
   animationDelay: string;
   animationDuration: string;
 }
+
+const CAREER_TRANSLATIONS: Record<string, string> = {
+  '策展人': 'Curator',
+  '景观建筑师': 'Landscape Architect',
+  '工业设计师': 'Industrial Designer',
+  '动画师': 'Animator',
+  '太阳能工程师': 'Solar Energy Engineer',
+  '建筑设计师': 'Architectural Designer',
+  '绘图员': 'Draftsperson',
+  '设计策略师': 'Design Strategist',
+  '网页设计师': 'Web Designer',
+  '建筑学教授': 'Architecture Professor',
+  '品牌体验设计师': 'Brand Experience Designer',
+  '文案撰稿人': 'Copywriter',
+  '电子游戏设计师': 'Video Game Designer',
+  '建筑师': 'Architect',
+  '计算设计师': 'Computational Designer',
+  '美术教师': 'Art Teacher',
+  '机电一体化工程师': 'Mechatronics Engineer',
+  '船舶设计师': 'Naval Designer',
+  '计算机工程师': 'Computer Engineer',
+  '架构师': 'Systems Architect',
+  '电子竞技运营': 'Esports Operations',
+  '游戏设计师': 'Game Designer',
+  '数据工程师': 'Data Engineer',
+  'UI / UX 设计师': 'UI / UX Designer',
+  '开发者': 'Developer',
+  '作家 / 撰稿人': 'Writer / Copywriter',
+  '城市/交通规划师': 'Urban / Transport Planner',
+  '体验设计师': 'Experience Designer',
+  '互动媒体艺术家': 'Interactive Media Artist',
+  '创意总监': 'Creative Director',
+  '文化体验开发者': 'Cultural Experience Developer',
+  '工程造价师': 'Cost Engineer',
+  'BIM 管理': 'BIM Manager',
+  '能耗模拟师': 'Energy Simulation Specialist',
+  '绿色建筑认证顾问': 'Green Building Certification Consultant',
+  '幕墙工程师': 'Facade Engineer',
+  '照明设计师': 'Lighting Designer',
+  '声学顾问': 'Acoustic Consultant',
+  '建筑材料研发': 'Building Materials R&D',
+  '数字制造': 'Digital Fabrication',
+  '室内设计师': 'Interior Designer',
+  '舞台/影视布景': 'Stage / Film Set Designer',
+  '城市数据分析师': 'Urban Data Analyst',
+  '文物/古建保护': 'Heritage Conservation Specialist',
+  '媒体从业者': 'Media Practitioner',
+  '建筑软件开发': 'Architecture Software Developer',
+  'AR/VR': 'AR / VR',
+  '交互设计': 'Interaction Design',
+  '城市规划': 'Urban Planning',
+  '城市设计': 'Urban Design',
+  '应急设计': 'Emergency Design',
+  '建成环境': 'Built Environment'
+};
 
 @Component({
   selector: 'app-career',
@@ -31,10 +87,10 @@ interface CareerNode {
       <div class="absolute top-0 left-0 right-0 z-20 px-4 pt-4 md:pl-24 flex items-center gap-4 pointer-events-none">
         <a routerLink="/essentials" class="pointer-events-auto ml-12 md:ml-0 ui-btn-secondary bg-surface/80 backdrop-blur-md">
           <svg lucideArrowLeft class="w-4 h-4" [strokeWidth]="2"></svg>
-          返回
+          {{ displayText('返回') }}
         </a>
         <div class="pointer-events-auto">
-          <h2 class="text-lg md:text-xl font-bold text-white shadow-black drop-shadow-md">就业方向概览</h2>
+          <h2 class="text-lg md:text-xl font-bold text-white shadow-black drop-shadow-md">{{ displayText('就业方向概览') }}</h2>
           <p class="text-[10px] md:text-xs text-gray-400 mt-0.5 shadow-black drop-shadow-md">Career Path Universe</p>
         </div>
       </div>
@@ -59,7 +115,7 @@ interface CareerNode {
             <!-- Central Circle -->
             <div class="w-28 h-28 md:w-40 md:h-40 rounded-full bg-surface border border-line shadow-[0_0_50px_rgba(255,255,255,0.05)] flex flex-col items-center justify-center text-center p-4 relative z-10">
                <div class="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Start Here</div>
-               <h1 class="text-base md:text-xl font-bold text-white leading-tight">Architecture<br><span class="text-xs md:text-sm font-normal text-gray-400">建筑学</span></h1>
+               <h1 class="text-base md:text-xl font-bold text-white leading-tight">Architecture<br><span class="text-xs md:text-sm font-normal text-gray-400">{{ displayText('建筑学') }}</span></h1>
                
                <!-- Icons row -->
                <div class="flex gap-2 md:gap-3 mt-2 md:mt-3 text-gray-500">
@@ -89,7 +145,7 @@ interface CareerNode {
                <!-- Label -->
                @if (isDesktop || scale() > 1.1) {
                  <div class="text-xs font-medium text-gray-400 group-hover:text-white transition-colors whitespace-nowrap cursor-pointer shadow-black drop-shadow-sm">
-                   {{ node.name }}
+                   {{ displayCareerName(node.name) }}
                  </div>
                }
             </div>
@@ -113,10 +169,10 @@ interface CareerNode {
 
         <div class="bg-surface/80 backdrop-blur-md border border-line rounded-card p-2 flex flex-col gap-1.5 shadow-panel">
            <div class="flex items-center gap-2 text-[10px] font-medium text-gray-400 tracking-wider mb-0.5 px-1">
-             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span> 设计</div>
-             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> 技术</div>
-             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span> 艺术</div>
-             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span> 管理</div>
+             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span> {{ displayText('设计') }}</div>
+             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> {{ displayText('技术') }}</div>
+             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span> {{ displayText('艺术') }}</div>
+             <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span> {{ displayText('管理') }}</div>
            </div>
         </div>
       </div>
@@ -190,6 +246,7 @@ export class CareerComponent implements OnInit, OnDestroy {
   private expandTimer: ReturnType<typeof setTimeout> | null = null;
 
   dataService = inject(DataService);
+  locale = inject(LocaleService);
 
   private readonly rawCareers = [
     '策展人', '景观建筑师', '工业设计师', '动画师', '太阳能工程师', '建筑设计师', '绘图员', '设计策略师', 
@@ -381,8 +438,18 @@ export class CareerComponent implements OnInit, OnDestroy {
   }
 
   openSearch(keyword: string) {
-    const query = encodeURIComponent(`什么是${keyword}`);
+    const queryText = this.locale.isEnglish() ? `What is ${this.displayCareerName(keyword)} in architecture?` : `什么是${keyword}`;
+    const query = encodeURIComponent(queryText);
     const url = `https://www.bing.com/search?q=${query}`;
     this.dataService.openExternalModal(url);
+  }
+
+  displayText(value: string): string {
+    return this.locale.translateData(value);
+  }
+
+  displayCareerName(name: string): string {
+    if (!this.locale.isEnglish()) return name;
+    return CAREER_TRANSLATIONS[name] ?? this.locale.translateData(name, 'Architecture Career');
   }
 }

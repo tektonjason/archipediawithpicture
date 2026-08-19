@@ -3,6 +3,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
+import { LocaleService } from '../../services/locale.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
@@ -14,8 +15,8 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
       
       <!-- Top Header -->
       <div class="ui-page-header">
-        <h2 class="ui-title">建筑干货</h2>
-        <p class="ui-subtitle">精选建筑设计方法与职业发展指南</p>
+        <h2 class="ui-title">{{ displayText('建筑干货') }}</h2>
+        <p class="ui-subtitle">{{ displayText('精选建筑设计方法与职业发展指南') }}</p>
       </div>
       
       <div class="space-y-4 max-w-4xl mx-auto w-full">
@@ -28,15 +29,15 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
                  <svg lucideMap class="w-6 h-6" [strokeWidth]="2"></svg>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">设计方法图谱</h3>
+                <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">{{ displayText('设计方法图谱') }}</h3>
                 <p class="text-sm text-gray-500 mt-1 group-hover:text-gray-400 transition-colors">
-                   系统化的设计思维与方法论总结
+                   {{ displayText('系统化的设计思维与方法论总结') }}
                 </p>
               </div>
             </div>
             
             <div class="flex items-center gap-4">
-               <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-all">
+               <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
                  <svg lucideChevronRight class="w-5 h-5" [strokeWidth]="2"></svg>
                </div>
             </div>
@@ -52,15 +53,15 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
                  <svg lucideCircleHelp class="w-6 h-6" [strokeWidth]="2"></svg>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">问答 Q&A</h3>
+                <h3 class="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">{{ displayText('问答 Q&A') }}</h3>
                 <p class="text-sm text-gray-500 mt-1 group-hover:text-gray-400 transition-colors">
-                   常见问题解答与经验分享
+                   {{ displayText('常见问题解答与经验分享') }}
                 </p>
               </div>
             </div>
             
             <div class="flex items-center gap-4">
-               <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-all">
+               <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
                  <svg lucideChevronRight class="w-5 h-5" [strokeWidth]="2"></svg>
                </div>
             </div>
@@ -76,15 +77,15 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
                  <svg lucideBriefcase class="w-6 h-6" [strokeWidth]="2"></svg>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">就业方向概览</h3>
+                <h3 class="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">{{ displayText('就业方向概览') }}</h3>
                 <p class="text-sm text-gray-500 mt-1 group-hover:text-gray-400 transition-colors">
-                   行业前景、职业规划与求职指南
+                   {{ displayText('行业前景、职业规划与求职指南') }}
                 </p>
               </div>
             </div>
             
             <div class="flex items-center gap-4">
-               <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-all">
+               <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
                  <svg lucideChevronRight class="w-5 h-5" [strokeWidth]="2"></svg>
                </div>
             </div>
@@ -113,7 +114,12 @@ import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 })
 export class EssentialsComponent implements OnInit {
   dataService = inject(DataService);
+  locale = inject(LocaleService);
   route = inject(ActivatedRoute);
+
+  displayText(value: string): string {
+    return this.locale.translateData(value);
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {

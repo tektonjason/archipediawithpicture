@@ -23,6 +23,7 @@ const SOURCES = [
     ],
     timeoutMs: 6000,
     maxItems: 4,
+    displayPriority: 10,
     fallback: {
       title: 'Architecture Projects',
       url: 'https://www.archdaily.com/search/projects',
@@ -36,6 +37,7 @@ const SOURCES = [
     feeds: ['https://archeyes.com/feed/'],
     timeoutMs: 12000,
     maxItems: 8,
+    displayPriority: 100,
     fallback: {
       title: 'Architecture, Design and Theory',
       url: 'https://archeyes.com/',
@@ -49,6 +51,7 @@ const SOURCES = [
     feeds: ['https://www.dezeen.com/architecture/feed/'],
     timeoutMs: 12000,
     maxItems: 5,
+    displayPriority: 100,
     fallback: {
       title: 'Architecture news and projects',
       url: 'https://www.dezeen.com/architecture/',
@@ -62,6 +65,7 @@ const SOURCES = [
     feeds: ['https://www.designboom.com/architecture/feed/'],
     timeoutMs: 12000,
     maxItems: 5,
+    displayPriority: 100,
     fallback: {
       title: 'Architecture archive',
       url: 'https://www.designboom.com/architecture/',
@@ -71,10 +75,13 @@ const SOURCES = [
   {
     name: 'Architectuul',
     homeUrl: 'https://architectuul.com',
-    adapter: 'jinaPageLinks',
-    pages: ['https://architectuul.com/'],
+    adapter: 'htmlPageLinks',
+    pages: ['https://architectuul.com/digest', 'https://architectuul.com/'],
     timeoutMs: 12000,
     maxItems: 3,
+    displayPriority: 20,
+    allowPath: /^\/digest\/(?!category:)/,
+    requireDateInTitle: true,
     allowTitle: /architect|architecture|building|house|museum|school|city|urban|design/i,
     rejectTitle: /^(home|login|search|about|contact|privacy|terms|facebook|instagram|youtube|x)$/i,
     fallback: {
@@ -86,10 +93,16 @@ const SOURCES = [
   {
     name: '有方',
     homeUrl: 'https://www.archiposition.com',
-    adapter: 'jinaPageLinks',
+    adapter: 'htmlPageLinks',
     pages: ['https://www.archiposition.com/'],
     timeoutMs: 12000,
-    maxItems: 3,
+    maxItems: 1,
+    displayPriority: -100,
+    allowRemoteImages: false,
+    allowPath: /^\/(?:items\/[a-f\d]{10}|video)/,
+    requireDateInTitle: true,
+    titleClass: 'index-feed-title',
+    summaryClass: 'index-feed-detail',
     allowTitle: /建筑|设计|城市|空间|展览|访谈|项目|实践|更新|评论/,
     rejectTitle: /^(首页|登录|注册|搜索|关于|联系|广告|招聘|更多)$/i,
     fallback: {
@@ -478,7 +491,7 @@ async function fetchText(url, timeoutMs = 15000) {
       signal: controller.signal,
       headers: {
         'accept': 'application/rss+xml, application/atom+xml, text/xml, text/html, text/plain;q=0.9, */*;q=0.8',
-        'user-agent': 'ARCHIPEDIA content indexer; https://www.archipedia.top'
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/136.0.0.0 Safari/537.36'
       }
     });
     if (!response.ok) {
@@ -536,7 +549,7 @@ function normalizeItem(item, source) {
     sourceHomeUrl: source.homeUrl,
     summary,
     summaryZh: translateNewsSummary(summary, title, source.name),
-    imageUrl: item.imageUrl || '',
+    imageUrl: source.allowRemoteImages === false ? '' : item.imageUrl || '',
     publishedAt: parseDate(item.publishedAt)
   };
 }
@@ -571,6 +584,136 @@ async function collectFeedSource(source) {
   const { text } = await fetchFirstAvailable(source.feeds, source.timeoutMs);
   const items = [...parseRss(text, source), ...parseAtom(text, source)];
   return uniqueByUrl(items).slice(0, source.maxItems);
+}
+
+function resolvePageUrl(value, pageUrl) {
+  if (!value || /^(#|javascript:|mailto:|tel:)/i.test(value)) return '';
+
+  try {
+    return new URL(decodeEntities(value), pageUrl).href;
+  } catch {
+    return '';
+  }
+}
+
+function sameHost(url, homeUrl) {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    const homeHostname = new URL(homeUrl).hostname.replace(/^www\./, '');
+    return hostname === homeHostname || hostname.endsWith(`.${homeHostname}`);
+  } catch {
+    return false;
+  }
+}
+
+function extractAttribute(attributes = '', name) {
+  const match = attributes.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, 'i'));
+  return match ? decodeEntities(match[1]).trim() : '';
+}
+
+function extractAnchorImage(innerHtml, pageUrl) {
+  const imageTag = innerHtml.match(/<img\b[^>]*>/i)?.[0] ?? '';
+  if (!imageTag) return '';
+
+  const candidate = ['src', 'data-src', 'data-lazy-src', 'data-original']
+    .map(name => extractAttribute(imageTag, name))
+    .find(Boolean);
+
+  return resolvePageUrl(candidate, pageUrl);
+}
+
+function extractDateFromTitle(title) {
+  const englishMatch = title.match(/\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{4})\b/i);
+  const numericMatch = title.match(/\b(\d{4})[./-](\d{1,2})[./-](\d{1,2})\b/);
+  if (!englishMatch && !numericMatch) return null;
+
+  let match;
+  let publishedAt;
+  if (englishMatch) {
+    const months = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+    match = englishMatch;
+    publishedAt = new Date(
+      Date.UTC(Number(match[3]), months[match[2].toLowerCase()], Number(match[1]))
+    ).toISOString();
+  } else {
+    match = numericMatch;
+    publishedAt = new Date(
+      Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    ).toISOString();
+  }
+
+  return {
+    publishedAt,
+    title: title.replace(match[0], '').replace(/\s+/g, ' ').trim()
+  };
+}
+
+function parseHtmlDate(value) {
+  if (!value) return '';
+  const timestamp = Date.parse(value.replace(' ', 'T'));
+  return Number.isNaN(timestamp) ? '' : new Date(timestamp).toISOString();
+}
+
+function extractElementTextByClass(html, className) {
+  if (!className) return '';
+  const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(
+    `<([a-z\\d]+)\\b[^>]*\\bclass=["'][^"']*\\b${escaped}\\b[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`,
+    'i'
+  );
+  return stripHtml(html.match(pattern)?.[2] || '');
+}
+
+function parseHtmlLinks(html, source, pageUrl) {
+  const links = [];
+  const anchorPattern = /<a\b([^>]*\bhref\s*=\s*["'][^"']+["'][^>]*)>([\s\S]*?)<\/a>/gi;
+  const blockedUrl = /\.(svg|png|jpg|jpeg|gif|webp|avif|pdf|zip)(\?|#|$)/i;
+
+  let match;
+  while ((match = anchorPattern.exec(html))) {
+    const attributes = match[1];
+    const innerHtml = match[2];
+    const url = resolvePageUrl(extractAttribute(attributes, 'href'), pageUrl);
+    if (!url || blockedUrl.test(url) || !sameHost(url, source.homeUrl)) continue;
+    if (source.allowPath && !source.allowPath.test(new URL(url).pathname)) continue;
+
+    const rawTitle = extractElementTextByClass(innerHtml, source.titleClass)
+      || extractAttribute(innerHtml, 'title')
+      || stripHtml(innerHtml)
+      || extractAttribute(attributes, 'aria-label')
+      || extractAttribute(attributes, 'title');
+    const datedTitle = extractDateFromTitle(rawTitle);
+    const attributeDate = parseHtmlDate(extractAttribute(attributes, 'data-date'));
+    if (source.requireDateInTitle && !datedTitle && !attributeDate) continue;
+
+    const title = datedTitle?.title || rawTitle;
+    if (!title || source.rejectTitle?.test(title)) continue;
+    if (source.allowTitle && !source.allowTitle.test(title)) continue;
+
+    links.push(normalizeItem({
+      title,
+      url,
+      summary: extractElementTextByClass(innerHtml, source.summaryClass)
+        || `来自 ${source.name} 的建筑资讯与知识条目。`,
+      imageUrl: extractAnchorImage(innerHtml, pageUrl),
+      publishedAt: datedTitle?.publishedAt || attributeDate || new Date().toISOString()
+    }, source));
+  }
+
+  return links.filter(Boolean);
+}
+
+async function collectHtmlPageLinks(source) {
+  const batches = await Promise.allSettled(source.pages.map(async page => {
+    const html = await fetchText(page, source.timeoutMs ?? 12000);
+    return parseHtmlLinks(html, source, page);
+  }));
+
+  return uniqueByUrl(batches.flatMap(result => result.status === 'fulfilled' ? result.value : []))
+    .slice(0, source.maxItems);
 }
 
 function jinaUrl(url) {
@@ -628,15 +771,47 @@ function fallbackItem(source) {
   }, source);
 }
 
-async function collectSource(source) {
-  try {
-    const items = source.adapter === 'feed'
-      ? await collectFeedSource(source)
-      : await collectJinaPageLinks(source);
+function isFallbackItem(item, source) {
+  return String(item?.publishedAt || '').startsWith('2000-01-01')
+    || item?.url === source.fallback.url;
+}
 
-    if (items.length) return items;
+function cachedItemsForSource(existingItems, source) {
+  return existingItems
+    .filter(item => {
+      if (item?.source !== source.name || isFallbackItem(item, source)) return false;
+      if (source.allowPath && !source.allowPath.test(new URL(item.url).pathname)) return false;
+      if (source.requireDateInTitle && extractDateFromTitle(item.title)) return false;
+      return true;
+    })
+    .slice(0, source.maxItems);
+}
+
+async function collectSource(source, existingItems) {
+  const cachedItems = cachedItemsForSource(existingItems, source);
+
+  try {
+    let items;
+    if (source.adapter === 'feed') {
+      items = await collectFeedSource(source);
+    } else if (source.adapter === 'htmlPageLinks') {
+      items = await collectHtmlPageLinks(source);
+    } else {
+      items = await collectJinaPageLinks(source);
+    }
+
+    if (items.length) {
+      const combined = uniqueByUrl([...items, ...cachedItems]).slice(0, source.maxItems);
+      console.log(`[news:update] ${source.name}: ${items.length} fresh, ${combined.length - items.length} cached`);
+      return combined;
+    }
   } catch (error) {
     console.log(`[news:update] ${source.name} failed: ${error.message}`);
+  }
+
+  if (cachedItems.length) {
+    console.log(`[news:update] ${source.name}: keeping ${cachedItems.length} cached items`);
+    return cachedItems;
   }
 
   const fallback = fallbackItem(source);
@@ -644,7 +819,13 @@ async function collectSource(source) {
 }
 
 function uniqueByUrl(items) {
-  return Array.from(new Map(items.filter(Boolean).map(item => [item.url, item])).values());
+  const unique = new Map();
+  for (const item of items.filter(Boolean)) {
+    if (!unique.has(item.url)) {
+      unique.set(item.url, item);
+    }
+  }
+  return Array.from(unique.values());
 }
 
 async function readExistingCache() {
@@ -657,12 +838,24 @@ async function readExistingCache() {
   }
 }
 
-async function collectNews() {
-  const batches = await Promise.allSettled(SOURCES.map(collectSource));
+async function collectNews(existingItems) {
+  const batches = await Promise.allSettled(
+    SOURCES.map(source => collectSource(source, existingItems))
+  );
   const items = batches.flatMap(result => result.status === 'fulfilled' ? result.value : []);
   const unique = uniqueByUrl(items);
-  unique.sort((a, b) => Date.parse(b.publishedAt || '') - Date.parse(a.publishedAt || ''));
-  return translateNewsItems(unique.slice(0, 16));
+  unique.sort((a, b) => {
+    const sourceA = SOURCES.find(source => source.name === a.source);
+    const sourceB = SOURCES.find(source => source.name === b.source);
+    const imageDelta = Number(Boolean(b.imageUrl)) - Number(Boolean(a.imageUrl));
+    if (imageDelta) return imageDelta;
+
+    const priorityDelta = (sourceB?.displayPriority ?? 0) - (sourceA?.displayPriority ?? 0);
+    if (priorityDelta) return priorityDelta;
+
+    return Date.parse(b.publishedAt || '') - Date.parse(a.publishedAt || '');
+  });
+  return translateNewsItems(unique.slice(0, 24));
 }
 
 async function translateNewsItems(items) {
@@ -671,10 +864,18 @@ async function translateNewsItems(items) {
 
   for (let index = 0; index < output.length; index++) {
     const item = output[index];
-    if (item.title && !hasCjk(item.title)) {
+    if (
+      item.title
+      && !hasCjk(item.title)
+      && !isReusableChineseTranslation(item.title, item.titleZh)
+    ) {
       requests.push({ index, field: 'titleZh', text: item.title });
     }
-    if (item.summary && !hasCjk(item.summary)) {
+    if (
+      item.summary
+      && !hasCjk(item.summary)
+      && !isReusableChineseTranslation(item.summary, item.summaryZh)
+    ) {
       requests.push({ index, field: 'summaryZh', text: item.summary });
     }
   }
@@ -693,6 +894,7 @@ async function translateNewsItems(items) {
           : truncate(translated, 150);
       }
     });
+    console.log(`[news:update] Edge translated ${requests.length} fields`);
   } catch (error) {
     console.log(`[news:update] Edge translate failed, using local fallback: ${error.message}`);
   }
@@ -704,49 +906,103 @@ async function translateNewsItems(items) {
   }));
 }
 
-async function translateWithEdge(texts) {
-  const payload = texts.map(text => text.replace(/\s+/g, ' ').trim());
-  const data = await fetchJson(edgeTranslateUrl, {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json, text/plain, */*',
-      'content-type': 'application/json',
-      'user-agent': 'Mozilla/5.0 (compatible; ARCHIPEDIA content indexer; https://www.archipedia.top)'
-    },
-    body: JSON.stringify(payload)
-  }, 12000);
+function isReusableChineseTranslation(original = '', translated = '') {
+  if (!translated || !hasCjk(translated)) return false;
+  if (/^来自\s*.+?的建筑资讯/.test(translated)) return false;
 
-  if (!Array.isArray(data) || data.length !== texts.length) {
-    throw new Error('Unexpected Edge translate response');
+  const cjkCount = (translated.match(/[\u3400-\u9fff]/g) ?? []).length;
+  const originalLatinWords = (original.match(/[a-z][a-z'-]*/gi) ?? []).length;
+  const translatedLatinWords = (translated.match(/[a-z][a-z'-]*/gi) ?? []).length;
+
+  if (cjkCount < 4) return false;
+  if (!originalLatinWords) return true;
+  return translatedLatinWords / originalLatinWords <= 0.45;
+}
+
+async function translateWithEdge(texts) {
+  const translations = [];
+  const batchSize = 16;
+
+  for (let index = 0; index < texts.length; index += batchSize) {
+    const payload = texts
+      .slice(index, index + batchSize)
+      .map(text => text.replace(/\s+/g, ' ').trim());
+    const data = await fetchJson(edgeTranslateUrl, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json, text/plain, */*',
+        'content-type': 'application/json',
+        'user-agent': 'Mozilla/5.0 (compatible; ARCHIPEDIA content indexer; https://www.archipedia.top)'
+      },
+      body: JSON.stringify(payload)
+    }, 15000);
+
+    if (!Array.isArray(data) || data.length !== payload.length) {
+      throw new Error('Unexpected Edge translate response');
+    }
+
+    translations.push(...data.map(item => item?.translations?.[0]?.text || ''));
   }
 
-  return data.map(item => item?.translations?.[0]?.text || '');
+  return translations;
 }
 
 function cleanMachineTranslation(value = '', original = '') {
-  const cleaned = stripHtml(value)
+  let cleaned = stripHtml(value)
     .replace(/\s+/g, ' ')
     .replace(/\.{3,}/g, '…')
     .replace(/\s*([，。；：、！？])\s*/g, '$1')
     .trim();
 
   if (!cleaned || cleaned === original || !hasCjk(cleaned)) return '';
+
+  if (original === 'SANCTUM Nature Therapy Retreat in Bezdonys, Lithuania by Arches') {
+    return 'Arches 设计的 SANCTUM 自然疗愈静修中心，位于立陶宛贝兹多尼斯';
+  }
+  if (original === 'three monolithic volumes by not a number architects reinterpret greek stone house typology') {
+    return 'NOT A NUMBER Architects 以三座整体体量重新诠释希腊石屋类型';
+  }
+  if (/\bSANCTUM Nature Therapy Retreat\b/i.test(original)) {
+    cleaned = cleaned
+      .replace(/拱门圣体自然疗法静修中心/g, 'SANCTUM 自然疗愈静修中心')
+      .replace(/圣体自然疗法静修中心/g, 'SANCTUM 自然疗愈静修中心');
+  }
+
   return cleaned;
 }
 
 const existing = await readExistingCache();
-let items = await collectNews();
+let items = await collectNews(existing);
 
 if (!items.length && existing.length) {
   items = existing;
 }
 
+const realItemCount = items.filter(item => {
+  const source = SOURCES.find(candidate => candidate.name === item.source);
+  return source ? !isFallbackItem(item, source) : true;
+}).length;
+
 const payload = {
   updatedAt: new Date().toISOString(),
-  sources: SOURCES.map(({ name, homeUrl, adapter }) => ({ name, homeUrl, adapter })),
+  sources: SOURCES.map(({ name, homeUrl, adapter, displayPriority }) => ({
+    name,
+    homeUrl,
+    adapter,
+    displayPriority
+  })),
+  stats: {
+    itemCount: items.length,
+    realItemCount,
+    fallbackCount: items.length - realItemCount,
+    displayableImageCount: items.filter(item => Boolean(item.imageUrl)).length
+  },
   items
 };
 
 await mkdir(path.dirname(outputFile), { recursive: true });
 await writeFile(outputFile, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
-console.log(`[news:update] Wrote ${items.length} items to ${path.relative(rootDir, outputFile)}`);
+console.log(
+  `[news:update] Wrote ${items.length} items (${realItemCount} real, ${items.length - realItemCount} fallback) `
+  + `to ${path.relative(rootDir, outputFile)}`
+);

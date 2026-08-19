@@ -104,19 +104,36 @@ function wrapText(text, maxChars, maxLines = 2) {
 
   const lines = [];
   let current = '';
-  for (const token of normalized.split(' ')) {
-    const next = current ? `${current} ${token}` : token;
-    if (next.length > maxChars && current) {
-      lines.push(current);
-      current = token;
-    } else {
-      current = next;
+  let truncated = false;
+  const visualWidth = value => Array.from(value).reduce((width, character) => (
+    width + (/[^\u0000-\u00ff]/u.test(character) ? 2 : 1)
+  ), 0);
+
+  for (const character of Array.from(normalized)) {
+    if (visualWidth(`${current}${character}`) <= maxChars || !current) {
+      current += character;
+      continue;
     }
-    if (lines.length >= maxLines) break;
+
+    const lastSpace = current.lastIndexOf(' ');
+    if (lastSpace > Math.floor(current.length / 3)) {
+      lines.push(current.slice(0, lastSpace).trim());
+      current = `${current.slice(lastSpace + 1)}${character}`.trimStart();
+    } else {
+      lines.push(current.trim());
+      current = character === ' ' ? '' : character;
+    }
+
+    if (lines.length >= maxLines) {
+      truncated = true;
+      break;
+    }
   }
-  if (current && lines.length < maxLines) lines.push(current);
-  if (lines.length && normalized.length > lines.join(' ').length) {
-    lines[lines.length - 1] = `${lines[lines.length - 1].slice(0, Math.max(0, maxChars - 1))}...`;
+
+  if (current && lines.length < maxLines) lines.push(current.trim());
+  if (lines.length && (truncated || normalized.length > lines.join('').length + (lines.length - 1))) {
+    const last = lines.length - 1;
+    lines[last] = `${lines[last].replace(/[.。…]+$/u, '').trimEnd()}...`;
   }
   return lines;
 }
@@ -124,7 +141,7 @@ function wrapText(text, maxChars, maxLines = 2) {
 function fallbackSvg(item) {
   const [bg, mid, accent] = paletteFor(item);
   const titleLines = wrapText(item.title, 24, 2);
-  const descLines = wrapText(item.description || domainFromUrl(item.url), 36, 2);
+  const descLines = wrapText(item.description || domainFromUrl(item.url), 52, 2);
   const domain = domainFromUrl(item.url);
   const initial = escapeXml((item.title || domain).trim().slice(0, 1).toUpperCase());
   const titleText = titleLines.map((line, index) =>
@@ -288,18 +305,42 @@ async function runPool(items, worker) {
   await Promise.all(workers);
 }
 
+function requestedResourceIds(args) {
+  const inline = args.find(arg => arg.startsWith('--ids='));
+  const flagIndex = args.indexOf('--ids');
+  const raw = inline?.slice('--ids='.length) ?? (flagIndex >= 0 ? args[flagIndex + 1] : '');
+  if (!raw) return null;
+
+  return new Set(raw.split(',').map(value => value.trim()).filter(Boolean));
+}
+
 async function main() {
-  const resources = await readResources();
+  const allResources = await readResources();
+  const requestedIds = requestedResourceIds(process.argv.slice(2));
+  const resources = requestedIds
+    ? allResources.filter(item => requestedIds.has(item.id))
+    : allResources;
+
+  if (requestedIds) {
+    const foundIds = new Set(resources.map(item => item.id));
+    const missingIds = [...requestedIds].filter(id => !foundIds.has(id));
+    if (missingIds.length) {
+      throw new Error(`Unknown resource ids: ${missingIds.join(', ')}`);
+    }
+  }
+
   await fs.mkdir(outputDir, { recursive: true });
 
-  const fallback = await generateFallback({
-    id: 'default',
-    category: 'ARCHIPEDIA',
-    title: 'Architecture Resource',
-    description: 'Curated design references and tools.',
-    url: 'https://www.archipedia.top'
-  });
-  await fs.writeFile(path.join(outputDir, 'default.webp'), fallback);
+  if (!requestedIds) {
+    const fallback = await generateFallback({
+      id: 'default',
+      category: 'ARCHIPEDIA',
+      title: 'Architecture Resource',
+      description: 'Curated design references and tools.',
+      url: 'https://www.archipedia.top'
+    });
+    await fs.writeFile(path.join(outputDir, 'default.webp'), fallback);
+  }
 
   let fetched = 0;
   let generated = 0;

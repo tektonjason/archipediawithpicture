@@ -1,5 +1,8 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { LocaleService } from '../../services/locale.service';
+import { ModalA11yDirective } from '../shared/modal-a11y.directive';
+import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 interface ServiceItem {
   id: string;
@@ -22,15 +25,282 @@ interface ServiceGroup {
   items: ServiceItem[];
 }
 
+interface ServiceEnglishCopy {
+  title: string;
+  description: string;
+  detail: string;
+  suitable: string[];
+  deliverables: string[];
+  beforeOrder: string[];
+  note?: string;
+}
+
+const SERVICE_GROUP_EN_COPY: Record<string, { title: string; summary: string }> = {
+  'site-model': {
+    title: 'Site & Map Data',
+    summary: 'For site analysis, base-map drafting, early research, and presentation cleanup. Consultation depends on site scope and data type.'
+  },
+  'wind-rose': {
+    title: 'Climate & Environmental Graphics',
+    summary: 'Climate-analysis and environmental charts for green-building arguments, site studies, and design presentations.'
+  }
+};
+
+const SERVICE_EN_COPY: Record<string, ServiceEnglishCopy> = {
+  'site-model': {
+    title: 'Site Model Download',
+    description: 'Provides surrounding massing-model data for site analysis, massing studies, and design presentation.',
+    detail: 'Organizes building massing, roads, water bodies, and basic terrain outlines for a specified location and scope, suitable as a base model for coursework, competitions, and early urban massing analysis.',
+    suitable: [
+      'Coursework or competitions that need a quick surrounding massing context.',
+      'Underlays for axis, bird-eye, sunlight, or spatial-analysis studies.',
+      'Projects with a known site location but no ready-to-import base model.'
+    ],
+    deliverables: [
+      'White model or basic site model files; final format is confirmed during consultation.',
+      'Building massing, roads, and major site objects within the agreed scope.',
+      'Base reference data for personal study and early design presentation.'
+    ],
+    beforeOrder: [
+      'Provide the site location, boundary screenshot, or coordinates.',
+      'Describe the desired radius, block extent, or administrative boundary.',
+      'Confirm model accuracy, file format, and whether terrain should be included.'
+    ],
+    note: 'Massing models are basic deliverables; accuracy and completeness depend on available local data.'
+  },
+  'site-plan': {
+    title: 'Site Plan Base Map',
+    description: 'Organizes site base maps, roads, water systems, building outlines, and other plan data for master plans and analysis diagrams.',
+    detail: 'Prepares plan underlays for master-plan drafting and site analysis, including roads, building outlines, water bodies, green space, and basic geographic elements within the requested scope.',
+    suitable: [
+      'Master plans, location diagrams, traffic diagrams, or functional analysis drawings.',
+      'Sites where manual tracing would take too much time.',
+      'Projects that need a consistent linework base for presentation drawings.'
+    ],
+    deliverables: [
+      'Plan base-map data within the specified scope.',
+      'Basic road, water, building-outline, and green-space layers where available.',
+      'File format and layer completeness confirmed during consultation.'
+    ],
+    beforeOrder: [
+      'Provide the site boundary, target scale, and intended use.',
+      'Specify required layers such as roads, water, buildings, and landscape.',
+      'Confirm whether vector format, image format, or both are needed.'
+    ]
+  },
+  'satellite-current': {
+    title: 'Latest Satellite Image',
+    description: 'Obtains recent satellite imagery for a specified area, useful for observing existing site conditions and creating base maps.',
+    detail: 'Helps obtain recent remote-sensing imagery for a specified area, suitable for observing current site conditions, surrounding development, road texture, and land-cover status.',
+    suitable: [
+      'Current-condition base maps or presentation background images.',
+      'Judging surrounding construction, green space, water bodies, and traffic relationships.',
+      'Projects that need a more intuitive existing-condition image than a standard map.'
+    ],
+    deliverables: [
+      'Recent satellite imagery exported for the specified scope.',
+      'Image materials for personal study and early design reference.',
+      'Image date, clarity, and coverage depend on available source data.'
+    ],
+    beforeOrder: [
+      'Provide the site boundary or coordinates.',
+      'Specify desired scale, size, or image format.',
+      'Confirm image clarity, time range, and copyright-use limits before use.'
+    ]
+  },
+  'satellite-history': {
+    title: 'Historical Satellite Images',
+    description: 'Searches imagery by year or period to support studies of site change, urban expansion, and construction history.',
+    detail: 'Compares historical imagery across different periods to show site transformation, suitable for urban-renewal studies, site-evolution analysis, waterfront change, and construction-process research.',
+    suitable: [
+      'Showing multi-year site change over time.',
+      'Comparing roads, buildings, rivers, landscape, or boundary shifts.',
+      'Providing image evidence for urban-renewal and site-narrative studies.'
+    ],
+    deliverables: [
+      'Historical satellite images for the requested years or periods.',
+      'Image sequences exported within the agreed scope.',
+      'Comparison boards can be organized when source availability allows.'
+    ],
+    beforeOrder: [
+      'State the target years or time periods.',
+      'Provide the site boundary and intended use.',
+      'Confirm possible gaps, cloud cover, and image clarity limits.'
+    ]
+  },
+  'road-network': {
+    title: 'Vector Road Network',
+    description: 'Organizes vector road-network data by district, subdistrict, or site boundary.',
+    detail: 'Prepares road-network data for a specified area, suitable for traffic-structure studies, accessibility diagrams, location analysis, and urban-texture base maps.',
+    suitable: [
+      'Road hierarchy, traffic-structure, or accessibility analysis diagrams.',
+      'District, subdistrict, or site-adjacent vector road data.',
+      'GIS, AI, or CAD base maps that need road linework.'
+    ],
+    deliverables: [
+      'Vector road data within the specified scope.',
+      'Road hierarchy and basic attributes where available from the source.',
+      'File format confirmed during consultation.'
+    ],
+    beforeOrder: [
+      'Provide the administrative area, street, site boundary, or study extent.',
+      'State whether road class, road names, or other attributes are needed.',
+      'Confirm coordinate system, output format, and completeness requirements.'
+    ],
+    note: 'Coverage and road-attribute completeness depend on the available source data.'
+  },
+  'shp-data': {
+    title: 'SHP File Download',
+    description: 'Provides city or site SHP datasets for preliminary GIS analysis and planning presentation.',
+    detail: 'Organizes SHP data for GIS analysis and planning graphics, supporting preliminary studies of boundaries, roads, site objects, POI, and other spatial information.',
+    suitable: [
+      'GIS data for a city, district, or site boundary.',
+      'Spatial overlay, buffer, or classification analysis.',
+      'Importing spatial data into GIS software for further processing.'
+    ],
+    deliverables: [
+      'SHP data for the requested city or site scope.',
+      'Boundary, road, or site-object layers where available.',
+      'Arbitrary site data cannot guarantee complete information.'
+    ],
+    beforeOrder: [
+      'Specify the city, administrative area, or site scope.',
+      'State required layer types and file format.',
+      'Confirm data source, coordinate system, completeness, and usage limits.'
+    ],
+    note: 'Custom site SHP data may be incomplete and is intended only for study and early design reference.'
+  },
+  'poi-data': {
+    title: 'POI Data Download',
+    description: 'Organizes point-of-interest data by area and keyword for facility, activity, and public-service analysis.',
+    detail: 'Extracts or organizes POI data around a specified scope for analyzing commercial mix, daily-life facilities, public services, population activity, and urban vitality.',
+    suitable: [
+      'Analyzing restaurants, retail, education, healthcare, transport, and other facilities.',
+      'Making POI heat maps, density diagrams, or category statistics.',
+      'Understanding surrounding functions and service radius around a site.'
+    ],
+    deliverables: [
+      'POI data organized by keyword and scope.',
+      'Basic fields such as name, category, and location where available.',
+      'Field completeness depends on the actual data source.'
+    ],
+    beforeOrder: [
+      'Provide the scope, keywords, categories, and intended use.',
+      'Confirm whether coordinates, names, categories, addresses, or other fields are required.',
+      'Pay attention to platform data, privacy, and copyright-use limits.'
+    ]
+  },
+  'wind-rose': {
+    title: 'Wind Rose Diagram',
+    description: 'Creates wind-direction and wind-frequency diagrams for a specified city or weather station.',
+    detail: 'Organizes wind direction and frequency information for a specified city or weather station, producing wind rose diagrams suited to design presentations and climate analysis.',
+    suitable: [
+      'Judging prevailing wind direction, ventilation corridors, and entrance orientation.',
+      'Climate-analysis pages or green-building argument diagrams.',
+      'Explaining the wind environment around a site in chart form.'
+    ],
+    deliverables: [
+      'Wind rose or wind-frequency charts.',
+      'Annual, seasonal, or monthly summaries depending on data availability.',
+      'Graphic style can be coordinated according to the presentation use.'
+    ],
+    beforeOrder: [
+      'Provide the city, weather station, or coordinates.',
+      'State whether the analysis should be annual, seasonal, or monthly.',
+      'Confirm chart size, color style, and output format.'
+    ]
+  },
+  'radiation': {
+    title: 'Solar Radiation Diagram',
+    description: 'Creates solar-radiation or thermal-environment charts for shading, orientation, and outdoor comfort studies.',
+    detail: 'Represents solar radiation and thermal-environment characteristics for a site or building across selected time periods, supporting decisions about shading, openings, orientation, and outdoor activity space.',
+    suitable: [
+      'Sunlight, solar-radiation, or thermal-environment analysis.',
+      'Explaining facade shading and spatial layout decisions.',
+      'Green-building, low-carbon, or climate-adaptive design presentations.'
+    ],
+    deliverables: [
+      'Radiation-analysis diagrams or related environmental charts.',
+      'Annual, seasonal, or selected-period summaries.',
+      'Output precision and calculation scope confirmed during consultation.'
+    ],
+    beforeOrder: [
+      'Provide the location, time period, and intended use.',
+      'State whether a building model, site boundary, or climate dataset is needed.',
+      'Confirm graphic style and output format.'
+    ]
+  },
+  'psychrometric': {
+    title: 'Psychrometric Chart',
+    description: 'Organizes air-condition and comfort-zone diagrams for passive design, ventilation, and humidity-thermal analysis.',
+    detail: 'Uses climate data to organize air temperature and humidity relationships with comfort zones, supporting passive-design strategies, ventilation cooling, and humid-thermal environmental analysis.',
+    suitable: [
+      'Judging local climate comfort zones and passive strategies.',
+      'Analyzing ventilation, dehumidification, shading, or heating and cooling potential.',
+      'Supporting climate-responsive design explanations with charts.'
+    ],
+    deliverables: [
+      'Psychrometric charts or comfort-zone analysis diagrams.',
+      'Annual or selected-month summaries.',
+      'Chart style and metric definitions confirmed during consultation.'
+    ],
+    beforeOrder: [
+      'Provide the city or weather station.',
+      'State whether comfort zones, strategy zones, or monthly distributions are needed.',
+      'Confirm output size, format, and intended use.'
+    ]
+  },
+  'temperature': {
+    title: 'Air Temperature Chart',
+    description: 'Creates dry-bulb, wet-bulb, and related climate curves or statistical charts.',
+    detail: 'Organizes temperature-related climate data into curves, monthly summaries, or dry-bulb and wet-bulb temperature graphics suited to design presentations.',
+    suitable: [
+      'Explaining climate background and seasonal temperature changes.',
+      'Supporting enclosure, ventilation, or shading strategies.',
+      'Environmental-analysis boards for coursework or competitions.'
+    ],
+    deliverables: [
+      'Dry-bulb, wet-bulb, or related statistical charts.',
+      'Annual, seasonal, or monthly summaries.',
+      'Output style can be coordinated with the presentation.'
+    ],
+    beforeOrder: [
+      'Provide the city, weather station, or coordinates.',
+      'State the time range and chart type.',
+      'Confirm whether charts should be combined with humidity, wind, or other data.'
+    ]
+  },
+  'humidity': {
+    title: 'Relative Humidity Chart',
+    description: 'Creates relative-humidity variation charts for climate, ventilation, and comfort analysis.',
+    detail: 'Represents relative humidity changes across a full year or selected periods, supporting design strategies for humid-hot climates, ventilation, dehumidification, and material selection.',
+    suitable: [
+      'Analyzing humid-hot, dry, or seasonal humidity patterns.',
+      'Supporting natural-ventilation, dehumidification, and indoor-comfort judgments.',
+      'Completing a climate-analysis chart set.'
+    ],
+    deliverables: [
+      'Relative-humidity curves or statistical charts.',
+      'Monthly, seasonal, or annual summaries.',
+      'Can be combined with temperature or psychrometric charts.'
+    ],
+    beforeOrder: [
+      'Provide the city or weather station.',
+      'State the time range and chart style.',
+      'Confirm whether a unified graphic template is needed.'
+    ]
+  }
+};
+
 @Component({
   selector: 'app-resource-services',
-  imports: [...APP_UI_ICONS],
+  imports: [ModalA11yDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page-scroll ui-page-pad text-white">
       <header class="ui-page-header">
-        <h1 class="ui-title">资源服务</h1>
+        <h1 class="ui-title">{{ displayText('资源服务') }}</h1>
         <p class="ui-subtitle">
-          场地资料、地图数据与气象分析图制作的第三方咨询入口。
+          {{ displayText('场地资料、地图数据与气象分析图制作的第三方咨询入口。') }}
         </p>
       </header>
 
@@ -38,10 +308,10 @@ interface ServiceGroup {
         <section class="ui-notice-info service-notice">
           <div class="ui-notice-title">
             <svg lucideInfo class="h-4 w-4 shrink-0" [strokeWidth]="2"></svg>
-            服务说明
+            {{ displayText('服务说明') }}
           </div>
           <p class="ui-notice-text">
-            本页仅展示第三方服务咨询入口。具体范围、价格、交付时间与数据完整性请与服务方确认，下载资料建议仅用于个人学习和方案前期参考。
+            {{ displayText('本页仅展示第三方服务咨询入口。具体范围、价格、交付时间与数据完整性请与服务方确认，下载资料建议仅用于个人学习和方案前期参考。') }}
           </p>
         </section>
 
@@ -52,33 +322,33 @@ interface ServiceGroup {
             </div>
             <div class="min-w-0">
               <p class="service-eyebrow">CONSULTATION</p>
-              <h2 class="service-consult-title">服务咨询</h2>
-              <p class="service-consult-text">添加微信确认服务范围、价格、交付时间与数据完整性。网站仅提供第三方咨询入口，不参与交易。</p>
+              <h2 class="service-consult-title">{{ displayText('服务咨询') }}</h2>
+              <p class="service-consult-text">{{ displayText('添加微信确认服务范围、价格、交付时间与数据完整性。网站仅提供第三方咨询入口，不参与交易。') }}</p>
             </div>
           </div>
           <button type="button" class="service-consult-toggle" (click)="toggleConsult()" [attr.aria-expanded]="consultOpen()">
-            <span>{{ consultOpen() ? '收起咨询方式' : '查看咨询方式' }}</span>
+            <span>{{ displayText(consultOpen() ? '收起咨询方式' : '查看咨询方式') }}</span>
             <svg lucideChevronDown class="h-4 w-4 transition-transform" [class.rotate-180]="consultOpen()" [strokeWidth]="2"></svg>
           </button>
           <div class="service-consult-action">
-            <div class="service-qr-card" aria-label="服务咨询微信二维码">
-              <img src="/images/services/wechat-qr.png" alt="服务咨询微信二维码" class="h-full w-full object-contain">
+            <div class="service-qr-card" [attr.aria-label]="displayText('服务咨询微信二维码')">
+              <img src="/images/services/wechat-qr.png" [alt]="displayText('服务咨询微信二维码')" class="h-full w-full object-contain">
             </div>
             <div class="min-w-0">
-              <p class="ui-card-meta">微信号</p>
+              <p class="ui-card-meta">{{ displayText('微信号') }}</p>
               <p class="service-wechat">AllDesignEverything</p>
               <button type="button" class="ui-btn-secondary mt-2 px-3 py-2 text-xs" (click)="copyWechat()">
                 <svg lucideCopy class="h-4 w-4" [strokeWidth]="2"></svg>
-                复制微信号
+                {{ displayText('复制微信号') }}
               </button>
               <button type="button" class="ui-btn-secondary mt-2 px-3 py-2 text-xs" (click)="openWechat()">
                 <svg lucideExternalLink class="h-4 w-4" [strokeWidth]="2"></svg>
-                打开微信
+                {{ displayText('打开微信') }}
               </button>
             </div>
           </div>
           @if (copied()) {
-            <p class="service-copy-toast">微信号已复制</p>
+            <p class="service-copy-toast" role="status" aria-live="polite">{{ displayText('微信号已复制') }}</p>
           }
         </section>
 
@@ -87,8 +357,8 @@ interface ServiceGroup {
             @for (group of serviceGroups; track group.title) {
               <section class="service-group-block">
                 <div class="service-group-head">
-                  <h2 class="service-group-title">{{ group.title }}</h2>
-                  <p class="service-group-summary">{{ group.summary }}</p>
+                  <h2 class="service-group-title">{{ serviceGroupTitle(group) }}</h2>
+                  <p class="service-group-summary">{{ serviceGroupSummary(group) }}</p>
                 </div>
 
                 <div class="services-grid">
@@ -96,12 +366,13 @@ interface ServiceGroup {
                     <button
                       type="button"
                       class="service-product-card group"
+                      appGsapCardHover
                       (click)="openServiceDetail(item)"
                     >
                       <div class="service-product-cover">
                         <img
-                          [src]="item.coverImage"
-                          [alt]="item.title + '示意图'"
+                          [src]="serviceCoverImage(item)"
+                          [alt]="serviceImageAlt(item, 'cover')"
                           loading="lazy"
                           decoding="async"
                           class="service-cover-image"
@@ -110,15 +381,15 @@ interface ServiceGroup {
                       <div class="service-product-body">
                         <div class="service-product-head">
                           <div class="min-w-0">
-                            <h3 class="service-product-title">{{ item.title }}</h3>
-                            <p class="service-product-price">{{ item.price }}</p>
+                            <h3 class="service-product-title">{{ serviceTitle(item) }}</h3>
+                            <p class="service-product-price">{{ displayText(item.price) }}</p>
                           </div>
                           <svg lucideChevronRight class="service-product-arrow" [strokeWidth]="2"></svg>
                         </div>
-                        <p class="service-product-desc">{{ item.description }}</p>
+                        <p class="service-product-desc">{{ serviceDescription(item) }}</p>
                         @if (item.note) {
                           <p class="service-product-note">
-                            {{ item.note }}
+                            {{ serviceNote(item) }}
                           </p>
                         }
                       </div>
@@ -133,13 +404,13 @@ interface ServiceGroup {
             <section class="rounded-card border border-line-soft bg-surface/80 p-5 shadow-panel">
               <div class="mb-3 flex items-center gap-2 text-amber-200">
                 <svg lucideAlertTriangle class="h-5 w-5" [strokeWidth]="2"></svg>
-                <h2 class="ui-panel-title">免责声明</h2>
+                <h2 class="ui-panel-title">{{ displayText('免责声明') }}</h2>
               </div>
               <div class="space-y-3 text-xs leading-relaxed text-gray-400">
-                <p>本页仅提供第三方资源服务的咨询入口与信息展示，ARCHIPEDIA 及网站运营方不直接提供下载、制图、代购、交易撮合、资金收付或售后服务。</p>
-                <p>用户应自行核验服务方身份、服务范围、价格、交付标准、数据来源、版权状态与交易安全。任何交易、沟通、付款、退款、纠纷或损失均由用户与第三方服务方自行承担。</p>
-                <p>相关地图、卫星图、SHP、POI、气象图等资料仅建议用于个人学习、课程训练和方案前期参考，不得用于科研发表、商业项目、测绘成果替代、行政审查、工程实施或其他需要法定资质与授权的数据用途。</p>
-                <p>本网站不保证资料完整性、准确性、时效性、可用性或合法授权状态；涉及地理信息、遥感影像、测绘成果、个人信息、平台数据和版权内容时，请遵守国家法律法规及原平台使用条款。</p>
+                <p>{{ displayText('本页仅提供第三方资源服务的咨询入口与信息展示，ARCHIPEDIA 及网站运营方不直接提供下载、制图、代购、交易撮合、资金收付或售后服务。') }}</p>
+                <p>{{ displayText('用户应自行核验服务方身份、服务范围、价格、交付标准、数据来源、版权状态与交易安全。任何交易、沟通、付款、退款、纠纷或损失均由用户与第三方服务方自行承担。') }}</p>
+                <p>{{ displayText('相关地图、卫星图、SHP、POI、气象图等资料仅建议用于个人学习、课程训练和方案前期参考，不得用于科研发表、商业项目、测绘成果替代、行政审查、工程实施或其他需要法定资质与授权的数据用途。') }}</p>
+                <p>{{ displayText('本网站不保证资料完整性、准确性、时效性、可用性或合法授权状态；涉及地理信息、遥感影像、测绘成果、个人信息、平台数据和版权内容时，请遵守国家法律法规及原平台使用条款。') }}</p>
               </div>
             </section>
           </aside>
@@ -148,16 +419,16 @@ interface ServiceGroup {
     </div>
 
     @if (selectedService(); as item) {
-      <div class="service-detail-overlay fixed inset-0 z-[80] flex items-center justify-center p-3 md:p-6" role="dialog" aria-modal="true" (click)="closeServiceDetail()">
-        <div class="service-detail-backdrop absolute inset-0 bg-black/80 backdrop-blur-md"></div>
-        <section class="service-detail-shell relative z-10 grid w-full max-w-6xl rounded-card border border-line bg-surface shadow-panel md:grid-cols-[minmax(0,1.2fr)_minmax(21rem,0.8fr)]" (click)="$event.stopPropagation()">
-          <button type="button" class="absolute right-4 top-4 z-20 ui-icon-btn bg-black/40" aria-label="关闭详情" (click)="closeServiceDetail()">
+      <div class="service-detail-overlay fixed inset-0 z-[80] flex items-center justify-center p-3 md:p-6" (click)="closeServiceDetail()">
+        <div class="service-detail-backdrop absolute inset-0 bg-black/80 backdrop-blur-md" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave"></div>
+        <section appModalA11y (modalClose)="closeServiceDetail()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="service-detail-shell relative z-10 grid w-full max-w-6xl rounded-card border border-line bg-surface shadow-panel md:grid-cols-[minmax(0,1.2fr)_minmax(21rem,0.8fr)]" (click)="$event.stopPropagation()">
+          <button type="button" class="absolute right-4 top-4 z-20 ui-icon-btn bg-black/40" [attr.aria-label]="displayText('关闭详情')" (click)="closeServiceDetail()">
             <svg lucideX class="h-5 w-5" [strokeWidth]="2"></svg>
           </button>
 
           <div class="service-detail-gallery min-h-0 bg-black/25 p-4 custom-scrollbar md:p-6">
             <div class="relative overflow-hidden rounded-card border border-white/10 bg-black/40">
-              <img [src]="selectedGalleryImage()" [alt]="item.title + '详情图'" class="max-h-[58vh] w-full object-contain" loading="lazy" decoding="async">
+              <img [src]="selectedGalleryImage()" [alt]="serviceImageAlt(item, 'detail')" class="max-h-[58vh] w-full object-contain" loading="lazy" decoding="async">
             </div>
             @if (item.gallery.length > 1) {
               <div class="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
@@ -169,7 +440,7 @@ interface ServiceGroup {
                     [class.thumb-active]="selectedImageIndex() === i"
                     (click)="selectedImageIndex.set(i)"
                   >
-                    <img [src]="image" [alt]="item.title + '缩略图 ' + (i + 1)" class="h-full w-full object-cover" loading="lazy" decoding="async">
+                    <img [src]="image" [alt]="serviceImageAlt(item, 'thumbnail', i + 1)" class="h-full w-full object-cover" loading="lazy" decoding="async">
                   </button>
                 }
               </div>
@@ -179,34 +450,34 @@ interface ServiceGroup {
           <div class="service-detail-info min-h-0 p-5 pr-6 custom-scrollbar md:p-7">
             <div class="pr-12">
               <p class="ui-card-meta uppercase tracking-wider">RESOURCE SERVICE</p>
-              <h2 class="mt-2 text-2xl font-black leading-tight text-white md:text-3xl">{{ item.title }}</h2>
-              <p class="mt-2 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-bold text-white">{{ item.price }}</p>
-              <p class="ui-card-text mt-4">{{ item.detail }}</p>
+              <h2 class="mt-2 text-2xl font-black leading-tight text-white md:text-3xl">{{ serviceTitle(item) }}</h2>
+              <p class="mt-2 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-bold text-white">{{ displayText(item.price) }}</p>
+              <p class="ui-card-text mt-4">{{ serviceDetail(item) }}</p>
             </div>
 
             <div class="service-detail-sections custom-scrollbar">
               <section class="detail-block">
-                <h3 class="detail-title">适合场景</h3>
+                <h3 class="detail-title">{{ displayText('适合场景') }}</h3>
                 <ul class="detail-list">
-                  @for (text of item.suitable; track text) {
+                  @for (text of serviceBullets(item, 'suitable'); track text) {
                     <li>{{ text }}</li>
                   }
                 </ul>
               </section>
 
               <section class="detail-block">
-                <h3 class="detail-title">可交付内容</h3>
+                <h3 class="detail-title">{{ displayText('可交付内容') }}</h3>
                 <ul class="detail-list">
-                  @for (text of item.deliverables; track text) {
+                  @for (text of serviceBullets(item, 'deliverables'); track text) {
                     <li>{{ text }}</li>
                   }
                 </ul>
               </section>
 
               <section class="detail-block">
-                <h3 class="detail-title">咨询前建议准备</h3>
+                <h3 class="detail-title">{{ displayText('咨询前建议准备') }}</h3>
                 <ul class="detail-list">
-                  @for (text of item.beforeOrder; track text) {
+                  @for (text of serviceBullets(item, 'beforeOrder'); track text) {
                     <li>{{ text }}</li>
                   }
                 </ul>
@@ -216,19 +487,19 @@ interface ServiceGroup {
             <div class="service-detail-contact mt-6 rounded-card border border-blue-400/20 bg-blue-500/10 p-4">
               <div class="service-detail-contact-inner flex items-center gap-4">
                 <div class="qr-soft-frame flex h-24 w-24 shrink-0 items-center justify-center rounded-card border border-blue-200/20 bg-blue-50/90 p-2">
-                  <img src="/images/services/wechat-qr.png" alt="服务咨询微信二维码" class="h-full w-full object-contain">
+                  <img src="/images/services/wechat-qr.png" [alt]="displayText('服务咨询微信二维码')" class="h-full w-full object-contain">
                 </div>
                 <div class="min-w-0">
-                  <p class="ui-card-meta">微信咨询</p>
+                  <p class="ui-card-meta">{{ displayText('微信咨询') }}</p>
                   <p class="mt-1 break-all font-mono text-sm font-bold text-white">AllDesignEverything</p>
                   <div class="service-detail-actions">
                     <button type="button" class="ui-btn-secondary mt-3 px-3 py-2 text-xs" (click)="copyWechat()">
                       <svg lucideCopy class="h-4 w-4" [strokeWidth]="2"></svg>
-                      复制微信号
+                      {{ displayText('复制微信号') }}
                     </button>
                     <button type="button" class="ui-btn-secondary mt-3 px-3 py-2 text-xs" (click)="openWechat()">
                       <svg lucideExternalLink class="h-4 w-4" [strokeWidth]="2"></svg>
-                      打开微信
+                      {{ displayText('打开微信') }}
                     </button>
                   </div>
                 </div>
@@ -242,6 +513,7 @@ interface ServiceGroup {
   styleUrls: ['./resource-services.component.css']
 })
 export class ResourceServicesComponent {
+  locale = inject(LocaleService);
   copied = signal(false);
   consultOpen = signal(false);
   selectedService = signal<ServiceItem | null>(null);
@@ -471,6 +743,80 @@ export class ResourceServicesComponent {
     const index = this.selectedImageIndex();
     if (index < 0) return item.gallery[0] || item.image || item.coverImage;
     return item.gallery[index] || item.image || item.coverImage;
+  }
+
+  displayText(value: string | null | undefined, fallback?: string): string {
+    return this.locale.translateData(value, fallback);
+  }
+
+  serviceCoverImage(item: ServiceItem): string {
+    if (!this.locale.isEnglish()) return item.coverImage;
+    return item.coverImage.replace(/\.webp$/, '-en.webp');
+  }
+
+  serviceGroupTitle(group: ServiceGroup): string {
+    const key = group.items[0]?.id;
+    if (this.locale.isEnglish() && key && SERVICE_GROUP_EN_COPY[key]) {
+      return SERVICE_GROUP_EN_COPY[key].title;
+    }
+    return this.displayText(group.title);
+  }
+
+  serviceGroupSummary(group: ServiceGroup): string {
+    const key = group.items[0]?.id;
+    if (this.locale.isEnglish() && key && SERVICE_GROUP_EN_COPY[key]) {
+      return SERVICE_GROUP_EN_COPY[key].summary;
+    }
+    return this.displayText(group.summary);
+  }
+
+  serviceTitle(item: ServiceItem): string {
+    return this.serviceCopy(item)?.title ?? this.displayText(item.title);
+  }
+
+  serviceDescription(item: ServiceItem): string {
+    return this.serviceCopy(item)?.description ?? this.displayText(item.description);
+  }
+
+  serviceDetail(item: ServiceItem): string {
+    return this.serviceCopy(item)?.detail ?? this.displayText(item.detail);
+  }
+
+  serviceNote(item: ServiceItem): string {
+    return this.serviceCopy(item)?.note ?? this.displayText(item.note);
+  }
+
+  serviceBullets(item: ServiceItem, section: 'suitable' | 'deliverables' | 'beforeOrder'): string[] {
+    const copy = this.serviceCopy(item);
+    if (copy) return copy[section];
+    return item[section].map(text => this.displayText(text, this.serviceBulletFallback(text, item)));
+  }
+
+  serviceImageAlt(item: ServiceItem, kind: 'cover' | 'detail' | 'thumbnail', index?: number): string {
+    const title = this.serviceTitle(item);
+    if (!this.locale.isEnglish()) {
+      if (kind === 'cover') return `${item.title}示意图`;
+      if (kind === 'detail') return `${item.title}详情图`;
+      return `${item.title}缩略图 ${index ?? ''}`.trim();
+    }
+
+    if (kind === 'cover') return `${title} service cover`;
+    if (kind === 'detail') return `${title} detail image`;
+    return `${title} thumbnail ${index ?? ''}`.trim();
+  }
+
+  private serviceCopy(item: ServiceItem): ServiceEnglishCopy | null {
+    if (!this.locale.isEnglish()) return null;
+    return SERVICE_EN_COPY[item.id] ?? null;
+  }
+
+  serviceBulletFallback(text: string, item: ServiceItem): string {
+    const title = this.displayText(item.title);
+    if (text.includes('提供')) return `Provide the required scope, location, and source information for ${title}.`;
+    if (text.includes('确认')) return `Confirm scope, format, accuracy, schedule, and usage limits before ordering.`;
+    if (text.includes('说明')) return `Describe the project scope, intended use, and required output format.`;
+    if (text.includes('可用于') || text.includes('适合')) return `Suitable for personal study, early design reference, and presentation preparation.`;
+    return `Prepare the site scope, intended use, and required output details for ${title}.`;
   }
 
   toggleConsult() {

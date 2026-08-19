@@ -81,13 +81,15 @@ https://archipedia.top/news-cache.json
 C:\Sites\archipedia-src\logs\news-update.log
 ```
 
-如果某个来源当天访问失败，脚本会记录失败原因，并保留该来源的备用入口卡片，避免主页空白。
+如果某个来源当天访问失败，脚本会记录失败原因，并优先保留上一批真实条目。服务器更新脚本会先生成候选缓存，确认真实条目和可用封面数量达到阈值后才替换线上文件，因此单次抓取异常不会覆盖当前正常缓存。
 
 ## 当前来源策略
 
-- ArchDaily：优先读取 RSS/FeedBurner；失败时保留 ArchDaily 项目入口。
-- Archeyes：读取官方 RSS，提取标题、链接、发布日期、封面图和摘要。
-- Architectuul：通过页面文本代理读取首页链接，并按建筑相关关键词过滤。
-- 有方：通过页面文本代理读取首页链接，并按中文建筑资讯关键词过滤。
+- ArchDaily：优先读取 RSS/FeedBurner；失败时保留上一批真实条目或项目入口。
+- Archeyes、Dezeen、designboom：读取官方 RSS，作为首页主要资讯来源，优先展示带有可正常加载封面的条目。
+- Architectuul：直接读取 Digest 页面，仅作为无封面补充来源。
+- 有方：图片服务器会拒绝第三方页面热链，因此仅保留最多 1 条低优先级备用资讯，不在首页前排展示，也不写入其远程封面地址。
 
 这些策略不依赖 AI。后续如果某个网站改版，只需要调整 `utils/update-news-cache.mjs` 中对应来源的 adapter。
+
+已安装的 `ARCHIPEDIA Daily News Update` 计划任务不需要重新创建。更新服务器上的 `utils\update-news-cache.mjs` 和 `server-scripts\update-news-cache.ps1` 后，原任务会自动使用新策略。

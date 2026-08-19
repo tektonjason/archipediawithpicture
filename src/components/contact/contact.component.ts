@@ -2,6 +2,7 @@
 import { Component, inject } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { AppLocale, LocaleService } from '../../services/locale.service';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 interface DownloadLink {
@@ -24,13 +25,50 @@ interface DownloadLink {
         <p class="ui-subtitle">About & Contact</p>
       </div>
 
+      <!-- Language Section -->
+      <section class="mb-10">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+          <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+          语言设置
+        </h3>
+        <div class="ui-card ui-card-hover p-6 flex flex-col gap-5 md:flex-row md:items-center md:justify-between" appGsapCardHover>
+          <div class="flex items-center gap-5">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center shrink-0 text-cyan-300">
+              <svg lucideLanguages class="w-6 h-6" [strokeWidth]="2"></svg>
+            </div>
+            <div>
+              <h4 class="text-base font-bold text-white">界面语言</h4>
+              <p class="mt-1 text-sm leading-relaxed text-gray-400">
+                选择应用界面显示语言。中文内容保持原样，英文界面会以贴合建筑学习场景的表达呈现。
+              </p>
+            </div>
+          </div>
+          <div class="flex shrink-0 rounded-control border border-line bg-black/20 p-1">
+            @for (option of locale.availableLocales; track option.value) {
+              <button
+                type="button"
+                (click)="setLocale(option.value)"
+                class="min-w-24 rounded-control px-4 py-2 text-sm font-bold transition-colors"
+                [class.bg-white]="locale.locale() === option.value"
+                [class.text-black]="locale.locale() === option.value"
+                [class.text-gray-400]="locale.locale() !== option.value"
+                [class.hover:text-white]="locale.locale() !== option.value"
+                [attr.aria-label]="option.value === 'zh' ? '切换为中文' : '切换为英文'"
+              >
+                {{ option.nativeLabel }}
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+
       <!-- User Tutorial Section -->
       <section class="mb-10">
         <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
           <span class="w-2 h-2 rounded-full bg-orange-500"></span>
           使用教程
         </h3>
-        <div (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cpjHpTZQ60RV')" class="cursor-pointer group ui-card ui-card-hover p-6 flex items-center gap-6" appGsapCardHover>
+        <button type="button" (click)="dataService.openExternalModal('https://www.kdocs.cn/l/cpjHpTZQ60RV')" class="w-full cursor-pointer group ui-card ui-card-hover p-6 flex items-center gap-6 text-left" appGsapCardHover>
           <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0 text-orange-400 group-hover:bg-orange-500/20 transition-colors">
             <svg lucideBookOpen class="w-6 h-6" [strokeWidth]="2"></svg>
           </div>
@@ -39,10 +77,10 @@ interface DownloadLink {
                查看详细的操作指南与功能介绍，快速上手应用。
             </p>
           </div>
-          <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-all">
+          <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
              <svg lucideChevronRight class="w-5 h-5" [strokeWidth]="2"></svg>
           </div>
-        </div>
+        </button>
       </section>
 
       <!-- Contact Info -->
@@ -82,12 +120,12 @@ interface DownloadLink {
               <p class="text-xs text-gray-400">{{ link.description }}</p>
             </div>
             <div class="flex items-center gap-3">
-              <div (click)="dataService.openExternalModal(link.url)" class="ui-btn-secondary cursor-pointer px-4 py-2 text-xs">
+              <button type="button" (click)="dataService.openExternalModal(link.url)" class="ui-btn-secondary cursor-pointer px-4 py-2 text-xs">
                 {{ link.buttonText }}
-              </div>
-              <div (click)="shareLink(link.url)" class="ui-icon-btn cursor-pointer">
+              </button>
+              <button type="button" (click)="shareLink(link.url)" class="ui-icon-btn cursor-pointer" [attr.aria-label]="displayText('分享')">
                 <svg lucideShare2 class="h-5 w-5" [strokeWidth]="2"></svg>
-              </div>
+              </button>
             </div>
           </div>
         }
@@ -125,12 +163,12 @@ interface DownloadLink {
             <li>Wikimedia Commons, 协议 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.en" target="_blank" rel="noopener noreferrer" class="underline text-blue-400 hover:text-blue-300">CC BY-SA 4.0</a></li>
             <li>Openverse, 协议 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.en" target="_blank" rel="noopener noreferrer" class="underline text-blue-400 hover:text-blue-300">CC BY-SA 4.0</a></li>
             <li>Pixabay, 协议 <a href="https://creativecommons.org/public-domain/cc0/" target="_blank" rel="noopener noreferrer" class="underline text-blue-400 hover:text-blue-300">CC0</a></li>
-            <li>《中国建筑图解词典》（作者：王其钧）</li>
-            <li>《西方建筑图解词典》（作者：王其钧）</li>
-            <li>《中国建筑史》（主编：潘谷西）</li>
-            <li>《外国建筑史》（作者：陈志华）</li>
-            <li>《外国近现代建筑史》（主编：罗小未）</li>
-            <li><em>Fundamentals of Building Construction: Materials and Methods</em> (作者：Edward Allen & Joseph Iano) Wiley出版社</li>
+            <li>{{ displayText('《中国建筑图解词典》（作者：王其钧）') }}</li>
+            <li>{{ displayText('《西方建筑图解词典》（作者：王其钧）') }}</li>
+            <li>{{ displayText('《中国建筑史》（主编：潘谷西）') }}</li>
+            <li>{{ displayText('《外国建筑史》（作者：陈志华）') }}</li>
+            <li>{{ displayText('《外国近现代建筑史》（主编：罗小未）') }}</li>
+            <li><em>Fundamentals of Building Construction: Materials and Methods</em> {{ displayText('(作者：Edward Allen & Joseph Iano) Wiley出版社') }}</li>
           </ul>
         </div>
       </section>
@@ -178,6 +216,15 @@ interface DownloadLink {
 })
 export class ContactComponent {
   dataService = inject(DataService);
+  locale = inject(LocaleService);
+
+  setLocale(locale: AppLocale) {
+    this.locale.setLocale(locale);
+  }
+
+  displayText(value: string | null | undefined): string {
+    return this.locale.translateData(value);
+  }
 
   onlineLinks: DownloadLink[] = [
     {

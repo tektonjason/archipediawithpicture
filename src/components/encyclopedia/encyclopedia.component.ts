@@ -2,6 +2,7 @@ import { Component, inject, computed, signal, AfterViewInit, ViewChild, ElementR
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DataService, Entry } from '../../services/data.service';
+import { LocaleService } from '../../services/locale.service';
 import { ArchitectureNewsItem, ArchitectureNewsService } from '../../services/architecture-news.service';
 import { AnimatedSearchBarComponent } from '../shared/animated-search-bar.component';
 import { GsapHoverTooltipDirective } from '../shared/gsap-hover-tooltip.directive';
@@ -16,6 +17,12 @@ import {
   matchesSearch,
   splitHighlight
 } from './encyclopedia-tools';
+import {
+  displayableEnglish,
+  entryBadgeFallback,
+  entrySnippetFallback,
+  tryTranslateRelationValue
+} from './entry-english';
 
 gsap.registerPlugin(Flip);
 
@@ -23,7 +30,7 @@ gsap.registerPlugin(Flip);
   selector: 'app-encyclopedia',
   imports: [RouterLink, FormsModule, AnimatedSearchBarComponent, GsapHoverTooltipDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
-    <div class="ui-page ui-page-pad text-white" (wheel)="onPageWheel($event)">
+    <div class="ui-page ui-page-pad text-white">
       <div class="encyclopedia-chrome" [class.is-compact]="encyclopediaChromeCompact()">
       
       <!-- Header Section -->
@@ -119,9 +126,6 @@ gsap.registerPlugin(Flip);
         id="encyclopedia-scroll-container"
         #scrollContainer
         (scroll)="onScroll()"
-        (wheel)="onContentWheel($event)"
-        (touchstart)="onContentTouchStart($event)"
-        (touchmove)="onContentTouchMove($event)"
         class="flex-1 overflow-y-auto custom-scrollbar -mr-2 pr-2"
       >
         @if (isHomePage()) {
@@ -133,12 +137,12 @@ gsap.registerPlugin(Flip);
                     @if (item.imageUrl) {
                       <img [src]="item.imageUrl" [alt]="newsTitle(item)" loading="eager" decoding="async">
                     } @else {
-                      <div class="home-image-fallback">{{ item.source.slice(0, 1) }}</div>
+                      <div class="home-image-fallback">{{ newsSourceName(item.source).slice(0, 1) }}</div>
                     }
                   </div>
                   <div class="home-feature-content">
                     <div class="home-news-meta">
-                      <span>{{ item.source }}</span>
+                      <span>{{ newsSourceName(item.source) }}</span>
                       <span>{{ formatNewsDate(item.publishedAt) }}</span>
                     </div>
                     <h3>{{ newsTitle(item) }}</h3>
@@ -148,7 +152,7 @@ gsap.registerPlugin(Flip);
                 </button>
               }
 
-              <div class="home-ad-slot" aria-label="广告位">
+              <div class="home-ad-slot" [attr.aria-label]="displayText('广告位')">
                 <span>AD SLOT</span>
                 <strong>Google Ads Ready</strong>
               </div>
@@ -161,7 +165,7 @@ gsap.registerPlugin(Flip);
               </div>
               <div class="home-source-row">
                 @for (source of newsService.sources(); track source.homeUrl) {
-                  <button type="button" (click)="openSource(source.homeUrl)">{{ source.name }}</button>
+                  <button type="button" (click)="openSource(source.homeUrl)">{{ newsSourceName(source.name) }}</button>
                 }
               </div>
             </div>
@@ -173,12 +177,12 @@ gsap.registerPlugin(Flip);
                     @if (item.imageUrl) {
                       <img [src]="item.imageUrl" [alt]="newsTitle(item)" loading="lazy" decoding="async">
                     } @else {
-                      <div class="home-image-fallback small">{{ item.source.slice(0, 1) }}</div>
+                      <div class="home-image-fallback small">{{ newsSourceName(item.source).slice(0, 1) }}</div>
                     }
                   </div>
                   <div class="home-news-body">
                     <div class="home-news-meta">
-                      <span>{{ item.source }}</span>
+                      <span>{{ newsSourceName(item.source) }}</span>
                       <span>{{ formatNewsDate(item.publishedAt) }}</span>
                     </div>
                     <h4>{{ newsTitle(item) }}</h4>
@@ -209,7 +213,8 @@ gsap.registerPlugin(Flip);
               [routerLink]="['/entry', entry.id]" 
               [queryParams]="searchQuery() ? { q: searchQuery() } : null"
               (click)="saveState(scrollContainer.scrollTop)" 
-              class="group ui-media-card animate-fade-in-up entry-card" appGsapCardHover
+              class="group ui-media-card animate-fade-in-up entry-card"
+              appGsapCardHover
               [class.flex]="viewMode() === 'list'"
               [class.flex-col]="viewMode() === 'grid'"
               [class.h-full]="viewMode() === 'grid'"
@@ -223,7 +228,7 @@ gsap.registerPlugin(Flip);
               <!-- Image Section -->
               <div class="overflow-hidden relative bg-gray-800 entry-image" [class.h-48]="viewMode() === 'grid'" [class.h-full]="viewMode() === 'list'" [class.w-32]="viewMode() === 'list'" [class.shrink-0]="viewMode() === 'list'">
                 @if (entry.imageUrl) {
-                   <img [src]="entry.imageUrl" class="w-full h-full object-cover" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" decoding="async" [alt]="entry.term" data-flip-id="image-{{entry.id}}">
+                   <img [src]="entry.imageUrl" class="w-full h-full object-cover" [style.object-position]="entry.imagePosition || 'center'" loading="lazy" decoding="async" [alt]="displayEntryTerm(entry)" data-flip-id="image-{{entry.id}}">
                 } @else {
                    <!-- Fallback Pattern -->
                    <div class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative" data-flip-id="image-{{entry.id}}">
@@ -232,7 +237,7 @@ gsap.registerPlugin(Flip);
                    </div>
                 }
                 <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
-                  {{ entry.subcategory?.split(' ')[0] || '词条' }}
+                  {{ displayEntryBadge(entry) }}
                 </div>
               </div>
 
@@ -240,7 +245,7 @@ gsap.registerPlugin(Flip);
               <div class="flex flex-col flex-1 min-w-0 entry-content" [class.p-4]="viewMode() === 'grid'" [class.p-2]="viewMode() === 'list'">
                 <div class="flex justify-between items-start gap-2 mb-1 shrink-0">
                   <h3 class="font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-1" [class.text-lg]="viewMode() === 'grid'" [class.text-base]="viewMode() === 'list'">
-                    @for (segment of highlightSegments(entry.term); track $index) {
+                    @for (segment of highlightSegments(displayEntryTerm(entry)); track $index) {
                       <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
                     }
                   </h3>
@@ -250,19 +255,19 @@ gsap.registerPlugin(Flip);
                 </div>
                 
                 <p class="text-xs text-gray-500 italic truncate shrink-0" [class.mb-3]="viewMode() === 'grid'" [class.mb-1]="viewMode() === 'list'">
-                  @for (segment of highlightSegments(entry.termEn); track $index) {
-                    <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
-                  }
+                    @for (segment of highlightSegments(displayEntrySubtitle(entry)); track $index) {
+                      <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
+                    }
                 </p>
                 
                 <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-1 leading-relaxed" [class.hidden]="viewMode() === 'list'">
-                  @for (segment of highlightSegments(searchSnippet(entry)); track $index) {
+                  @for (segment of highlightSegments(displayEntrySnippet(entry)); track $index) {
                     <span [class.search-hit]="segment.matched">{{ segment.text }}</span>
                   }
                 </p>
                 
                 <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5" [class.border-t-0]="viewMode() === 'list'" [class.pt-0]="viewMode() === 'list'">
-                   <span class="text-xs text-gray-600 font-medium truncate max-w-[70%]">{{ entry.category }}</span>
+                   <span class="text-xs text-gray-600 font-medium truncate max-w-[70%]">{{ displayEntryCategory(entry) }}</span>
                    <div class="flex items-center text-xs font-medium text-gray-500 group-hover:text-white transition-colors">
                      阅读更多 
                      <svg lucideChevronRight class="w-3 h-3 ml-1" [strokeWidth]="2"></svg>
@@ -277,7 +282,7 @@ gsap.registerPlugin(Flip);
 
       <!-- Admin Add Button -->
       @if (dataService.isAdmin()) {
-        <button (click)="createNew()" title="添加新词条" class="absolute bottom-8 right-8 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-500 hover:scale-105 transition-all z-20">
+        <button (click)="createNew()" title="添加新词条" class="absolute bottom-8 right-8 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg transition-[transform,background-color,box-shadow] duration-fast ease-ui-out hover:bg-blue-500 hover:scale-[1.04] active:scale-[0.97] z-20">
           <svg lucidePlus class="w-6 h-6" [strokeWidth]="2"></svg>
         </button>
       }
@@ -645,6 +650,7 @@ gsap.registerPlugin(Flip);
 })
 export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   dataService = inject(DataService);
+  locale = inject(LocaleService);
   newsService = inject(ArchitectureNewsService);
   router: Router = inject(Router);
   route: ActivatedRoute = inject(ActivatedRoute);
@@ -661,15 +667,12 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
 
   // Typewriter properties
   currentTitle = signal('');
-  private titles = ['建筑百科', 'ARCHIPEDIA'];
   private titleIndex = 0;
   private charIndex = 0;
   private isDeleting = false;
   private timer: any;
   private queryUpdateTimer: ReturnType<typeof setTimeout> | null = null;
   private scrollFrame = 0;
-  private lastContentScrollTop = 0;
-  private lastContentTouchY = 0;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
@@ -718,22 +721,23 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       if (this.scrollContainer?.nativeElement) {
         const savedTop = this.dataService.encyclopediaScrollPosition();
         this.scrollContainer.nativeElement.scrollTop = savedTop;
-        this.lastContentScrollTop = savedTop;
-        if (savedTop > 24) {
+        if (savedTop > 48) {
           this.collapseEncyclopediaChrome();
         }
       }
     }, 0);
     
     if (this.prefersReducedMotion) {
-      this.currentTitle.set('建筑百科');
+      this.currentTitle.set(this.locale.isEnglish() ? 'ARCHIPEDIA' : '建筑百科');
     } else {
       this.typewriterEffect();
     }
   }
 
   private typewriterEffect() {
-    const currentFullTitle = this.titles[this.titleIndex];
+    const titles = this.locale.isEnglish() ? ['ARCHIPEDIA', 'KNOWLEDGE BASE'] : ['建筑百科', 'ARCHIPEDIA'];
+    if (this.titleIndex >= titles.length) this.titleIndex = 0;
+    const currentFullTitle = titles[this.titleIndex];
 
     if (this.isDeleting) {
       this.currentTitle.set(currentFullTitle.substring(0, this.charIndex - 1));
@@ -750,7 +754,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       this.isDeleting = true;
     } else if (this.isDeleting && this.charIndex === 0) {
       this.isDeleting = false;
-      this.titleIndex = (this.titleIndex + 1) % this.titles.length;
+      this.titleIndex = (this.titleIndex + 1) % titles.length;
       delta = 500; // Pause before typing next
     }
 
@@ -818,63 +822,16 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  onContentWheel(event: WheelEvent) {
-    const container = this.scrollContainer?.nativeElement;
-    if (!container) return;
-
-    if (event.deltaY > 8) {
-      this.collapseEncyclopediaChrome();
-    } else if (event.deltaY < -8 && container.scrollTop <= 1) {
-      this.expandEncyclopediaChrome();
-    }
-  }
-
-  onPageWheel(event: WheelEvent) {
-    const container = this.scrollContainer?.nativeElement;
-    if (!container || container.contains(event.target as Node)) return;
-
-    if (event.deltaY > 8) {
-      this.collapseEncyclopediaChrome();
-      container.scrollBy({ top: event.deltaY, behavior: 'auto' });
-      event.preventDefault();
-    } else if (event.deltaY < -8) {
-      if (container.scrollTop <= 1) {
-        this.expandEncyclopediaChrome();
-      } else {
-        container.scrollBy({ top: event.deltaY, behavior: 'auto' });
-      }
-      event.preventDefault();
-    }
-  }
-
-  onContentTouchStart(event: TouchEvent) {
-    this.lastContentTouchY = event.touches[0]?.clientY ?? 0;
-  }
-
-  onContentTouchMove(event: TouchEvent) {
-    const container = this.scrollContainer?.nativeElement;
-    const currentY = event.touches[0]?.clientY ?? this.lastContentTouchY;
-    const deltaY = this.lastContentTouchY - currentY;
-    this.lastContentTouchY = currentY;
-
-    if (!container) return;
-    if (deltaY > 8) {
-      this.collapseEncyclopediaChrome();
-    } else if (deltaY < -8 && container.scrollTop <= 1) {
-      this.expandEncyclopediaChrome();
-    }
-  }
-
   private updateChromeFromScroll() {
     const container = this.scrollContainer?.nativeElement;
     if (!container) return;
 
     const currentTop = container.scrollTop;
-    const delta = currentTop - this.lastContentScrollTop;
-    if (currentTop > 24 && delta > 1) {
+    if (currentTop > 48) {
       this.collapseEncyclopediaChrome();
+    } else if (currentTop <= 8) {
+      this.expandEncyclopediaChrome();
     }
-    this.lastContentScrollTop = currentTop;
   }
 
   private collapseEncyclopediaChrome() {
@@ -938,7 +895,6 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     }, 140);
     if (this.scrollContainer?.nativeElement) {
       this.scrollContainer.nativeElement.scrollTop = 0;
-      this.lastContentScrollTop = 0;
     }
   }
 
@@ -966,6 +922,14 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
         if (!matchCat) return false;
         if (!rawQuery) return true;
         if (matchesSearch(document, rawQuery)) return true;
+        const localizedHaystack = [
+          this.displayEntryTerm(document.entry),
+          this.displayEntrySubtitle(document.entry),
+          this.displayEntrySnippet(document.entry),
+          this.displayText(document.entry.category),
+          this.displayText(document.entry.subcategory)
+        ].join(' ').toLowerCase();
+        if (localizedHaystack.includes(rawQuery.toLowerCase())) return true;
 
         const alternate = rawQuery.includes('栱')
           ? rawQuery.replace(/栱/g, '拱')
@@ -999,7 +963,6 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       this.dataService.encyclopediaScrollPosition.set(0);
       if (this.scrollContainer?.nativeElement) {
         this.scrollContainer.nativeElement.scrollTop = 0;
-        this.lastContentScrollTop = 0;
       }
       return;
     }
@@ -1010,7 +973,7 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
       opacity: 0,
       y: 8,
       stagger: 0.008,
-      ease: "power2.in",
+      ease: "power2.out",
       overwrite: "auto",
       onComplete: () => {
         // Update category and reset scroll/search after exit animation
@@ -1023,7 +986,6 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
         this.dataService.encyclopediaScrollPosition.set(0);
         if (this.scrollContainer?.nativeElement) {
           this.scrollContainer.nativeElement.scrollTop = 0;
-          this.lastContentScrollTop = 0;
         }
 
         // Enter animation for new cards
@@ -1076,12 +1038,90 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
     return createSearchSnippet(entry, this.debouncedQuery());
   }
 
+  displayText(value: string | null | undefined, fallback?: string): string {
+    return this.locale.translateData(value, fallback);
+  }
+
+  displayEntryTerm(entry: Entry): string {
+    if (this.locale.isEnglish()) {
+      return entry.termEn?.trim() || this.displayText(entry.term, 'Architecture Entry');
+    }
+    return entry.term;
+  }
+
+  displayEntrySubtitle(entry: Entry): string {
+    if (this.locale.isEnglish()) {
+      return [this.displayEntryCategory(entry), this.displayEntrySubcategory(entry)]
+        .filter(Boolean)
+        .join(' · ');
+    }
+    return entry.termEn;
+  }
+
+  displayEntryBadge(entry: Entry): string {
+    const badge = entry.subcategory?.split(' ')[0] || '词条';
+    if (!this.locale.isEnglish()) return this.displayText(badge);
+
+    const translated = tryTranslateRelationValue(badge, value => this.displayText(value));
+    return translated || entryBadgeFallback(entry, this.displayEntryCategory(entry), this.displayEntrySubcategory(entry));
+  }
+
+  displayEntryCategory(entry: Entry): string {
+    if (!this.locale.isEnglish()) return this.displayText(entry.category);
+    return tryTranslateRelationValue(entry.category, value => this.displayText(value)) || 'Architecture';
+  }
+
+  displayEntrySubcategory(entry: Entry): string {
+    if (!this.locale.isEnglish()) return this.displayText(entry.subcategory);
+    return tryTranslateRelationValue(entry.subcategory, value => this.displayText(value)) || '';
+  }
+
+  displayEntrySnippet(entry: Entry): string {
+    const source = createSearchSnippet(entry, this.debouncedQuery()) || entry.definition || entry.details;
+    const translated = this.displayText(source);
+    if (!this.locale.isEnglish()) return translated;
+    if (displayableEnglish(translated)) return translated;
+
+    return entrySnippetFallback(
+      entry,
+      this.displayEntryCategory(entry),
+      this.displayEntrySubcategory(entry)
+    );
+  }
+
   newsTitle(item: ArchitectureNewsItem): string {
-    return item.titleZh || item.title;
+    if (!this.locale.isEnglish()) {
+      return item.titleZh || item.title;
+    }
+
+    const title = item.title || item.titleZh || '';
+    if (title && !this.locale.hasCjk(title)) return title;
+
+    const translated = this.displayText(title);
+    if (translated && !this.locale.hasCjk(translated)) return translated;
+
+    return `${item.source} architecture update`;
   }
 
   newsSummary(item: ArchitectureNewsItem): string {
-    return item.summaryZh || item.summary;
+    if (!this.locale.isEnglish()) {
+      return item.summaryZh || item.summary;
+    }
+
+    const summary = item.summary || item.summaryZh || '';
+    if (summary && !this.locale.hasCjk(summary)) return summary;
+
+    const translated = this.displayText(summary);
+    if (translated && !this.locale.hasCjk(translated)) return translated;
+
+    return `A recent architecture story from ${item.source}, selected for project research and design reading.`;
+  }
+
+  newsSourceName(source: string): string {
+    if (!this.locale.isEnglish()) return source;
+
+    if (source === '有方') return 'Archiposition';
+    return this.displayText(source);
   }
 
   openNewsItem(item: ArchitectureNewsItem) {
@@ -1097,12 +1137,12 @@ export class EncyclopediaComponent implements AfterViewInit, OnDestroy {
   }
 
   formatNewsDate(value?: string): string {
-    if (!value) return '今日';
+    if (!value) return this.locale.isEnglish() ? 'Today' : '今日';
 
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '今日';
+    if (Number.isNaN(date.getTime())) return this.locale.isEnglish() ? 'Today' : '今日';
 
-    return new Intl.DateTimeFormat('zh-CN', {
+    return new Intl.DateTimeFormat(this.locale.isEnglish() ? 'en-US' : 'zh-CN', {
       month: '2-digit',
       day: '2-digit'
     }).format(date);

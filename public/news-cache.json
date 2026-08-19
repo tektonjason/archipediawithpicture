@@ -1,229 +1,337 @@
 {
-  "updatedAt": "2026-07-02T16:42:53.890Z",
+  "updatedAt": "2026-08-19T17:14:04.885Z",
   "sources": [
     {
       "name": "ArchDaily",
       "homeUrl": "https://www.archdaily.com",
-      "adapter": "feed"
+      "adapter": "feed",
+      "displayPriority": 10
     },
     {
       "name": "Archeyes",
       "homeUrl": "https://archeyes.com",
-      "adapter": "feed"
+      "adapter": "feed",
+      "displayPriority": 100
     },
     {
       "name": "Dezeen",
       "homeUrl": "https://www.dezeen.com",
-      "adapter": "feed"
+      "adapter": "feed",
+      "displayPriority": 100
     },
     {
       "name": "designboom",
       "homeUrl": "https://www.designboom.com",
-      "adapter": "feed"
+      "adapter": "feed",
+      "displayPriority": 100
     },
     {
       "name": "Architectuul",
       "homeUrl": "https://architectuul.com",
-      "adapter": "jinaPageLinks"
+      "adapter": "htmlPageLinks",
+      "displayPriority": 20
     },
     {
       "name": "有方",
       "homeUrl": "https://www.archiposition.com",
-      "adapter": "jinaPageLinks"
+      "adapter": "htmlPageLinks",
+      "displayPriority": -100
     }
   ],
+  "stats": {
+    "itemCount": 24,
+    "realItemCount": 24,
+    "fallbackCount": 0,
+    "displayableImageCount": 18
+  },
   "items": [
     {
       "id": "designboom-aHR0cHM6Ly93d3cuZG",
-      "title": "one-kilometer garden ring shapes carlo ratti associati’s ‘hospital of the future’",
-      "titleZh": "一公里长的花园环形，塑造了卡洛·拉蒂·阿索恰蒂的“未来医院”",
+      "title": "ZHA to thread sprawling ‘baku expo city’ through pine forest in azerbaijan",
+      "titleZh": "ZHA将穿越阿塞拜疆松林的广阔“巴库博览城”",
       "source": "designboom",
-      "url": "https://www.designboom.com/architecture/garden-ring-carlo-ratti-hospital-future-park-associati-brescia-italy/",
+      "url": "https://www.designboom.com/architecture/zha-baku-expo-city-pine-forest-azerbaijan-zaha-hadid/",
       "sourceHomeUrl": "https://www.designboom.com",
-      "summary": "the new campus extends the radial hospital plan of brescia, italy with glazed wings and a garden-filled hybrid timber structure.",
-      "summaryZh": "新校区延伸了意大利布雷西亚放射状医院布局，采用了玻璃翼楼和花园式混合木结构。",
-      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/carlo-ratti-associati-hospital-future-brescia-italy-designboom-700-500x400-22b08q85r529.jpg",
-      "publishedAt": "2026-07-02T16:34:59.000Z"
+      "summary": "ZHA plans its 'baku expo city' masterplan in azerbaijan around preserved pines and streets shaped by prevailing winds.",
+      "summaryZh": "ZHA计划其在阿塞拜疆的“巴库博览城市”总体规划，围绕受保护的松树和受盛行风塑造的街道为核心。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/08/ZHA-zaha-hadid-architects-baku-masterplan-azerbaijan-designboom-700-500x400-22b08q85r728.jpg",
+      "publishedAt": "2026-08-19T16:45:13.000Z"
     },
     {
       "id": "designboom-aHR0cHM6Ly93d3cuZG",
-      "title": "kengo kuma on why craftsmanship remains architecture’s connection to place",
-      "titleZh": "隈研吾谈为何工艺依然是建筑与场所的联系",
+      "title": "dp6 adds timber painter’s studio to renovated home in the netherlands",
+      "titleZh": "DP6在荷兰翻新的住宅中新增了木质画家工作室",
       "source": "designboom",
-      "url": "https://www.designboom.com/architecture/kengo-kuma-craftsmanship-architecture-connection-place-interview/",
+      "url": "https://www.designboom.com/architecture/timber-painters-studio-garden-dp6s-home-renovation-netherlands/",
       "sourceHomeUrl": "https://www.designboom.com",
-      "summary": "the japanese architect reflects on local materials, evolving traditions, and the role craftsmanship continues to play in an increasingly technological world.",
-      "summaryZh": "这位日本建筑师反思了本地材料、不断演变的传统，以及工艺在日益科技化世界中持续发挥的作用。",
-      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/kengo-kuma-craftsmanship-architecture-connection-place-designboom-700-500x400-22b08q85r234.jpg",
-      "publishedAt": "2026-07-02T10:45:43.000Z"
+      "summary": "behind its canal-facing façade, the home quietly turns its back on the city to make room for art, greenery and light.",
+      "summaryZh": "在面向运河的立面后，这座住宅悄然背对城市，为艺术、绿意和光线腾出空间。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/08/timber-painters-studio-garden-dp6s-home-renovation-netherlands1-500x400-22b08q85r809.jpg",
+      "publishedAt": "2026-08-19T15:53:23.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Schaum Architects to lead restoration of Donald Judd's Artillery Sheds in Texas",
+      "titleZh": "Schaum 建筑事务所将领导德克萨斯州唐纳德·贾德炮兵仓库的修复工作",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/08/19/schaum-architects-restoration-donald-judd-artillery-sheds-texas/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Texas studio Schaum Architects has joined a team of restorers to work on the two massive Artillery Sheds at the Chinati Foundation, the museum artist Donald Judd set up in Marfa to act as permanent storehouses and exhibition spaces for his work.",
+      "summaryZh": "德克萨斯的Schaum建筑事务所加入了一支修复团队，负责奇纳蒂基金会的两座大型炮兵棚的建设，该基金会是唐纳德·贾德在马尔法设立的永久仓库和展览空间。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/08/schaum-architects-judd-artillery-shed-restoration-texas_dezeen_2364_sq-411x411.jpg",
+      "publishedAt": "2026-08-19T15:00:58.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Tierra y Mar House by Álvarez Arquitectos in Mal País, Costa Rica",
+      "titleZh": "哥斯达黎加马尔帕伊斯阿尔瓦雷斯建筑公司建造的Tierra y Mar宅邸",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/tierra-y-mar-house-by-alvarez-arquitectos-in-mal-pais-costa-rica/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Tierra y Mar is a tropical residence set within the dry-forest canopy of Mal Pais, Costa Rica. Designed by Alvarez Arquitectos, the house uses elevated terraces, deep roof planes, shaded...",
+      "summaryZh": "Tierra y Mar 是一座热带住宅，坐落在哥斯达黎加马尔派斯的干旱森林树冠层中。由阿尔瓦雷斯建筑公司设计，这座房子采用了高架露台、深屋顶、遮阳…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/03-aerial-view-curved-roof-canopy-level-terraces-tierra-y-mar-house-alvarez-arquitectos-depth-lens-archeyes.jpg?fit=850%2C478&ssl=1",
+      "publishedAt": "2026-08-19T11:30:00.000Z"
     },
     {
       "id": "designboom-aHR0cHM6Ly93d3cuZG",
-      "title": "BIG completes dymak’s HQ as a full-scale showcase of natural materials in denmark",
-      "titleZh": "BIG将DYMAK总部完善为丹麦天然材料的全方位展示平台",
+      "title": "the nakagin capsule tower and the dream of a home that could change",
+      "titleZh": "中银胶囊塔与一个可以改变的家的梦想",
       "source": "designboom",
-      "url": "https://www.designboom.com/architecture/big-bjarke-ingels-group-dymak-headquarters-full-scale-showcase-natural-materials-denmark/",
+      "url": "https://www.designboom.com/architecture/nakagin-capsule-tower-dream-home-change-kisho-kurokawa-tokyo/",
       "sourceHomeUrl": "https://www.designboom.com",
-      "summary": "timber, clay, cork, and eelgrass shape a workplace where material performance is experienced through everyday use.",
-      "summaryZh": "木材、粘土、软木和海草塑造了一个通过日常使用体验材料性能的工作场所。",
-      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/big-bjarke-ingels-group-dymak-headquarters-full-scale-showcase-natural-materials-denmark-designboom-700-1-500x400-22b08q85r533.jpg",
-      "publishedAt": "2026-07-02T10:31:52.000Z"
+      "summary": "the nakagin capsule tower turned metabolist ideas about impermanence into a building of replaceable living pods.",
+      "summaryZh": "中银胶囊塔将新陈代谢者关于无常的观念转变为一座可替代的活体舱建筑。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/08/nakagin-capsule-tower-home-change-stuck-time-kisho-kurokawa-tokyo-designboom-700-500x400-22b08q85r092.jpg",
+      "publishedAt": "2026-08-19T10:50:49.000Z"
     },
     {
       "id": "dezeen-aHR0cHM6Ly93d3cuZG",
-      "title": "SpaceDNA arranges split levels of Indian home around rust-orange staircase",
-      "titleZh": "SpaceDNA将印度人住宅的分层布局围绕锈橙色楼梯展开",
+      "title": "Demountable timber library in Amsterdam is \"a living room for the neighbourhood\"",
+      "titleZh": "阿姆斯特丹可拆卸木质图书馆是“邻里的客厅”",
       "source": "Dezeen",
-      "url": "https://www.dezeen.com/2026/07/02/splitscape-residence-spacedna/",
+      "url": "https://www.dezeen.com/2026/08/19/oba-next-lab-matter-makers-awr-baz/",
       "sourceHomeUrl": "https://www.dezeen.com",
-      "summary": "Perforated steel screens filter light into this multi-generational house in Coimbatore, India, which architecture studio SpaceDNA completed with an oxide-coated staircase that steps around a triple-height void.",
-      "summaryZh": "穿孔钢板过滤光线，进入这座位于印度科印拜陀的多代同堂住宅，建筑事务所SpaceDNA通过覆盖氧化物的楼梯完成，楼梯环绕三层高空洞。",
-      "imageUrl": "http://static.dezeen.com/uploads/2026/06/splitscape-residence-space-dna-india-SQ-411x411.jpg",
-      "publishedAt": "2026-07-02T10:30:50.000Z"
+      "summary": "Stepped, pastel-pink seating spills out from inside the OBA Next Lab library and community space in Amsterdam, designed by Dutch architecture practices Matter Makers, AWR and BAZ Studio as a public living room.",
+      "summaryZh": "阿姆斯特丹OBA Next Lab图书馆和社区空间内，阶梯式、粉色座椅从室内延伸出来，该空间由荷兰建筑事务所Matter Makers、AWR和BAZ Studio设计，作为公共客厅。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/08/oba-next-lab-architecture-library-community-space-amsterdam-netherlands-wooden-architecture-demountable_dezeen_2364_sq2-411x411.jpg",
+      "publishedAt": "2026-08-19T10:30:45.000Z"
     },
     {
       "id": "dezeen-aHR0cHM6Ly93d3cuZG",
-      "title": "MAD adds trio of \"cloud buildings\" to Tencent headquarters in Shenzhen",
-      "titleZh": "MAD在深圳腾讯总部新增三座“云层建筑”",
+      "title": "Tivoli creates theme park Japanese neighbourhood in central Copenhagen",
+      "titleZh": "蒂沃利在哥本哈根市中心创建了主题公园日式社区",
       "source": "Dezeen",
-      "url": "https://www.dezeen.com/2026/07/02/mad-tengyun-center-tencent-headquarters-shenzhen/",
+      "url": "https://www.dezeen.com/2026/08/19/tivoli-theme-park-japanese-hikari-copenhagen/",
       "sourceHomeUrl": "https://www.dezeen.com",
-      "summary": "Three interconnected curved volumes and two office towers comprise the Tengyun Center in Shenzhen, China, which has been completed by architecture studio MAD for technology company Tencent.",
-      "summaryZh": "位于中国深圳的腾云中心由三个相互连接的弧形体量和两座办公楼组成，由建筑事务所MAD为腾讯科技公司完成。",
-      "imageUrl": "http://static.dezeen.com/uploads/2026/07/mad-tengyun-center-tencent-headquarters-shenzhen_dezeen_2364_sq_4-1704x2272-1-411x411.jpg",
-      "publishedAt": "2026-07-02T10:00:36.000Z"
+      "summary": "Danish amusement park Tivoli has unveiled Hikari, a new area informed by Japanese cities that features art by Takashi Murakami and was designed to be \"genuinely respectful of its origin\".",
+      "summaryZh": "丹麦游乐园蒂沃利推出了“光”新区域，该区域灵感来自日本城市，展出村上隆的艺术作品，旨在“真诚尊重其起源”。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/08/tivoli-hikari-theme-park-copenhagen_dezeen_2364_col_sq3-411x411.jpg",
+      "publishedAt": "2026-08-19T10:00:50.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "ARB scraps two-year practice requirement for architectural registration in the UK",
+      "titleZh": "英国建筑注册局取消了两年执业要求",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/08/19/arb-professional-practice-experience-news/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "The Architects Registration Board has announced changes to its professional practice experience approach, which will see its two-year requirement of industry experience scrapped.",
+      "summaryZh": "建筑师注册委员会宣布对其专业实践经验方式的调整，取消了两年行业经验的要求。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/08/arb-professional-practice-experience-news-sq_dezeen_2364_col_0-411x411.jpg",
+      "publishedAt": "2026-08-19T09:00:27.000Z"
     },
     {
       "id": "designboom-aHR0cHM6Ly93d3cuZG",
-      "title": "monolithic brick volumes wrap weekend house around a series of courtyards in argentina",
-      "titleZh": "巨大的砖砌体量将周末别墅环绕在阿根廷一系列庭院之间",
+      "title": "twilight of corridors: how TAKK rethinks domestic architecture beyond fixed rooms",
+      "titleZh": "走廊的黄昏：TAKK如何重新思考固定房间之外的家居建筑",
       "source": "designboom",
-      "url": "https://www.designboom.com/architecture/monolithic-brick-volumes-weekend-house-courtyards-argentina-plug-arquitectura/",
+      "url": "https://www.designboom.com/architecture/life-after-rooms-how-barcelona-studio-takk-questions-domestic-architecture-we-call-home/",
       "sourceHomeUrl": "https://www.designboom.com",
-      "summary": "modular construction is adapted to traditional brick craftsmanship.",
-      "summaryZh": "模块化建筑采用传统砖砌工艺。",
-      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/san-andres-de-giles-weekend-brick-house-plug-arquitectura-designboom-700-1-500x400-22b08q85r170.jpg",
-      "publishedAt": "2026-07-02T09:30:26.000Z"
-    },
-    {
-      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
-      "title": "Davidson Prize winner proposes reusing buses as mobile playgrounds",
-      "titleZh": "戴维森奖得主提议将公交车再利用为流动游乐场",
-      "source": "Dezeen",
-      "url": "https://www.dezeen.com/2026/07/02/rua-studio-playdeck-davidson-prize/",
-      "sourceHomeUrl": "https://www.dezeen.com",
-      "summary": "Multidisciplinary team RUA Studio has won this year's Davidson Prize with Playdeck, a concept design that envisions repurposing decommissioned buses into playscapes for people of all ages.",
-      "summaryZh": "多学科团队RUA Studio凭借Playdeck获得了今年的戴维森奖，该概念设计设想将退役的公交车改造成适合各年龄段游客的游乐景观。",
-      "imageUrl": "http://static.dezeen.com/uploads/2026/07/rua-studio-playdeck-davidson-prize_dezeen_2364_sq_0-411x411.jpg",
-      "publishedAt": "2026-07-02T09:00:13.000Z"
+      "summary": "TAKK sees the home not as a neutral container, but as an infrastructure quietly shaping how — and with whom — we live.",
+      "summaryZh": "TAKK认为，家不是中立的容器，而是默默塑造我们如何生活、与谁共处的基础设施。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/08/takk-domestic-architecture-beyond-fixed-rooms-500x400-22b08q85r874.jpg",
+      "publishedAt": "2026-08-19T08:44:52.000Z"
     },
     {
       "id": "designboom-aHR0cHM6Ly93d3cuZG",
-      "title": "designing for the senses: moving beyond the picture-perfect obsession to activate emotion",
-      "titleZh": "为感官设计：超越完美无瑕的痴迷，激发情感",
+      "title": "tato architects turns a former bank into a reflective cinema in kyoto",
+      "titleZh": "Tato建筑事务所将一座前银行改造成京都的反思电影院",
       "source": "designboom",
-      "url": "https://www.designboom.com/architecture/designing-emotion-room-for-dreams-podcast/",
+      "url": "https://www.designboom.com/architecture/tato-architects-kyoto-minami-kaikan-building-light-cinema/",
       "sourceHomeUrl": "https://www.designboom.com",
-      "summary": "the fourth episode of the room for dreams podcast moves past the picture-perfect obsession to explore the drama and imperfection of spatial memory.",
-      "summaryZh": "《梦之室》播客第四集超越了完美无瑕的痴迷，探讨了空间记忆的戏剧性和不完美。",
-      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/06/700-thumb-1-500x400-22b08q85r042.jpg",
-      "publishedAt": "2026-07-02T08:45:55.000Z"
+      "summary": "yo shimada transforms a former bank in kyoto with stainless-steel mesh, reflective surfaces and three distinct screening rooms.",
+      "summaryZh": "岛田耀将京都一座前银行改造为不锈钢网、反光表面和三个独立的放映室。",
+      "imageUrl": "https://www.designboom.com/wp-content/dbsub/391083/2026-08-16/kyoto-minami-kaikan-movie-theater-700-6a81740f72abe-500x400-22b08q85r596.jpg",
+      "publishedAt": "2026-08-19T05:43:43.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Modern Balcony Design Ideas for Contemporary Homes",
+      "titleZh": "现代阳台设计理念：当代住宅",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/modern-balcony-design-ideas-for-contemporary-homes/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "A balcony can provide more than just extra room in the house. It can be a peaceful spot for your morning coffee, a mini garden, or a cozy place to...",
+      "summaryZh": "阳台不仅能为房子提供额外的空间。它可以是早晨喝咖啡的宁静角落，一个小花园，或者是一个温馨的地方…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/itadaki-Lt-345_KwRE-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-08-19T03:10:47.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Bridging Two Worlds: A Modern Guide to Cross-Cultural Architecture and Global Homebuilding",
+      "titleZh": "连接两个世界：跨文化建筑与全球住宅建设的现代指南",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/bridging-two-worlds-a-modern-guide-to-cross-cultural-architecture-and-global-homebuilding/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Architecture has always involved more than the sum of its parts; whether made of concrete, steel, or timber, it is about the spaces where human life unfolds and the communities...",
+      "summaryZh": "建筑一直不仅仅是部分之和;无论是混凝土、钢材还是木材，它都关乎人类生活展开的空间和社区…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/aditya-parikh-QDz1IHgGO18-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-08-18T22:49:22.000Z"
     },
     {
       "id": "dezeen-aHR0cHM6Ly93d3cuZG",
-      "title": "Sunken lightwells illuminate partially submerged London home by Stylus Architects",
-      "titleZh": "下沉式光井照亮了由Stylus Architects设计的部分淹没的伦敦住宅",
+      "title": "OMA completes first US affordable housing development in San Francisco",
+      "titleZh": "OMA完成了美国旧金山首个经济适用房开发项目",
       "source": "Dezeen",
-      "url": "https://www.dezeen.com/2026/07/02/green-lodge-stylus-architects-london-house-extension/",
+      "url": "https://www.dezeen.com/2026/08/18/730-stanyan-oma-affordable-housing-san-francisco-ya-studio/",
       "sourceHomeUrl": "https://www.dezeen.com",
-      "summary": "Local studio Stylus Architects has completed Green Lodge, a partially submerged family home in Roehampton Village, southwest London, where a series of sunken lightwells brings daylight into rooms set below ground.",
-      "summaryZh": "本地事务所Stylus Architects已完成位于伦敦西南部罗汉普顿村的Green Lodge，这是一座部分淹没的家庭住宅，一系列下沉的采光井为地下房间引入自然光。",
-      "imageUrl": "http://static.dezeen.com/uploads/2026/06/green-lodge-stylus-architects-london-house-extension-sq_dezeen_2364_col_0-411x411.jpg",
-      "publishedAt": "2026-07-02T05:00:55.000Z"
+      "summary": "The New York office of OMA and local practice YA Studio have arranged a 160-home apartment block in San Francisco, California, around multiple courtyards.",
+      "summaryZh": "OMA纽约办公室和本地YA Studio在加利福尼亚旧金山规划了一栋160户的公寓楼，围绕多个庭院。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/08/oma-stanyan-san-francisco-affordable-housing-_dezeen_2364_dq-411x411.jpg",
+      "publishedAt": "2026-08-18T19:00:56.000Z"
     },
     {
       "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
-      "title": "Jean-Claude Casadesus Auditorium and Music School in Leers by Ateliers O-S Architectes",
-      "titleZh": "让-克洛德·卡萨德苏斯礼堂及音乐学校，位于利尔斯，由Ateliers O-S Architectes设计",
+      "title": "Residential and Studio House Lechner by Lechner and Lechner Architects in Salzburg, Austria",
+      "titleZh": "奥地利萨尔茨堡Lechner and Lechner建筑事务所设计的莱希纳住宅及工作室",
       "source": "Archeyes",
-      "url": "https://archeyes.com/jean-claude-casadesus-auditorium-and-music-school-in-leers-by-ateliers-o-s-architectes/",
+      "url": "https://archeyes.com/residential-and-studio-house-lechner-by-lechner-and-lechner-architects-in-salzburg-austria/",
       "sourceHomeUrl": "https://archeyes.com",
-      "summary": "The Auditorium and Music and Dance School Jean-Claude Casadesus in Leers, France, designed by ateliers O-S architectes, combines a 150-seat auditorium, rehearsal spaces, teaching rooms, shared facilities, and an upper-level...",
-      "summaryZh": "法国勒尔的让-克洛德·卡萨德苏斯礼堂及音乐舞蹈学校由O-S建筑师事务所设计，结合了150座位的礼堂、排练空间、教学室、共享设施以及上层…",
-      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/01-white-brick-street-facade-curved-entrance-dusk-jean-claude-casadesus-leers-ateliers-o-s-architectes-cyrille-weiner-archeyes.jpg?fit=850%2C602&ssl=1",
-      "publishedAt": "2026-07-01T23:30:00.000Z"
-    },
-    {
-      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
-      "title": "Pliskin Architecture creates \"welcoming threshold\" at brick-clad Brooklyn rowhouse",
-      "titleZh": "Pliskin Architecture在砖墙布鲁克林排屋中打造“欢迎门槛”",
-      "source": "Dezeen",
-      "url": "https://www.dezeen.com/2026/07/01/leonard-street-rowhouse-pliskin-architecture-brooklyn/",
-      "sourceHomeUrl": "https://www.dezeen.com",
-      "summary": "Local studio Pliskin Architecture has updated a rowhouse with an interlocking brick entry programme to create a two-family home that fits into the context of a Brooklyn street.",
-      "summaryZh": "本地工作室Pliskin Architecture更新了一栋联排别墅，采用了互锁砖砌入口程序，打造出一栋符合布鲁克林街道背景的双户住宅。",
-      "imageUrl": "http://static.dezeen.com/uploads/2026/07/imageye___-_imgi_1_leonard-street-rowhouse-pliskin-architecture-brooklyn_dezeen_2364_sq22-411x411.jpg",
-      "publishedAt": "2026-07-01T19:00:15.000Z"
+      "summary": "Residential & Studio House Lechner inserts a mixed-use dwelling and workplace into Salzburg’s historic center, using a compact vertical organization, planted terraces, and water to reframe dense urban living around...",
+      "summaryZh": "住宅与工作室莱希纳将混合用途住宅和工作场所融入萨尔茨堡历史中心，利用紧凑的垂直结构、植栽梯田和水源，重新构建了密集的城市生活环境…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/sliding-glass-dining-room-opening-to-pool-terrace-residential-studio-house-lechner-lechner-architects-julian-hoeck-archeyes.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-08-18T11:30:00.000Z"
     },
     {
       "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
-      "title": "Alila Yangshuo Hotel by Vector Architects: Sugar Mill Adaptive Reuse in Guangxi, China",
-      "titleZh": "Vector建筑事务所设计的阿里拉阳火酒店：中国广西糖厂适应性再利用",
+      "title": "Before You Build: Financial Decisions That Can Shape Your Dream Home",
+      "titleZh": "在你建造之前：能够塑造你梦想家园的财务决策",
       "source": "Archeyes",
-      "url": "https://archeyes.com/alila-yangshuo-hotel-by-vector-architects-sugar-mill-adaptive-reuse-in-guangxi-china/",
+      "url": "https://archeyes.com/before-you-build-financial-decisions-that-can-shape-your-dream-home/",
       "sourceHomeUrl": "https://archeyes.com",
-      "summary": "Yangshuo Sugarhouse Hotel by Vector Architects converts a disused 1960s sugar mill in Guangxi into a hotel complex in which preserved industrial structures, new guest accommodation, water courts, and framed...",
-      "summaryZh": "Vector建筑事务所设计的阳朔糖屋酒店，将广西一座废弃的1960年代糖厂改建为酒店综合体，保留了工业建筑、新的客房、水上广场，以及…",
-      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/reflecting-pond-chimney-mill-perforated-brick-wing-alila-yangshuo-vector-architects-shengliang-su-hao-chen-archeyes.jpg?fit=850%2C538&ssl=1",
-      "publishedAt": "2026-07-01T11:30:00.000Z"
+      "summary": "Dream homes are built from the images, plans, and sometimes drawings of the dream home in the future homeowner’s mind. Homeowners begin planning the rooms of their dream homes with...",
+      "summaryZh": "梦想之家是基于未来房主脑海中对梦想之家的图像、设计图，有时甚至图纸建造的。房主们开始规划梦想之家的房间…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/troy-mortier-FW1XhtGsdBA-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-08-17T20:11:09.000Z"
     },
     {
       "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
-      "title": "How Quality Home Décor Products Transform a Room",
-      "titleZh": "优质家居装饰产品如何改变房间",
+      "title": "The modern architectural tour: Experiencing urban spaces without the digital friction",
+      "titleZh": "现代建筑之旅：体验无数字摩擦的城市空间",
       "source": "Archeyes",
-      "url": "https://archeyes.com/how-quality-home-decor-products-transform-a-room/",
+      "url": "https://archeyes.com/the-modern-architectural-tour-experiencing-urban-spaces-without-the-digital-friction/",
       "sourceHomeUrl": "https://archeyes.com",
-      "summary": "The structural elements of a room, its walls, flooring, and built-in fixtures, establish a foundation. What occupies the space between those surfaces determines whether the room feels finished. Decorative objects,...",
-      "summaryZh": "房间的结构元素、墙壁、地板和内置装置奠定了基础。这些表面之间占据的空间决定了房间是否完成。装饰品,…",
-      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/clay-banks-wluBK3L6bl0-unsplash.jpg?fit=850%2C567&ssl=1",
-      "publishedAt": "2026-06-30T18:16:11.000Z"
+      "summary": "Experiencing a new city’s built environment requires more than just a good pair of walking shoes. We travel across oceans to see brutalist concrete facades in London or sustainable timber...",
+      "summaryZh": "体验新城市的建成环境不仅仅是一双好走路鞋。我们跨越海洋，去伦敦看野兽派混凝土立面或可持续木材…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/sorasak-_UIN-pFfJ7c-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-08-17T19:22:12.000Z"
     },
     {
       "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
-      "title": "Jantar Mantar, New Delhi: 18th-Century Observatory Architecture by Sawai Jai Singh II",
-      "titleZh": "新德里詹塔尔·曼塔尔：萨瓦伊·贾伊·辛格二世设计的18世纪天文台建筑",
+      "title": "Chongqing Bay Clubhouse Interior Design by OTN in Chongqing, China",
+      "titleZh": "重庆湾会所室内设计：OTN在中国重庆",
       "source": "Archeyes",
-      "url": "https://archeyes.com/jantar-mantar-new-delhi-18th-century-observatory-architecture-by-sawai-jai-singh-ii/",
+      "url": "https://archeyes.com/chongqing-bay-clubhouse-interior-design-by-otn-in-chongqing-china/",
       "sourceHomeUrl": "https://archeyes.com",
-      "summary": "Completed around 1724 on open ground south of Shahjahanabad, Jantar Mantar in New Delhi is the earliest of the masonry observatories built under Sawai Jai Singh II. Conceived as a...",
-      "summaryZh": "新德里的贾塔尔曼塔尔建成于约1724年，位于沙贾汗阿巴德南部的空地上，是萨瓦伊·贾伊·辛格二世时期建造的最早石砌天文台。被设想为…",
-      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/misra-yantra-frontal-marble-crescent-scales-jantar-mantar-delhi-sawai-jai-singh-ii-archeyes.jpg?fit=850%2C435&ssl=1",
-      "publishedAt": "2026-06-30T11:30:00.000Z"
+      "summary": "Chongqing Bay is a 4,066-square-meter clubhouse interior on Nanbin Road in Chongqing, organized as a sequence of arrival, reception, social, dining, and wellness spaces. Designed by OTN, the project translates...",
+      "summaryZh": "重庆湾是一座位于重庆南宾路的4066平方米会所内部，按到达、接待、社交、餐饮和养生等空间顺序排列。该项目由OTN设计，内容是…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/entrance-drop-off-curtain-facade-circular-bronze-canopy-olive-tree-chongqing-bay-otn-qiang-archeyes.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-08-17T11:30:00.000Z"
     },
     {
       "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
-      "title": "Panosi Ujezd Summer House: Former Pigsty Conversion by Lenka Milerova in the Czech Republic",
-      "titleZh": "帕诺西·乌耶兹德夏季别墅：捷克共和国伦卡·米莱罗娃改建的前猪圈",
+      "title": "Hé Showroom by LubanEra Design: Flexible Fashion Retail Interior in Shenzhen, China",
+      "titleZh": "LubanEra Design 的贺展厅：中国深圳灵活时尚零售室内",
       "source": "Archeyes",
-      "url": "https://archeyes.com/panosi-ujezd-summer-house-former-pigsty-conversion-by-lenka-milerova-in-the-czech-republic/",
+      "url": "https://archeyes.com/he-showroom-by-lubanera-design-flexible-fashion-retail-interior-in-shenzhen-china/",
       "sourceHomeUrl": "https://archeyes.com",
-      "summary": "Panoši Újezd Summer House by Lenka Milerová architektka converts a former pigsty in the Czech countryside into a compact seasonal dwelling, retaining its stone rural shell while introducing concrete, steel,...",
-      "summaryZh": "帕诺希·乌耶兹德夏季别墅由伦卡·米莱洛娃建筑师设计，将捷克乡村的旧猪圈改建为紧凑的季节性住宅，保留了乡村石质外壳，同时引入了混凝土和钢材,…",
-      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/garden-facade-stone-walls-tiled-roof-panosi-ujezd-summer-house-lenka-milerova-radek-srettr-ulehla-archeyes.jpg?fit=850%2C567&ssl=1",
-      "publishedAt": "2026-06-28T11:30:00.000Z"
+      "summary": "Hé Showroom is a 300-square-meter fashion retail interior in Nanyou, Shenzhen, organized as a sequence of display, fitting, conversation, and lounge settings. The project uses mobile concrete volumes, vaulted circulation,...",
+      "summaryZh": "何展厅是位于深圳南友的300平方米时尚零售室内，布局为展示、试穿、对话和休息室的连续布局。该项目采用可移动混凝土体量和拱形流通,…",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/08/vaulted-corridor-glossy-brown-tile-platform-brick-lounge-he-showroom-lubanera-design-nie-xiaocong-archeyes.jpg?fit=850%2C638&ssl=1",
+      "publishedAt": "2026-08-16T11:30:00.000Z"
     },
     {
-      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
-      "title": "Viikki Church by JKMM Architects: Timber Church Architecture in Helsinki, Finland",
-      "titleZh": "JKMM建筑事务所设计的维基教堂：芬兰赫尔辛基木结构教堂建筑",
-      "source": "Archeyes",
-      "url": "https://archeyes.com/viikki-church-by-jkmm-architects-timber-church-architecture-in-helsinki-finland/",
-      "sourceHomeUrl": "https://archeyes.com",
-      "summary": "Viikki Church by JKMM Architects is a timber parish building in Helsinki’s Eco-Viikki district, completed in 2005 as a civic and spiritual anchor for Latokartano. The project reworks the Finnish...",
-      "summaryZh": "由JKMM Architects设计的Viikki教堂是一座位于赫尔辛基生态维基区的木质教区建筑，建成于2005年，作为拉托卡塔诺的市政和精神支柱。该项目重新设计了芬兰…",
-      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/06/rear-elevation-curved-shingle-volumes-clerestory-lawn-viikki-church-jkmm-architects-trevor-patt-archeyes.jpg?fit=850%2C500&ssl=1",
-      "publishedAt": "2026-06-27T11:30:00.000Z"
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "Phoenix From The Ashes Urban History At Sunset",
+      "titleZh": "灰烬重生的凤凰城落时分城市历史",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/phoenix-from-the-ashes",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2025-09-03T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "Velonotte in Bergamo: Architecture By Bike",
+      "titleZh": "贝加莫的Velonotte：自行车建筑",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/velonotte-architecture-by-bike-by-night-in-bergamo",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2024-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "The Building Of The Month V",
+      "titleZh": "本月之作 V",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/the-building-of-the-month-v",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2024-02-08T00:00:00.000Z"
+    },
+    {
+      "id": "archdaily-aHR0cHM6Ly93d3cuYX",
+      "title": "Woonhuis Heenvliet Studio Brandvries",
+      "titleZh": "Woonhuis Heenvliet Studio Brandvries",
+      "source": "ArchDaily",
+      "url": "https://www.archdaily.com/1183423/woonhuis-heenvliet-studio-brandvries",
+      "sourceHomeUrl": "https://www.archdaily.com",
+      "summary": "Woonhuis Heenvliet is located on the edge of the historic village of Heenvliet. When the owners bought the plot, it had an existing house that was partly built on the footprint of a barn that had once been part of a historic ensemble. ]]>",
+      "summaryZh": "Woonhuis Heenvliet位于历史悠久的Heenvliet村庄边缘。当业主购买该地块时，已有一座房屋，部分建在曾是历史建筑群一部分的谷仓基础上。]]>",
+      "imageUrl": "",
+      "publishedAt": "2026-08-19T10:00:00.000Z"
+    },
+    {
+      "id": "archdaily-aHR0cHM6Ly93d3cuYX",
+      "title": "Call For Entries International Design Competition For The Redevelopment Of The Hwamyeong Outdoo…",
+      "titleZh": "花明外斗重建国际设计大赛征集征集…",
+      "source": "ArchDaily",
+      "url": "https://www.archdaily.com/1183617/call-for-entries-international-design-competition-for-the-redevelopment-of-the-hwamyeong-outdoor-swimming-pool",
+      "sourceHomeUrl": "https://www.archdaily.com",
+      "summary": "The competition aims to create synergy with Busan&rsquo;s waterfront redevelopment initiatives and transform the existing summer-only facility into a year-round family-oriented destination, developing it as an eco-friendly waterfront leisure space.",
+      "summaryZh": "该竞赛旨在与釜山滨水区的改造项目产生协同效应，将现有的夏季专属设施转变为全年适合家庭的目的地，打造为环保的滨水休闲空间。",
+      "imageUrl": "",
+      "publishedAt": "2026-08-19T09:10:00.000Z"
+    },
+    {
+      "id": "archdaily-aHR0cHM6Ly93d3cuYX",
+      "title": "Crossing Grounds Art Design And Technology",
+      "titleZh": "Crossing Grounds艺术设计与技术",
+      "source": "ArchDaily",
+      "url": "https://www.archdaily.com/1183594/crossing-grounds-art-design-and-technology",
+      "sourceHomeUrl": "https://www.archdaily.com",
+      "summary": "Crossing Grounds: Art, Design, and Technology brings together 16 research projects by 22 artists, architects, designers, scientists, engineers, and technologists from across the Georgia Institute of Technology at the Korea Foundation Gallery in Seoul.",
+      "summaryZh": "《跨越的地带：艺术、设计与技术》汇集了来自佐治亚理工学院22位艺术家、建筑师、设计师、科学家、工程师和技术专家的16个研究项目，地点在首尔韩国基金会画廊。",
+      "imageUrl": "",
+      "publishedAt": "2026-08-19T09:05:00.000Z"
     }
   ]
 }

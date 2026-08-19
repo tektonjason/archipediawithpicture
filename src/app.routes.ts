@@ -59,6 +59,14 @@ export const routes: Routes = [
   },
   {
     path: 'resources',
+    data: { collection: 'resources' },
+    resolve: { data: resourcesReady },
+    loadComponent: () => import('./components/resources/resources.component')
+      .then(module => module.ResourcesComponent)
+  },
+  {
+    path: 'inspiration',
+    data: { collection: 'inspiration' },
     resolve: { data: resourcesReady },
     loadComponent: () => import('./components/resources/resources.component')
       .then(module => module.ResourcesComponent)

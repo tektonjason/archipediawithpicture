@@ -1,47 +1,12 @@
 {
-  "name": "archipedia",
+  "name": "archipedia-news-updater",
   "private": true,
-  "version": "0.0.0",
+  "version": "2026.7.29",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "vite",
-    "news:update": "node utils/update-news-cache.mjs",
-    "news:update:dist": "node utils/update-news-cache.mjs --out dist/news-cache.json",
-    "prebuild": "node utils/update-news-cache.mjs",
-    "build": "vite build",
-    "preview": "vite preview",
-    "content:check": "node utils/content-health.mjs"
-  },
-  "dependencies": {
-    "@angular/build": "^21.1.0",
-    "@angular/cli": "^21.1.0",
-    "@angular/common": "^21.1.0",
-    "@angular/compiler": "^21.1.0",
-    "@angular/compiler-cli": "^21.1.0",
-    "@angular/core": "^21.1.0",
-    "@angular/forms": "^21.1.0",
-    "@angular/platform-browser": "^21.1.0",
-    "@angular/router": "^21.1.0",
-    "@lucide/angular": "^1.17.0",
-    "gsap": "^3.15.0",
-    "pinyin": "3.1.0",
-    "qrcode": "^1.5.4",
-    "rxjs": "^7.8.2"
-  },
-  "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.2.3",
-    "@types/node": "^22.14.0",
-    "@types/qrcode": "^1.5.6",
-    "autoprefixer": "^10.4.24",
-    "postcss": "^8.5.6",
-    "sharp": "^0.34.5",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.9.3",
-    "vite": "^6.2.0",
-    "vite-plugin-pwa": "^1.2.0",
-    "vite-tsconfig-paths": "^6.1.1"
+    "news:update": "node utils/update-news-cache.mjs"
   }
 }

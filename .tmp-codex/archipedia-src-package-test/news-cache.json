@@ -1,0 +1,325 @@
+{
+  "updatedAt": "2026-07-29T12:12:41.224Z",
+  "sources": [
+    {
+      "name": "ArchDaily",
+      "homeUrl": "https://www.archdaily.com",
+      "adapter": "feed",
+      "displayPriority": 10
+    },
+    {
+      "name": "Archeyes",
+      "homeUrl": "https://archeyes.com",
+      "adapter": "feed",
+      "displayPriority": 100
+    },
+    {
+      "name": "Dezeen",
+      "homeUrl": "https://www.dezeen.com",
+      "adapter": "feed",
+      "displayPriority": 100
+    },
+    {
+      "name": "designboom",
+      "homeUrl": "https://www.designboom.com",
+      "adapter": "feed",
+      "displayPriority": 100
+    },
+    {
+      "name": "Architectuul",
+      "homeUrl": "https://architectuul.com",
+      "adapter": "htmlPageLinks",
+      "displayPriority": 20
+    },
+    {
+      "name": "有方",
+      "homeUrl": "https://www.archiposition.com",
+      "adapter": "htmlPageLinks",
+      "displayPriority": -100
+    }
+  ],
+  "stats": {
+    "itemCount": 23,
+    "realItemCount": 22,
+    "fallbackCount": 1,
+    "displayableImageCount": 18
+  },
+  "items": [
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "SANCTUM Nature Therapy Retreat in Bezdonys, Lithuania by Arches",
+      "titleZh": "SANCTUM Nature Therapy Retreat 位于 Bezdonys, Lithuania 由 Arches",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/sanctum-nature-therapy-retreat-in-bezdonys-lithuania-by-arches/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "SANCTUM Nature Therapy Retreat by Arches is a forest retreat near Bezdonys, Lithuania, organized around existing clearings, mature trees, and a linear landscape axis. The project combines accommodation, communal facilities,...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注景观与场地：SANCTUM Nature Therapy Retreat 位于 Bezdonys, Lithuania 由 Arches。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/aerial-view-forest-clearing-autumn-sanctum-retreat-arches-leonas-garbacauskas-archeyes.jpg?fit=850%2C566&ssl=1",
+      "publishedAt": "2026-07-29T11:30:00.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Bricolage uses salvaged bricks for self-build home in London",
+      "titleZh": "Bricolage uses salvaged bricks 面向 self-build 住宅 位于 London",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/29/bricolage-castlands-road-self-build/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "London studio Bricolage has self-built Castlands Road, a house in Lewisham defined by a budget-friendly palette of salvaged bricks and clay blocks.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注居住空间、建筑师与事务所：Bricolage uses salvaged bricks 面向 self-build 住宅 位于 London。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/bricolage-castlands-road-self-build-home-london_dezeen_2364_sq-411x411.jpg",
+      "publishedAt": "2026-07-29T10:30:32.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "kengo kuma crowns cultural center in switzerland with wing-like timber roofs",
+      "titleZh": "kengo kuma crowns 文化中心 位于 switzerland 结合 wing-like 木构 roofs",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/kengo-kuma-cultural-center-switzerland-verbier-timber-roofs/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "wood, glass and sweeping canopies shape a new setting for performance, culture and collective life.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注材料与构造：kengo kuma crowns 文化中心 位于 switzerland 结合 wing-like 木构 roofs。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/kengo-kuma-cultural-center-switzerland-verbier-timber-roofs-designboom-6-copy-500x400-22b08q85r981.jpg",
+      "publishedAt": "2026-07-29T09:51:47.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Bio-based community garden by Jan Kattein Architects opens in London",
+      "titleZh": "Bio-based community garden 由 Jan Kattein 建筑师 opens 位于 London",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/29/jan-kattein-architects-global-generation-community-garden-london/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Handmade bricks, wooden shakes and a cob wall enclose a trio of buildings at this community garden in London, which has been designed by local studio Jan Kattein Architects.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注城市与公共空间、景观与场地、建筑师与事务所：Bio-based community garden 由 Jan Kattein 建筑师 opens 位于 London。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/jan-kattein-architects-global-generation-community-garden-london-sturrock-sq2_dezeen_2364_col_0-411x411.jpg",
+      "publishedAt": "2026-07-29T08:30:55.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "three monolithic volumes by not a number architects reinterpret greek stone house typology",
+      "titleZh": "three monolithic volumes 由 not a number 建筑师 reinterpret greek stone 住宅 typology",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/three-monolithic-volumes-not-a-number-architects-greek-stone-house-typology-treelithon/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "exposed stone walls and concrete slabs define the interior material palette, while timber furniture, staircases, and doors introduce warmth.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注居住空间、材料与构造、建筑师与事务所：three monolithic volumes 由 not a number 建筑师 reinterpret greek stone 住宅 typology。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/treelithon-three-monolithic-volumes-not-a-number-architects-greek-stone-house-designboom-700-500x400-22b08q85r067.jpg",
+      "publishedAt": "2026-07-29T07:45:48.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "black asphalt and birch plywood shape compact retreat within czech barn",
+      "titleZh": "black asphalt 与 birch plywood shape compact retreat within czech barn",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/black-asphalt-birch-plywood-compact-retreat-czech-barn-facha-architekti/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "the box in the barn creates a seasonal retreat within a rural family homestead.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注居住空间：black asphalt 与 birch plywood shape compact retreat within czech barn。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/box-barn-retreat-home-black-asphalt-birch-plywood-czech-republic-designboom-700-500x400-22b08q85r278.jpg",
+      "publishedAt": "2026-07-28T23:55:47.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "\"Gently curving\" Gordie Howe International Bridge opens between US and Canada",
+      "titleZh": "\"Gently curving\" Gordie Howe International Bridge opens between US 与 Canada",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/gordie-howe-international-bridge-opens-traffic/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "A bridge with towers informed by a hockey slapshot has opened to public traffic between the United States and Canada after more than seven years of construction, decades of planning and a contentious back-and-forth with the federal government.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注建筑项目与设计动态：\"Gently curving\" Gordie Howe International Bridge opens between US 与 Canada。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/gordie-howe-bridge-canada-usa-opening_dezeen_2364_sq-1-411x411.jpg",
+      "publishedAt": "2026-07-28T19:00:55.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Dezeen Debate features \"bad acid trip\" building proposal",
+      "titleZh": "Dezeen Debate features \"bad acid trip\" 建筑 proposal",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/dezeen-debate-mvrdv-rotterdam-rocks-shift-competition/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "The latest Dezeen Debate newsletter features MVRDV's winning proposal to design a \"new world wonder\" in Rotterdam, the Netherlands. Subscribe to Dezeen Debate now.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注建筑项目与设计动态：Dezeen Debate features \"bad acid trip\" 建筑 proposal。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/rotterdam-rocks-mvrdv-shift-landmark-world-wonder-competition-netherlands-architecture-news_dezeen_1704_col_3_square-411x411.jpg",
+      "publishedAt": "2026-07-28T18:00:41.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Why stadium design is getting more outlandish",
+      "titleZh": "Why stadium 设计 is getting more outlandish",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/stadium-design-outlandish-heatherwick-foster-gmp-populous/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Stadiums are becoming more distinctive with clubs and countries using them to attract attention. As part of our Future Stadium series, we look at why stadium design is becoming more icon-focused.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注建筑项目与设计动态：Why stadium 设计 is getting more outlandish。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/2-birmingham-city-stadium-heatherwick-studio-manica_dezeen_2364_sq_3-1-1704x2361-1-411x411.jpg",
+      "publishedAt": "2026-07-28T17:00:20.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "bagel-inspired details and flexible furniture shape seoul bakery’s open interior",
+      "titleZh": "bagel-inspired details 与 flexible furniture shape 首尔 bakery的open 室内空间",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/bagel-inspired-details-flexible-furniture-seoul-bakery-open-interior-jojoworkshop-achime-bagel/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "jojoworkshop translates the daily rhythm of baking into a warm interior, with an open kitchen, custom furniture, and bagel-inspired details.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注建筑项目与设计动态：bagel-inspired details 与 flexible furniture shape 首尔 bakery的open 室内空间。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/jojoworkshop-achime-bagel-bakery-seoul-designboom-700-500x400-22b08q85r706.jpg",
+      "publishedAt": "2026-07-28T15:45:07.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Torre Negra Laboratory Building at UAD Alamedas Campus in Durango by Jonathan Corral Arquitectos",
+      "titleZh": "Torre Negra Laboratory 建筑 at UAD Alamedas 校园 位于 Durango 由 Jonathan Corral Arquitectos",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/torre-negra-laboratory-building-at-uad-alamedas-campus-in-durango-by-jonathan-corral-arquitectos/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Torre Negra by Jonathan Corral Arquitectos is a compact laboratory building at the UAD Alamedas Campus in Durango, Mexico. Organized as a dense vertical stack for health sciences education, the...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注教育建筑：Torre Negra Laboratory 建筑 at UAD Alamedas 校园 位于 Durango 由 Jonathan Corral Arquitectos。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/twisted-black-steel-fin-facade-frontal-torre-negra-jonathan-corral-arquitectos-archeyes.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-07-28T11:30:00.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "shenzhen natural history museum by 3XN, B+H, and zhubo opens to the public",
+      "titleZh": "shenzhen natural history 博物馆 由 3XN, B+H, 与 zhubo opens 以 the public",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/shenzhen-natural-history-museum-3xn-bh-architects-zhubo-design-china/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "the 105,300-square-meter museum rises beside yanzi lake as a geological form visitors can climb, cross and explore",
+      "summaryZh": "来自 designboom 的建筑资讯，关注文化建筑：shenzhen natural history 博物馆 由 3XN, B+H, 与 zhubo opens 以 the public。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/shenzhen-natural-history-museum-china-granite-terrain-3xn-designboom-08-copy-500x400-22b08q85r050.jpg",
+      "publishedAt": "2026-07-28T07:49:40.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "The Architecture of Accuracy: Why Commercial As-Built Drawings Matter More Than Original Constr…",
+      "titleZh": "The Architecture的Accuracy: Why Commercial As-Built Drawings Matter More Than Original Constr…",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/the-architecture-of-accuracy-why-commercial-as-built-drawings-matter-more-than-original-construction-documents/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Every commercial building begins as a drawing. Architects spend months refining floor plans, sections, elevations, and details before construction begins. Yet the moment work starts in the field, those drawings...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注制图与技术文件、建筑师与事务所：The Architecture的Accuracy: Why Commercial As-Built Drawings Matter More Than Original Constr…。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/c-dustin-91AQt9p4Mo8-unsplash-1.jpg?fit=850%2C478&ssl=1",
+      "publishedAt": "2026-07-27T17:35:49.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "How Heat Pumps Handle Humidity Compared to Traditional AC",
+      "titleZh": "How Heat Pumps Handle Humidity Compared 以 Traditional AC",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/how-heat-pumps-handle-humidity-compared-to-traditional-ac/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Bay Area is known for its humid coastal environment. Together with cooling efficiency and operating costs, heat pump humidity control is another decisive factor for your next upgrade. You don’t...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注建筑项目与设计动态：How Heat Pumps Handle Humidity Compared 以 Traditional AC。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/yue-wu-_tJ1pseaB8s-unsplash.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-07-27T17:31:16.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "EcoNeo Low-Carbon Summerhouse in Zealand by SAGA Space Architects",
+      "titleZh": "EcoNeo Low-Carbon Summerhouse 位于 Zealand 由 SAGA Space 建筑师",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/econeo-low-carbon-summerhouse-in-zealand-by-saga-space-architects/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "EcoNeo is a 35 m2 low-carbon summerhouse in Zealand, Denmark, designed by SAGA Space Architects as a compact domestic prototype informed by habitat design for extreme environments. Organized around a...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注居住空间、建筑师与事务所：EcoNeo Low-Carbon Summerhouse 位于 Zealand 由 SAGA Space 建筑师。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/wooden-terrace-outdoor-dining-deck-chairs-econeo-saga-space-architects-edi-cliff-archeyes.jpg?fit=850%2C478&ssl=1",
+      "publishedAt": "2026-07-27T11:30:00.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "The Design-Build Model and Residential Architecture in San Diego: A Shift in How Homes Get Made",
+      "titleZh": "The 设计-Build Model 与 Residential Architecture 位于 San Diego: A Shift 位于 How Homes Get Made",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/the-design-build-model-and-residential-architecture-in-san-diego-a-shift-in-how-homes-get-made/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "The relationship between design and construction has historically been adversarial. Architects draw; contractors build. The two disciplines operate under separate contracts, communicate through layers of documentation, and share accountability for...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注制图与技术文件、居住空间、建筑师与事务所：The 设计-Build Model 与 Residential Architecture 位于 San Diego: A Shift 位于 How Homes Get Made。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/lerone-pieters-1LWny6N4qug-unsplash.jpg?fit=850%2C477&ssl=1",
+      "publishedAt": "2026-07-26T19:49:49.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Laiva Plaza Hotel Boutique in San Jose del Cabo, Mexico by RA!",
+      "titleZh": "Laiva Plaza 酒店 Boutique 位于 San Jose del Cabo, Mexico 由 RA!",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/laiva-plaza-hotel-boutique-in-san-jose-del-cabo-mexico-by-ra/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Laiva Plaza Hotel by RA! is a 1,557 square meter hospitality project in the historic center of San Jose del Cabo, Mexico, organized around a shaded public atrium, a vertical...",
+      "summaryZh": "Laiva Plaza 酒店 由 RA!。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/front-facade-zigzag-parapet-roof-grasses-laiva-plaza-hotel-ra-arquitectos-oscar-hernandez-archeyes.jpg?fit=850%2C567&ssl=1",
+      "publishedAt": "2026-07-26T11:30:00.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "7 Bathroom Renovation Mistakes Airdrie Homeowners Make (And How to Avoid Them)",
+      "titleZh": "7 Bathroom 更新改造 Mistakes Airdrie Homeowners Make (与 How 以 Avoid Them)",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/7-bathroom-renovation-mistakes-airdrie-homeowners-make-and-how-to-avoid-them/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Quick Answer Most bathroom renovation problems trace back to a handful of avoidable errors: skipping permits, choosing the wrong materials for hard water, ignoring ventilation, and underestimating the budget. Airdrie’s...",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注居住空间、可持续与更新、材料与构造：7 Bathroom 更新改造 Mistakes Airdrie Homeowners Make (与 How 以 Avoid Them)。",
+      "imageUrl": "https://i0.wp.com/archeyes.com/wp-content/uploads/2026/07/rod-long-iD1GObFLsOs-unsplash.jpg?fit=850%2C478&ssl=1",
+      "publishedAt": "2026-07-24T23:42:30.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "Phoenix From The Ashes Urban History At Sunset",
+      "titleZh": "Phoenix From The Ashes 城市 History At Sunset",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/phoenix-from-the-ashes",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2025-09-03T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "Velonotte in Bergamo: Architecture By Bike",
+      "titleZh": "Velonotte 位于 Bergamo: Architecture 由 Bike",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/velonotte-architecture-by-bike-by-night-in-bergamo",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2024-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "The Building Of The Month V",
+      "titleZh": "The 建筑的The Month V",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/the-building-of-the-month-v",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2024-02-08T00:00:00.000Z"
+    },
+    {
+      "id": "archdaily-aHR0cHM6Ly93d3cuYX",
+      "title": "Architecture Projects",
+      "titleZh": "建筑项目",
+      "source": "ArchDaily",
+      "url": "https://www.archdaily.com/search/projects",
+      "sourceHomeUrl": "https://www.archdaily.com",
+      "summary": "Selected architecture projects, interviews, competitions, and case studies from ArchDaily.",
+      "summaryZh": "来自 ArchDaily 的建筑资讯，关注建筑师与事务所、建筑观点：建筑项目。",
+      "imageUrl": "",
+      "publishedAt": "2000-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "--aHR0cHM6Ly93d3cuYX",
+      "title": "菲律宾圣殿式教堂，探索包容性的精神空间 / CAZA Architects",
+      "titleZh": "菲律宾圣殿式教堂，探索包容性的精神空间 / CAZA Architects",
+      "source": "有方",
+      "url": "https://www.archiposition.com/items/7f7b920ab8",
+      "sourceHomeUrl": "https://www.archiposition.com",
+      "summary": "摆脱传统教堂形态，以参数化设计创造静谧庇护所。",
+      "summaryZh": "摆脱传统教堂形态，以参数化设计创造静谧庇护所。",
+      "imageUrl": "",
+      "publishedAt": "2026-07-29T07:37:18.000Z"
+    }
+  ]
+}

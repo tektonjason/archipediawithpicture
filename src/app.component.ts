@@ -18,9 +18,12 @@ import { Subscription, filter } from 'rxjs';
 import { GsapHoverTooltipDirective } from './components/shared/gsap-hover-tooltip.directive';
 import { GsapCardHoverDirective } from './components/shared/gsap-card-hover.directive';
 import { AnalyticsService } from './services/analytics.service';
+import { LocaleService } from './services/locale.service';
 
 import { SplashScreenComponent } from './components/shared/splash-screen.component';
 import { APP_UI_ICONS } from './components/shared/ui-icons';
+import { LocalizeTextDirective } from './components/shared/localize-text.directive';
+import { ModalA11yDirective } from './components/shared/modal-a11y.directive';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -29,28 +32,35 @@ interface BeforeInstallPromptEvent extends Event {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GsapHoverTooltipDirective, GsapCardHoverDirective, SplashScreenComponent, ...APP_UI_ICONS],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, GsapHoverTooltipDirective, GsapCardHoverDirective, LocalizeTextDirective, ModalA11yDirective, SplashScreenComponent, ...APP_UI_ICONS],
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   dataService = inject(DataService);
+  locale = inject(LocaleService);
   private analytics = inject(AnalyticsService);
   private router = inject(Router);
 
   showSplash = signal(true);
   showUpdateNotice = signal(false);
-  readonly updateNoticeDate = '2026.07.01';
-  readonly lastUpdatedDate = '2026.07.01';
+  readonly updateNoticeDate = '2026.08.20';
+  readonly lastUpdatedDate = '2026.08.20';
   readonly updateNoticeItems = [
-    '首页建筑资讯支持自动获取与刷新，内容会以中文摘要展示。',
-    '百科、读物与资源库支持分享卡片，便于保存和转发。',
+    '新增灵感库，整合院校展览与建筑资讯，并加入分类清晰、需身份验证的项目资料下载；推荐标识同步优化。',
+    '更新应用设计规范与全局交互动效，按钮、卡片、弹窗和提示反馈更加统一、轻快。',
+    '新增中英双语界面切换，可在关于应用中切换语言，英文界面已覆盖卡片、详情页与主要功能模块。',
+    '资源库新增卡片视图；规范速查新增常用条文、收藏、笔记与纠错反馈。',
     '新增本地笔记与统一用户中心，可集中查看收藏、历史和笔记。',
-    '资源库新增卡片视图；规范速查新增常用条文、收藏、笔记与纠错反馈。'
+    '百科、读物与资源库支持分享卡片，便于保存和转发。',
+    '首页建筑资讯支持自动获取与刷新，内容会以中文摘要展示。'
   ];
-  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_07_01_services_v1';
-  private readonly servicesNavCometStorageKey = 'arch_services_nav_comet_seen_2026_07_03_v1';
+  private readonly updateNoticeStorageKey = 'arch_update_notice_seen_2026_08_20_inspiration_library';
+  private readonly servicesNavCometStorageKey = 'arch_services_nav_comet_seen_2026_07_05_v2';
 
   @ViewChild('servicesNavItem', { read: ElementRef }) private servicesNavItem?: ElementRef<HTMLElement>;
+  @ViewChild('sidebarPanel', { read: ElementRef }) private sidebarPanel?: ElementRef<HTMLElement>;
+  @ViewChild('menuBarTop', { read: ElementRef }) private menuBarTop?: ElementRef<SVGLineElement>;
+  @ViewChild('menuBarBottom', { read: ElementRef }) private menuBarBottom?: ElementRef<SVGLineElement>;
 
   // Q&A Carousel Data
   qaQuestions = [
@@ -71,6 +81,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   currentQuestionIndex = signal(0);
   currentQuestion = computed(() => this.qaQuestions[this.currentQuestionIndex()]);
   private carouselInterval: any;
+
+  displayText(value: string | null | undefined): string {
+    return this.locale.translateData(value);
+  }
 
   // isSidebarOpen signal removed; using dataService.isSidebarOpen
 
@@ -163,34 +177,26 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     // Initialize GSAP matchMedia for responsive sidebar
     this.mm = gsap.matchMedia();
-    const isOpen = this.dataService.isSidebarOpen();
-
     this.mm.add("(min-width: 768px)", () => {
-      // Desktop: animate width
-      gsap.set("#sidebar-panel", { width: isOpen ? "16rem" : "0rem" });
-      if (isOpen) {
-        gsap.set(".nav-item", { opacity: 1, x: 0 });
-        gsap.set(".bar-top", { attr: { x1: 5, y1: 5, x2: 15, y2: 15 } });
-        gsap.set(".bar-bot", { attr: { x1: 15, y1: 5, x2: 5, y2: 15 } });
-      } else {
-        gsap.set(".nav-item", { opacity: 0, x: -20 });
-        gsap.set(".bar-top", { attr: { x1: 3, y1: 6, x2: 17, y2: 6 } });
-        gsap.set(".bar-bot", { attr: { x1: 3, y1: 14, x2: 17, y2: 14 } });
+      const isOpen = this.dataService.isSidebarOpen();
+      const panel = this.sidebarPanel?.nativeElement;
+      if (panel) {
+        const navItems = panel.querySelectorAll<HTMLElement>('.nav-item');
+        gsap.set(panel, { width: isOpen ? "16rem" : "0rem", xPercent: 0 });
+        gsap.set(navItems, { opacity: isOpen ? 1 : 0, x: isOpen ? 0 : -12 });
       }
+      this.setMenuIcon(isOpen);
     });
 
     this.mm.add("(max-width: 767px)", () => {
-      // Mobile: animate xPercent
-      gsap.set("#sidebar-panel", { width: "16rem", xPercent: isOpen ? 0 : -100 });
-      if (isOpen) {
-        gsap.set(".nav-item", { opacity: 1, x: 0 });
-        gsap.set(".bar-top", { attr: { x1: 5, y1: 5, x2: 15, y2: 15 } });
-        gsap.set(".bar-bot", { attr: { x1: 15, y1: 5, x2: 5, y2: 15 } });
-      } else {
-        gsap.set(".nav-item", { opacity: 0, x: -20 });
-        gsap.set(".bar-top", { attr: { x1: 3, y1: 6, x2: 17, y2: 6 } });
-        gsap.set(".bar-bot", { attr: { x1: 3, y1: 14, x2: 17, y2: 14 } });
+      const isOpen = this.dataService.isSidebarOpen();
+      const panel = this.sidebarPanel?.nativeElement;
+      if (panel) {
+        const navItems = panel.querySelectorAll<HTMLElement>('.nav-item');
+        gsap.set(panel, { width: "16rem", xPercent: isOpen ? 0 : -100 });
+        gsap.set(navItems, { opacity: isOpen ? 1 : 0, x: isOpen ? 0 : -12 });
       }
+      this.setMenuIcon(isOpen);
     });
 
     window.setTimeout(() => this.requestServicesNavComet(), 300);
@@ -211,83 +217,101 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   animateSidebar(isOpen: boolean) {
+    const panel = this.sidebarPanel?.nativeElement;
+    const topBar = this.menuBarTop?.nativeElement;
+    const bottomBar = this.menuBarBottom?.nativeElement;
+    if (!panel || !topBar || !bottomBar) return;
+    const navItems = Array.from(panel.querySelectorAll<HTMLElement>('.nav-item'));
+
     if (this.sidebarTl) {
       this.sidebarTl.kill();
     }
-    this.sidebarTl = gsap.timeline();
+
+    if (this.prefersReducedMotion) {
+      const isDesktop = window.innerWidth >= 768;
+      gsap.set(panel, {
+        width: isDesktop ? (isOpen ? "16rem" : "0rem") : "16rem",
+        xPercent: isDesktop ? 0 : (isOpen ? 0 : -100)
+      });
+      gsap.set(navItems, { opacity: isOpen ? 1 : 0, x: isOpen ? 0 : -12 });
+      this.setMenuIcon(isOpen);
+      this.notifyLayoutShift();
+      if (isOpen) this.requestServicesNavComet();
+      return;
+    }
+
+    this.sidebarTl = gsap.timeline({
+      defaults: { overwrite: 'auto' },
+      onComplete: () => {
+        this.notifyLayoutShift();
+        if (isOpen) this.requestServicesNavComet();
+      }
+    });
     this.notifyLayoutShift();
     
     const isDesktop = window.innerWidth >= 768;
-    const openDuration = this.prefersReducedMotion ? 0.01 : 0.34;
-    const closeDuration = this.prefersReducedMotion ? 0.01 : 0.24;
-    const itemDuration = this.prefersReducedMotion ? 0.01 : 0.24;
 
     if (isOpen) {
-      // Open Menu
       this.sidebarTl
-        // 1. Sidebar Panel Animation
-        .to("#sidebar-panel", {
-          width: isDesktop ? "16rem" : "16rem",
-          xPercent: isDesktop ? 0 : 0,
-          duration: openDuration,
+        .to(panel, {
+          width: "16rem",
+          xPercent: 0,
+          duration: 0.34,
           ease: "power3.out"
         }, 0)
-        // 2. Nav Items Stagger In
-        .fromTo(".nav-item", 
-          { opacity: 0, x: -12 },
-          { opacity: 1, x: 0, duration: itemDuration, ease: "power2.out", stagger: 0.025, overwrite: "auto" },
-          0.06
-        )
-        // 3. Hamburger Morph to X
-        .to(".bar-top", {
+        .to(navItems, {
+          opacity: 1,
+          x: 0,
+          duration: 0.24,
+          ease: "power2.out",
+          stagger: 0.025
+        }, 0.06)
+        .to(topBar, {
           attr: { x1: 5, y1: 5, x2: 15, y2: 15 },
-          duration: itemDuration,
+          duration: 0.24,
           ease: "power2.out"
         }, 0)
-        .to(".bar-bot", {
+        .to(bottomBar, {
           attr: { x1: 15, y1: 5, x2: 5, y2: 15 },
-          duration: itemDuration,
+          duration: 0.24,
           ease: "power2.out"
-        }, 0)
-        .call(() => {
-          this.notifyLayoutShift();
-          this.requestServicesNavComet();
-        });
-        
-    } else {
-      // Close Menu
-      this.sidebarTl
-        // 1. Nav Items Fall Out
-        .to(".nav-item", {
-          x: -12,
-          opacity: 0,
-          duration: closeDuration,
-          ease: "power2.in",
-          stagger: { from: "end", each: 0.012 },
-          overwrite: "auto"
-        }, 0)
-        // 2. Sidebar Panel Animation
-        .to("#sidebar-panel", {
-          width: isDesktop ? "0rem" : "16rem",
-          xPercent: isDesktop ? 0 : -100,
-          duration: closeDuration,
-          ease: "power2.inOut"
-        }, 0.12)
-        // 3. X Morph to Hamburger
-        .to(".bar-top", {
-          attr: { x1: 3, y1: 6, x2: 17, y2: 6 },
-          duration: closeDuration,
-          ease: "power2.inOut"
-        }, 0)
-        .to(".bar-bot", {
-          attr: { x1: 3, y1: 14, x2: 17, y2: 14 },
-          duration: closeDuration,
-          ease: "power2.inOut"
-        }, 0)
-        // Reset nav-item transforms so they are ready for the next open
-        .set(".nav-item", { clearProps: "x" })
-        .call(() => this.notifyLayoutShift());
+        }, 0);
+      return;
     }
+
+    this.sidebarTl
+      .to(navItems, {
+        x: -12,
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+        stagger: { from: "end", each: 0.018 }
+      }, 0)
+      .to(panel, {
+        width: isDesktop ? "0rem" : "16rem",
+        xPercent: isDesktop ? 0 : -100,
+        duration: 0.28,
+        ease: "power2.inOut"
+      }, 0.12)
+      .to(topBar, {
+        attr: { x1: 3, y1: 6, x2: 17, y2: 6 },
+        duration: 0.24,
+        ease: "power2.inOut"
+      }, 0)
+      .to(bottomBar, {
+        attr: { x1: 3, y1: 14, x2: 17, y2: 14 },
+        duration: 0.24,
+        ease: "power2.inOut"
+      }, 0);
+  }
+
+  private setMenuIcon(isOpen: boolean) {
+    const topBar = this.menuBarTop?.nativeElement;
+    const bottomBar = this.menuBarBottom?.nativeElement;
+    if (!topBar || !bottomBar) return;
+
+    gsap.set(topBar, { attr: isOpen ? { x1: 5, y1: 5, x2: 15, y2: 15 } : { x1: 3, y1: 6, x2: 17, y2: 6 } });
+    gsap.set(bottomBar, { attr: isOpen ? { x1: 15, y1: 5, x2: 5, y2: 15 } : { x1: 3, y1: 14, x2: 17, y2: 14 } });
   }
 
   private notifyLayoutShift() {
@@ -450,10 +474,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const highlight = navItem.querySelector<HTMLElement>('.services-nav-highlight');
-    const cometParts = Array.from(navItem.querySelectorAll<SVGGeometryElement>(
-      '.services-nav-comet-glow, .services-nav-comet-trail, .services-nav-comet-head'
-    ));
-    if (!highlight || cometParts.length === 0) {
+    const orbitPath = navItem.querySelector<SVGGeometryElement>('.services-nav-comet-orbit-path');
+    const guidePath = navItem.querySelector<SVGGeometryElement>('.services-nav-comet-guide');
+    const tailSmear = navItem.querySelector<SVGPolylineElement>('.services-nav-comet-smear');
+    const tailParticles = Array.from(navItem.querySelectorAll<SVGCircleElement>('.services-nav-comet-particle'));
+    const headHalo = navItem.querySelector<SVGCircleElement>('.services-nav-comet-head-halo');
+    const headCore = navItem.querySelector<SVGCircleElement>('.services-nav-comet-head-core');
+    if (!highlight || !orbitPath || !guidePath || !tailSmear || tailParticles.length === 0 || !headHalo || !headCore) {
       this.retryServicesNavComet();
       return;
     }
@@ -461,35 +488,84 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pendingServicesNavComet = false;
     localStorage.setItem(this.servicesNavCometStorageKey, 'true');
 
-    const orbitLength = cometParts[0].getTotalLength();
-    const [glowPath, trailPath, headPath] = cometParts;
+    const orbitLength = orbitPath.getTotalLength();
+    const travel = { distance: 0 };
+    const cometNodes = [guidePath, tailSmear, ...tailParticles, headHalo, headCore];
+    const getPathPoint = (distance: number) => {
+      const boundedDistance = gsap.utils.clamp(0, orbitLength, distance);
+      return orbitPath.getPointAtLength(boundedDistance);
+    };
+    const renderComet = () => {
+      const headDistance = travel.distance;
+      const headPoint = getPathPoint(headDistance);
+      const tangentPoint = getPathPoint(headDistance - 2);
+      const dx = headPoint.x - tangentPoint.x;
+      const dy = headPoint.y - tangentPoint.y;
+      const tangentLength = Math.hypot(dx, dy) || 1;
+      const normal = { x: -dy / tangentLength, y: dx / tangentLength };
+      const entranceAlpha = gsap.utils.clamp(0, 1, headDistance / 44);
+
+      gsap.set(headHalo, {
+        attr: { cx: headPoint.x, cy: headPoint.y },
+        autoAlpha: entranceAlpha * 0.86
+      });
+      gsap.set(headCore, {
+        attr: { cx: headPoint.x, cy: headPoint.y },
+        autoAlpha: entranceAlpha
+      });
+
+      const smearPoints: string[] = [];
+      for (let index = 14; index >= 0; index -= 1) {
+        const smearDistance = headDistance - 8 - index * 3.4;
+        if (smearDistance > 0) {
+          const point = getPathPoint(smearDistance);
+          smearPoints.push(`${point.x.toFixed(2)},${point.y.toFixed(2)}`);
+        }
+      }
+      gsap.set(tailSmear, {
+        attr: { points: smearPoints.join(' ') },
+        autoAlpha: smearPoints.length > 1 ? entranceAlpha * 0.34 : 0
+      });
+
+      tailParticles.forEach((particle, index) => {
+        const lag = 6 + index * 3.15;
+        const particleDistance = headDistance - lag;
+        if (particleDistance <= 0) {
+          gsap.set(particle, { autoAlpha: 0 });
+          return;
+        }
+
+        const point = getPathPoint(particleDistance);
+        const fade = 1 - index / tailParticles.length;
+        const powderOffset = ((index % 5) - 2) * 0.46;
+        const radius = 2.65 * fade + 0.34;
+        const opacity = entranceAlpha * 0.6 * Math.pow(fade, 1.55);
+
+        gsap.set(particle, {
+          attr: {
+            cx: point.x + normal.x * powderOffset,
+            cy: point.y + normal.y * powderOffset,
+            r: radius
+          },
+          autoAlpha: opacity
+        });
+      });
+    };
 
     this.servicesNavCometTl?.kill();
     navItem.classList.add('services-nav-entry-active');
 
     gsap.set(highlight, { autoAlpha: 1 });
-    gsap.set(glowPath, {
-      strokeDasharray: `${orbitLength * 0.42} ${orbitLength}`,
-      strokeDashoffset: orbitLength,
-      autoAlpha: 0.7
-    });
-    gsap.set(trailPath, {
-      strokeDasharray: `${orbitLength * 0.26} ${orbitLength}`,
-      strokeDashoffset: orbitLength,
-      autoAlpha: 1
-    });
-    gsap.set(headPath, {
-      strokeDasharray: `${Math.max(orbitLength * 0.025, 10)} ${orbitLength}`,
-      strokeDashoffset: orbitLength,
-      autoAlpha: 1
-    });
+    gsap.set(cometNodes, { autoAlpha: 0 });
+    gsap.set(guidePath, { autoAlpha: 0.28 });
+    renderComet();
 
     this.servicesNavCometTl = gsap.timeline({
-      defaults: { ease: 'power2.inOut' },
+      defaults: { ease: 'power1.inOut' },
       onComplete: () => {
         navItem.classList.remove('services-nav-entry-active');
         gsap.set(highlight, { autoAlpha: 0 });
-        gsap.set(cometParts, { clearProps: 'strokeDasharray,strokeDashoffset,opacity,visibility' });
+        gsap.set(cometNodes, { autoAlpha: 0, clearProps: 'opacity,visibility' });
       }
     });
 
@@ -500,20 +576,27 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         boxShadow: '0 0 34px rgba(56, 189, 248, 0.22)',
         duration: 0.18
       }, 0)
-      .to(cometParts, {
-        strokeDashoffset: -orbitLength,
-        duration: 1.85
+      .to(travel, {
+        distance: orbitLength,
+        duration: 2.05,
+        ease: 'sine.inOut',
+        onUpdate: renderComet
       }, 0.02)
       .to(navItem, {
         boxShadow: '0 0 0 rgba(56, 189, 248, 0)',
         duration: 0.45,
         ease: 'power1.out'
-      }, 1.35)
+      }, 1.55)
+      .to(cometNodes, {
+        autoAlpha: 0,
+        duration: 0.42,
+        ease: 'power1.out'
+      }, 1.95)
       .to(highlight, {
         autoAlpha: 0,
-        duration: 0.38,
+        duration: 0.42,
         ease: 'power1.out'
-      }, 1.52);
+      }, 2.02);
   }
 
   private scheduleUpdateNotice() {

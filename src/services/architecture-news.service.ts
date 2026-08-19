@@ -130,9 +130,9 @@ export class ArchitectureNewsService {
     this.loading.set(true);
     this.error.set('');
 
-    const cacheBust = force ? `?t=${Date.now()}` : '';
+    const cacheBust = `?t=${Date.now()}`;
     this.loadPromise = fetch(`news-cache.json${cacheBust}`, {
-      cache: force ? 'reload' : 'default'
+      cache: 'no-store'
     })
       .then(response => {
         if (!response.ok) {

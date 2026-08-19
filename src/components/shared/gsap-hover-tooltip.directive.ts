@@ -10,95 +10,122 @@ export class GsapHoverTooltipDirective implements AfterViewInit, OnDestroy {
   @Input() hoverScale: number = 1.06;
   @Input() tooltipPos: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
-  private tl?: gsap.core.Timeline;
+  private static instantUntil = 0;
+  private static nextId = 0;
   private tooltipEl?: HTMLDivElement;
+  private showTimer?: ReturnType<typeof setTimeout>;
+  private describedByBefore = '';
+  private startX = 0;
+  private startY = 0;
   private prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private canHover = typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   constructor(private el: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit() {
     if (!this.tooltipText.trim()) return;
 
-    // 1. Create Tooltip Element
     this.tooltipEl = document.createElement('div');
     this.tooltipEl.className = 'fixed pointer-events-none z-[100] px-3.5 py-2 bg-surface/95 backdrop-blur-md border border-line text-gray-200 text-xs rounded-control shadow-panel font-medium tracking-wide whitespace-nowrap';
     this.tooltipEl.textContent = this.tooltipText;
+    this.tooltipEl.id = `arch-tooltip-${++GsapHoverTooltipDirective.nextId}`;
+    this.tooltipEl.setAttribute('role', 'tooltip');
+    this.tooltipEl.style.willChange = 'transform, opacity';
+    this.describedByBefore = this.el.nativeElement.getAttribute('aria-describedby') ?? '';
+    const describedBy = new Set(this.describedByBefore.split(/\s+/).filter(Boolean));
+    describedBy.add(this.tooltipEl.id);
+    this.el.nativeElement.setAttribute('aria-describedby', Array.from(describedBy).join(' '));
     
     // Default styles for animation
-    let startY = 0;
-    let startX = 0;
     let tOrigin = 'bottom center';
     
     if (this.tooltipPos === 'bottom') {
-      startY = -10;
+      this.startY = -6;
       tOrigin = 'top center';
     } else if (this.tooltipPos === 'right') {
-      startX = -10;
+      this.startX = -6;
       tOrigin = 'left center';
     } else if (this.tooltipPos === 'left') {
-      startX = 10;
+      this.startX = 6;
       tOrigin = 'right center';
     } else {
-      startY = 10;
+      this.startY = 6;
     }
 
     gsap.set(this.tooltipEl, { 
       autoAlpha: 0, 
-      y: startY, 
-      x: startX,
-      scale: 0.8,
+      y: this.startY,
+      x: this.startX,
+      scale: 0.96,
       transformOrigin: tOrigin,
       left: 0,
       top: 0
     });
     
     document.body.appendChild(this.tooltipEl);
-
-    // 2. Prepare Button styles
-    // Clear any conflicting transition on transform if it exists, to let GSAP handle it
-    const currentTransition = window.getComputedStyle(this.el.nativeElement).transition;
-    if (currentTransition.includes('transform') || currentTransition === 'all') {
-      // GSAP works best if CSS transitions don't fight it
-      this.el.nativeElement.style.transition = currentTransition.replace(/transform[^,]*(,|$)/g, '').replace(/all[^,]*(,|$)/g, 'background-color 0.3s, border-color 0.3s, color 0.3s');
-    }
-
-    // 3. Create Timeline
-    this.tl = gsap.timeline({ paused: true })
-      // Button scale
-      .to(this.el.nativeElement, {
-        scale: this.prefersReducedMotion ? 1 : this.hoverScale,
-        duration: 0.16,
-        ease: 'power2.out'
-      }, 0)
-      // Tooltip pop
-      .to(this.tooltipEl, {
-        autoAlpha: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.16,
-        ease: 'power2.out'
-      }, 0);
   }
 
   @HostListener('mouseenter')
   onMouseEnter() {
-    if (!this.tl) return;
+    if (!this.canHover) return;
+    const instant = performance.now() < GsapHoverTooltipDirective.instantUntil;
+    if (instant) {
+      this.showTooltip();
+    } else {
+      this.clearShowTimer();
+      this.showTimer = setTimeout(() => this.showTooltip(), 350);
+    }
+  }
+
+  @HostListener('focusin')
+  onFocusIn() {
+    this.showTooltip();
+  }
+
+  private showTooltip() {
+    if (!this.tooltipEl) return;
+    this.clearShowTimer();
     this.updatePosition();
-    this.tl.timeScale(1).play();
+    gsap.to(this.tooltipEl, {
+      autoAlpha: 1,
+      y: 0,
+      x: 0,
+      scale: 1,
+      duration: this.prefersReducedMotion ? 0 : 0.14,
+      ease: 'power3.out',
+      overwrite: 'auto'
+    });
   }
 
   @HostListener('mouseleave')
   onMouseLeave() {
-    if (!this.tl) return;
-    // Reverse with an accelerated timescale for snappy exit
-    this.tl.timeScale(1.6).reverse();
+    if (!this.canHover) return;
+    this.hideTooltip();
+  }
+
+  @HostListener('focusout')
+  onFocusOut() {
+    this.hideTooltip();
+  }
+
+  private hideTooltip() {
+    this.clearShowTimer();
+    if (!this.tooltipEl) return;
+    gsap.to(this.tooltipEl, {
+      autoAlpha: 0,
+      y: this.startY,
+      x: this.startX,
+      scale: 0.96,
+      duration: this.prefersReducedMotion ? 0 : 0.1,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+    GsapHoverTooltipDirective.instantUntil = performance.now() + 900;
   }
 
   @HostListener('click')
   onClick() {
-    if (!this.tl) return;
-    // Hide tooltip immediately on click (especially useful for mobile tap)
-    this.tl.timeScale(1.8).reverse();
+    this.hideTooltip();
   }
 
   private updatePosition() {
@@ -120,12 +147,10 @@ export class GsapHoverTooltipDirective implements AfterViewInit, OnDestroy {
       top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
       left = rect.left - tooltipRect.width - 8;
     } else {
-      // Default: top
-      top = rect.top - tooltipRect.height - 8; // 8px gap
+      top = rect.top - tooltipRect.height - 8;
       left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
     }
 
-    // Safe boundaries
     if (left < 8) left = 8;
     if (top < 8) top = 8;
     if (left + tooltipRect.width > window.innerWidth - 8) {
@@ -142,11 +167,21 @@ export class GsapHoverTooltipDirective implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.tl) {
-      this.tl.kill();
+    this.clearShowTimer();
+    if (this.tooltipEl) gsap.killTweensOf(this.tooltipEl);
+    if (this.describedByBefore) {
+      this.el.nativeElement.setAttribute('aria-describedby', this.describedByBefore);
+    } else {
+      this.el.nativeElement.removeAttribute('aria-describedby');
     }
     if (this.tooltipEl && this.tooltipEl.parentNode) {
       this.tooltipEl.parentNode.removeChild(this.tooltipEl);
     }
+  }
+
+  private clearShowTimer() {
+    if (!this.showTimer) return;
+    clearTimeout(this.showTimer);
+    this.showTimer = undefined;
   }
 }

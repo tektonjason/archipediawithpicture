@@ -1,5 +1,6 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, Output, EventEmitter, computed, inject } from '@angular/core';
 import { gsap } from 'gsap';
+import { LocaleService } from '../../services/locale.service';
 
 type OrientationPermissionState = 'unknown' | 'pending' | 'granted' | 'denied' | 'unavailable';
 
@@ -15,6 +16,11 @@ type DeviceOrientationEventConstructorWithPermission = typeof DeviceOrientationE
       #splashContainer
       class="fixed inset-0 z-[100] flex items-center justify-center bg-app cursor-pointer overflow-hidden touch-none"
       (click)="enterApp()"
+      (keydown.enter)="enterApp()"
+      (keydown.space)="$event.preventDefault(); enterApp()"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="locale.isEnglish() ? 'Enter ARCHIPEDIA' : '进入 ARCHIPEDIA'"
     >
       <!-- Background pattern/gradient to make it look nicer -->
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none"></div>
@@ -27,11 +33,11 @@ type DeviceOrientationEventConstructorWithPermission = typeof DeviceOrientationE
           </div>
           
           <div class="flex flex-col items-center gap-3">
-            <h1 class="text-4xl md:text-6xl font-extrabold tracking-[0.16em] text-white drop-shadow-2xl font-brand">
-              建筑百科
+            <h1 class="splash-title text-4xl md:text-6xl font-extrabold tracking-[0.16em] text-white drop-shadow-2xl font-brand" [class.splash-title-en]="locale.isEnglish()">
+              {{ splashTitle() }}
             </h1>
             <p class="text-sm md:text-base text-gray-400 font-medium tracking-[0.3em] uppercase">
-              Archipedia
+              {{ splashSubtitle() }}
             </p>
           </div>
           
@@ -51,9 +57,36 @@ type DeviceOrientationEventConstructorWithPermission = typeof DeviceOrientationE
     .transform-style-3d {
       transform-style: preserve-3d;
     }
+    .logo-outer {
+      width: min(88vw, 31rem);
+      min-height: min(72vh, 35.5rem);
+    }
+    .splash-title {
+      max-width: 100%;
+      text-align: center;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .splash-title-en {
+      font-size: clamp(2.15rem, 4vw, 3.25rem);
+      letter-spacing: 0.1em;
+      line-height: 1.05;
+    }
+    @media (max-width: 640px) {
+      .logo-outer {
+        width: min(88vw, 27rem);
+        min-height: min(70dvh, 32rem);
+        padding: 2rem 1.25rem;
+      }
+      .splash-title-en {
+        font-size: clamp(2.1rem, 10vw, 3rem);
+        letter-spacing: 0.08em;
+      }
+    }
   `]
 })
 export class SplashScreenComponent implements AfterViewInit, OnDestroy {
+  locale = inject(LocaleService);
   @ViewChild('splashContainer') splashContainer!: ElementRef<HTMLElement>;
   @ViewChild('logoOuter') logoOuter!: ElementRef<HTMLElement>;
   @ViewChild('logoInner') logoInner!: ElementRef<HTMLElement>;
@@ -68,6 +101,8 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
   private enterFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private hasEmittedEnter = false;
   private orientationPermissionState: OrientationPermissionState = 'unknown';
+  splashTitle = computed(() => this.locale.isEnglish() ? 'ARCHIPEDIA' : '建筑百科');
+  splashSubtitle = computed(() => this.locale.isEnglish() ? 'Architecture Knowledge Base' : 'Archipedia');
 
   ngAfterViewInit() {
     if (typeof window === 'undefined') return;
@@ -285,7 +320,7 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
       rotationX: 0,
       rotationY: 0,
       duration: 0.18,
-      ease: "power2.inOut"
+      ease: "power3.out"
     }, 0);
     
     this.enterTl.to(this.logoInner.nativeElement, {
@@ -293,7 +328,7 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
       y: 0,
       z: 0,
       duration: 0.18,
-      ease: "power2.inOut"
+      ease: "power3.out"
     }, 0);
 
     // Zoom and fade out
@@ -301,11 +336,11 @@ export class SplashScreenComponent implements AfterViewInit, OnDestroy {
       scale: 1.2,
       opacity: 0,
       duration: 0.32,
-      ease: "power2.in"
+      ease: "power3.out"
     }, 0.12).to(this.splashContainer.nativeElement, {
       opacity: 0,
       duration: 0.24,
-      ease: "power2.inOut"
+      ease: "power2.out"
     }, 0.18);
   }
 

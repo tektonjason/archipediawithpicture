@@ -30,13 +30,36 @@ export interface Link {
   title: string;
   url: string;
   category: string;
+  subcategory?: string;
+  collection?: ResourceCollection;
   description: string;
   tags?: string[];
   imageUrl?: string;
   imageAlt?: string;
   previewSourceUrl?: string;
   featuredTags?: string[];
+  recommended?: boolean;
+  actions?: ResourceAction[];
 }
+
+export type ResourceCollection = 'resources' | 'inspiration';
+
+interface ResourceActionBase {
+  id: string;
+  label: string;
+  description?: string;
+  url: string;
+}
+
+export type ResourceAction =
+  | (ResourceActionBase & {
+      type: 'external';
+    })
+  | (ResourceActionBase & {
+      type: 'verified-download';
+      policy: 'nus-gradbook' | 'project-material';
+      provider: 'dropbox' | 'baidu-pan';
+    });
 
 export type FavoriteKind = 'entry' | 'reading' | 'resource' | 'standard';
 
@@ -220,6 +243,7 @@ export class DataService {
   encyclopediaSelectedCategory = signal<string>('home');
   encyclopediaViewMode = signal<'grid' | 'list'>('grid');
   resourcesViewMode = signal<'list' | 'cards'>('list');
+  inspirationViewMode = signal<'list' | 'cards'>('list');
 
   constructor() {
     this.initLayout();
@@ -243,6 +267,7 @@ export class DataService {
     });
     effect(() => localStorage.setItem('arch_view_mode', this.encyclopediaViewMode()));
     effect(() => localStorage.setItem('arch_resources_view_mode', this.resourcesViewMode()));
+    effect(() => localStorage.setItem('arch_inspiration_view_mode', this.inspirationViewMode()));
   }
 
   private initLayout() {
@@ -442,7 +467,7 @@ export class DataService {
 
   // --- Links ---
   addLink(link: Link) {
-    this.webLinks.update(l => [...l, link]);
+    this.webLinks.update(l => [...l, { ...link, collection: link.collection ?? 'resources' }]);
   }
   
   removeLink(id: string) {
@@ -455,6 +480,10 @@ export class DataService {
 
   getResourcePreview(link: Link): string {
     return link.imageUrl || `/images/resources/${link.id}.webp`;
+  }
+
+  getResourceCollection(link: Link): ResourceCollection {
+    return link.collection ?? 'resources';
   }
 
   // --- Image Handling ---
@@ -543,6 +572,8 @@ export class DataService {
       if (vm) this.encyclopediaViewMode.set(vm as 'grid' | 'list');
       const rvm = localStorage.getItem('arch_resources_view_mode');
       if (rvm === 'list' || rvm === 'cards') this.resourcesViewMode.set(rvm);
+      const ivm = localStorage.getItem('arch_inspiration_view_mode');
+      if (ivm === 'list' || ivm === 'cards') this.inspirationViewMode.set(ivm);
     } catch (err) {
       console.error('Failed to load storage', err);
     }
@@ -745,51 +776,24 @@ export class DataService {
 
   private syncResources(seedLinks: Link[]) {
     const currentLinks = this.webLinks();
-    const currentMap = new Map<string, Link>();
-    for (const link of currentLinks) {
-      currentMap.set(link.id, link);
-    }
+    const currentMap = new Map(currentLinks.map(link => [link.id, link]));
+    const seedIds = new Set(seedLinks.map(link => link.id));
 
-    let hasChanges = false;
-    const merged = [...currentLinks];
-
-    seedLinks.forEach(seedLink => {
+    const orderedSeedLinks = seedLinks.map(seedLink => {
       const seed: Link = {
         ...seedLink,
         imageUrl: seedLink.imageUrl ?? `/images/resources/${seedLink.id}.webp`,
         imageAlt: seedLink.imageAlt ?? `${seedLink.title} 资源预览`,
         previewSourceUrl: seedLink.previewSourceUrl ?? seedLink.url
       };
-      if (!currentMap.has(seed.id)) {
-        merged.push(seed);
-        hasChanges = true;
-      } else {
-        const existing = currentMap.get(seed.id);
-        if (existing) {
-          const tagsChanged = JSON.stringify(existing.tags) !== JSON.stringify(seed.tags);
-          const featuredTagsChanged = JSON.stringify(existing.featuredTags) !== JSON.stringify(seed.featuredTags);
-          if (
-            existing.category !== seed.category ||
-            existing.url !== seed.url ||
-            existing.title !== seed.title ||
-            existing.description !== seed.description ||
-            existing.imageUrl !== seed.imageUrl ||
-            existing.imageAlt !== seed.imageAlt ||
-            existing.previewSourceUrl !== seed.previewSourceUrl ||
-            tagsChanged ||
-            featuredTagsChanged
-          ) {
-            const idx = merged.findIndex(m => m.id === seed.id);
-            if (idx > -1) {
-              merged[idx] = { ...existing, ...seed };
-              hasChanges = true;
-            }
-          }
-        }
-      }
+      const existing = currentMap.get(seed.id);
+      return existing ? { ...existing, ...seed } : seed;
     });
 
-    if (hasChanges) {
+    const customLinks = currentLinks.filter(link => !seedIds.has(link.id));
+    const merged = [...orderedSeedLinks, ...customLinks];
+
+    if (JSON.stringify(currentLinks) !== JSON.stringify(merged)) {
       this.webLinks.set(merged);
     }
   }

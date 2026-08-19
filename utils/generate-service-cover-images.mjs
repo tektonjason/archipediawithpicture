@@ -13,6 +13,7 @@ const services = [
   {
     id: 'site-model',
     title: '场地模型下载',
+    titleEn: 'Site Model Download',
     code: 'SITE MODEL',
     source: '模型下载 主图.png',
     accent: '#8b9cff',
@@ -21,6 +22,7 @@ const services = [
   {
     id: 'site-plan',
     title: '场地平面图下载',
+    titleEn: 'Site Plan Download',
     code: 'SITE PLAN',
     source: '平面图下载 主图.png',
     accent: '#a78bfa',
@@ -29,6 +31,7 @@ const services = [
   {
     id: 'satellite-current',
     title: '最新卫星图下载',
+    titleEn: 'Current Satellite Image',
     code: 'SATELLITE',
     source: '最新卫星图 示例.png',
     accent: '#60a5fa',
@@ -37,6 +40,7 @@ const services = [
   {
     id: 'satellite-history',
     title: '历史卫星图下载',
+    titleEn: 'Historical Satellite Images',
     code: 'HISTORICAL',
     source: '历史卫星图 2000年至今示例1.png',
     accent: '#94a3b8',
@@ -45,6 +49,7 @@ const services = [
   {
     id: 'road-network',
     title: '矢量路网下载',
+    titleEn: 'Vector Road Network',
     code: 'ROAD DATA',
     source: '矢量路网 示例.png',
     accent: '#67e8f9',
@@ -53,6 +58,7 @@ const services = [
   {
     id: 'shp-data',
     title: 'SHP 文件下载',
+    titleEn: 'SHP File Download',
     code: 'GIS SHP',
     source: 'SHP数据 主图.png',
     accent: '#818cf8',
@@ -61,6 +67,7 @@ const services = [
   {
     id: 'poi-data',
     title: 'POI 数据下载',
+    titleEn: 'POI Data Download',
     code: 'POI DATA',
     source: 'POI 1.jpg',
     accent: '#2dd4bf',
@@ -69,6 +76,7 @@ const services = [
   {
     id: 'wind-rose',
     title: '风玫瑰图',
+    titleEn: 'Wind Rose Diagram',
     code: 'WIND ROSE',
     source: '风玫瑰.png',
     accent: '#38bdf8',
@@ -77,6 +85,7 @@ const services = [
   {
     id: 'radiation',
     title: '热辐射图',
+    titleEn: 'Solar Radiation Diagram',
     code: 'RADIATION',
     source: '全年热辐射.jpg',
     accent: '#fbbf24',
@@ -85,6 +94,7 @@ const services = [
   {
     id: 'psychrometric',
     title: '焓湿图',
+    titleEn: 'Psychrometric Chart',
     code: 'PSYCHROMETRIC',
     source: '全年焓湿图.jpg',
     accent: '#4ade80',
@@ -93,6 +103,7 @@ const services = [
   {
     id: 'temperature',
     title: '气温图',
+    titleEn: 'Air Temperature Chart',
     code: 'TEMPERATURE',
     source: '干球温度.png',
     accent: '#fb7185',
@@ -101,6 +112,7 @@ const services = [
   {
     id: 'humidity',
     title: '相对湿度图',
+    titleEn: 'Relative Humidity Chart',
     code: 'HUMIDITY',
     source: '相对湿度 - 副本.jpg',
     accent: '#22d3ee',
@@ -121,6 +133,25 @@ const wrapText = (text, limit = 10) => {
   for (let index = 0; index < chars.length; index += limit) {
     lines.push(chars.slice(index, index + limit).join(''));
   }
+  return lines.slice(0, 2);
+};
+
+const wrapEnglishText = (text, limit = 22) => {
+  const words = String(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = '';
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (current && next.length > limit) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current) lines.push(current);
   return lines.slice(0, 2);
 };
 
@@ -150,11 +181,17 @@ const imageToDataUri = async (file, position) => {
   return `data:image/png;base64,${buffer.toString('base64')}`;
 };
 
-const makeCoverSvg = async (service) => {
+const makeCoverSvg = async (service, locale = 'zh') => {
   const sourceFile = path.join(assetDir, service.source);
   const imageUri = await imageToDataUri(sourceFile, service.position);
-  const titleLines = wrapText(service.title);
+  const isEnglish = locale === 'en';
+  const titleLines = isEnglish ? wrapEnglishText(service.titleEn) : wrapText(service.title);
   const accent = service.accent;
+  const titleFont = isEnglish ? 'Inter, Arial, sans-serif' : 'Microsoft YaHei, Noto Sans CJK SC, PingFang SC, Arial, sans-serif';
+  const titleSize = isEnglish ? 44 : 50;
+  const bodyFont = isEnglish ? 'Inter, Arial, sans-serif' : 'Microsoft YaHei, Noto Sans CJK SC, PingFang SC, Arial, sans-serif';
+  const footerTitle = isEnglish ? 'Third-party resource consultation' : '第三方资源咨询入口';
+  const footerSub = isEnglish ? 'Site data, map datasets, and climate-analysis diagrams' : '场地资料、地图数据与气象分析图制作';
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -200,7 +237,7 @@ const makeCoverSvg = async (service) => {
   <text x="72" y="86" fill="#dbeafe" fill-opacity="0.92"
         font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900" letter-spacing="7">ARCHIPEDIA SERVICE</text>
   <text x="72" y="158" fill="#f8fafc"
-        font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, Arial, sans-serif" font-size="50" font-weight="900">${tspans(titleLines, 72, 158, 50)}</text>
+        font-family="${bodyFont}" font-size="${titleSize}" font-weight="900">${tspans(titleLines, 72, 158, titleSize)}</text>
   <text x="1128" y="136" text-anchor="end" fill="${accent}" fill-opacity="0.80"
         font-family="Inter, Arial, sans-serif" font-size="30" font-weight="900" letter-spacing="2">${escapeXml(service.code)}</text>
 
@@ -216,9 +253,9 @@ const makeCoverSvg = async (service) => {
   </g>
 
   <text x="72" y="674" fill="#e5e7eb" fill-opacity="0.90"
-        font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, Arial, sans-serif" font-size="24" font-weight="800">第三方资源咨询入口</text>
+        font-family="${titleFont}" font-size="24" font-weight="800">${escapeXml(footerTitle)}</text>
   <text x="72" y="710" fill="#94a3b8" fill-opacity="0.78"
-        font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, Arial, sans-serif" font-size="16" font-weight="600">场地资料、地图数据与气象分析图制作</text>
+        font-family="${titleFont}" font-size="16" font-weight="600">${escapeXml(footerSub)}</text>
   <text x="1128" y="710" text-anchor="end" fill="#64748b" fill-opacity="0.45"
         font-family="Inter, Arial, sans-serif" font-size="72" font-weight="900">A</text>
 </svg>`;
@@ -240,13 +277,14 @@ const renderWebp = async (svg) => {
   return lastBuffer;
 };
 
-const writeCover = async (service) => {
+const writeCover = async (service, locale = 'zh') => {
   const sourceFile = path.join(assetDir, service.source);
   await assertFile(sourceFile);
 
-  const svg = await makeCoverSvg(service);
+  const svg = await makeCoverSvg(service, locale);
   const buffer = await renderWebp(svg);
-  const outputFile = path.join(outputDir, `${service.id}.webp`);
+  const suffix = locale === 'en' ? '-en' : '';
+  const outputFile = path.join(outputDir, `${service.id}${suffix}.webp`);
   await fs.writeFile(outputFile, buffer);
 
   const metadata = await sharp(outputFile).metadata();
@@ -254,15 +292,15 @@ const writeCover = async (service) => {
   const size = stat.size;
 
   if (metadata.width !== width || metadata.height !== height) {
-    throw new Error(`${service.id}.webp has invalid dimensions: ${metadata.width}x${metadata.height}`);
+    throw new Error(`${service.id}${suffix}.webp has invalid dimensions: ${metadata.width}x${metadata.height}`);
   }
 
   if (size > maxBytes) {
-    throw new Error(`${service.id}.webp is ${Math.round(size / 1024)}KB, expected <= 100KB`);
+    throw new Error(`${service.id}${suffix}.webp is ${Math.round(size / 1024)}KB, expected <= 100KB`);
   }
 
   return {
-    name: `${service.id}.webp`,
+    name: `${service.id}${suffix}.webp`,
     source: service.source,
     kb: Number((size / 1024).toFixed(1)),
     width: metadata.width,
@@ -274,7 +312,8 @@ await fs.mkdir(outputDir, { recursive: true });
 
 const results = [];
 for (const service of services) {
-  results.push(await writeCover(service));
+  results.push(await writeCover(service, 'zh'));
+  results.push(await writeCover(service, 'en'));
 }
 
 console.table(results);

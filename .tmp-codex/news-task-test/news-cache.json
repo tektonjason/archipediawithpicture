@@ -1,0 +1,241 @@
+{
+  "updatedAt": "2026-07-29T11:30:41.453Z",
+  "sources": [
+    {
+      "name": "ArchDaily",
+      "homeUrl": "https://www.archdaily.com",
+      "adapter": "feed",
+      "displayPriority": 10
+    },
+    {
+      "name": "Archeyes",
+      "homeUrl": "https://archeyes.com",
+      "adapter": "feed",
+      "displayPriority": 100
+    },
+    {
+      "name": "Dezeen",
+      "homeUrl": "https://www.dezeen.com",
+      "adapter": "feed",
+      "displayPriority": 100
+    },
+    {
+      "name": "designboom",
+      "homeUrl": "https://www.designboom.com",
+      "adapter": "feed",
+      "displayPriority": 100
+    },
+    {
+      "name": "Architectuul",
+      "homeUrl": "https://architectuul.com",
+      "adapter": "htmlPageLinks",
+      "displayPriority": 20
+    },
+    {
+      "name": "有方",
+      "homeUrl": "https://www.archiposition.com",
+      "adapter": "htmlPageLinks",
+      "displayPriority": -100
+    }
+  ],
+  "stats": {
+    "itemCount": 16,
+    "realItemCount": 14,
+    "fallbackCount": 2,
+    "displayableImageCount": 10
+  },
+  "items": [
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "kengo kuma crowns cultural center in switzerland with wing-like timber roofs",
+      "titleZh": "kengo kuma crowns 文化中心 位于 switzerland 结合 wing-like 木构 roofs",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/kengo-kuma-cultural-center-switzerland-verbier-timber-roofs/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "wood, glass and sweeping canopies shape a new setting for performance, culture and collective life.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注材料与构造：kengo kuma crowns 文化中心 位于 switzerland 结合 wing-like 木构 roofs。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/kengo-kuma-cultural-center-switzerland-verbier-timber-roofs-designboom-6-copy-500x400-22b08q85r981.jpg",
+      "publishedAt": "2026-07-29T09:51:47.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Bio-based community garden by Jan Kattein Architects opens in London",
+      "titleZh": "Bio-based community garden 由 Jan Kattein 建筑师 opens 位于 London",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/29/jan-kattein-architects-global-generation-community-garden-london/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Handmade bricks, wooden shakes and a cob wall enclose a trio of buildings at this community garden in London, which has been designed by local studio Jan Kattein Architects.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注城市与公共空间、景观与场地、建筑师与事务所：Bio-based community garden 由 Jan Kattein 建筑师 opens 位于 London。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/jan-kattein-architects-global-generation-community-garden-london-sturrock-sq2_dezeen_2364_col_0-411x411.jpg",
+      "publishedAt": "2026-07-29T08:30:55.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "three monolithic volumes by not a number architects reinterpret greek stone house typology",
+      "titleZh": "three monolithic volumes 由 not a number 建筑师 reinterpret greek stone 住宅 typology",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/three-monolithic-volumes-not-a-number-architects-greek-stone-house-typology-treelithon/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "exposed stone walls and concrete slabs define the interior material palette, while timber furniture, staircases, and doors introduce warmth.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注居住空间、材料与构造、建筑师与事务所：three monolithic volumes 由 not a number 建筑师 reinterpret greek stone 住宅 typology。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/treelithon-three-monolithic-volumes-not-a-number-architects-greek-stone-house-designboom-700-500x400-22b08q85r067.jpg",
+      "publishedAt": "2026-07-29T07:45:48.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "black asphalt and birch plywood shape compact retreat within czech barn",
+      "titleZh": "black asphalt 与 birch plywood shape compact retreat within czech barn",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/black-asphalt-birch-plywood-compact-retreat-czech-barn-facha-architekti/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "the box in the barn creates a seasonal retreat within a rural family homestead.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注居住空间：black asphalt 与 birch plywood shape compact retreat within czech barn。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/box-barn-retreat-home-black-asphalt-birch-plywood-czech-republic-designboom-700-500x400-22b08q85r278.jpg",
+      "publishedAt": "2026-07-28T23:55:47.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "\"Gently curving\" Gordie Howe International Bridge opens between US and Canada",
+      "titleZh": "\"Gently curving\" Gordie Howe International Bridge opens between US 与 Canada",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/gordie-howe-international-bridge-opens-traffic/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "A bridge with towers informed by a hockey slapshot has opened to public traffic between the United States and Canada after more than seven years of construction, decades of planning and a contentious back-and-forth with the federal government.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注建筑项目与设计动态：\"Gently curving\" Gordie Howe International Bridge opens between US 与 Canada。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/gordie-howe-bridge-canada-usa-opening_dezeen_2364_sq-1-411x411.jpg",
+      "publishedAt": "2026-07-28T19:00:55.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Dezeen Debate features \"bad acid trip\" building proposal",
+      "titleZh": "Dezeen Debate features \"bad acid trip\" 建筑 proposal",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/dezeen-debate-mvrdv-rotterdam-rocks-shift-competition/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "The latest Dezeen Debate newsletter features MVRDV's winning proposal to design a \"new world wonder\" in Rotterdam, the Netherlands. Subscribe to Dezeen Debate now.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注建筑项目与设计动态：Dezeen Debate features \"bad acid trip\" 建筑 proposal。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/rotterdam-rocks-mvrdv-shift-landmark-world-wonder-competition-netherlands-architecture-news_dezeen_1704_col_3_square-411x411.jpg",
+      "publishedAt": "2026-07-28T18:00:41.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Why stadium design is getting more outlandish",
+      "titleZh": "Why stadium 设计 is getting more outlandish",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/stadium-design-outlandish-heatherwick-foster-gmp-populous/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Stadiums are becoming more distinctive with clubs and countries using them to attract attention. As part of our Future Stadium series, we look at why stadium design is becoming more icon-focused.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注建筑项目与设计动态：Why stadium 设计 is getting more outlandish。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/2-birmingham-city-stadium-heatherwick-studio-manica_dezeen_2364_sq_3-1-1704x2361-1-411x411.jpg",
+      "publishedAt": "2026-07-28T17:00:20.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "bagel-inspired details and flexible furniture shape seoul bakery’s open interior",
+      "titleZh": "bagel-inspired details 与 flexible furniture shape 首尔 bakery的open 室内空间",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/bagel-inspired-details-flexible-furniture-seoul-bakery-open-interior-jojoworkshop-achime-bagel/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "jojoworkshop translates the daily rhythm of baking into a warm interior, with an open kitchen, custom furniture, and bagel-inspired details.",
+      "summaryZh": "来自 designboom 的建筑资讯，关注建筑项目与设计动态：bagel-inspired details 与 flexible furniture shape 首尔 bakery的open 室内空间。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/jojoworkshop-achime-bagel-bakery-seoul-designboom-700-500x400-22b08q85r706.jpg",
+      "publishedAt": "2026-07-28T15:45:07.000Z"
+    },
+    {
+      "id": "dezeen-aHR0cHM6Ly93d3cuZG",
+      "title": "Sinuous form of Shenzhen Natural History Museum emulates \"a piece of landscape\"",
+      "titleZh": "Sinuous form的Shenzhen Natural History 博物馆 emulates \"a piece的景观\"",
+      "source": "Dezeen",
+      "url": "https://www.dezeen.com/2026/07/28/shenzhen-natural-history-museum-3xn/",
+      "sourceHomeUrl": "https://www.dezeen.com",
+      "summary": "Granite cloaks the sweeping form of Shenzhen Natural History Museum, completed in China by architecture studios 3XN, B+H Architects and Zhubo Design.",
+      "summaryZh": "来自 Dezeen 的建筑资讯，关注文化建筑、景观与场地、建筑师与事务所：Sinuous form的Shenzhen Natural History 博物馆 emulates \"a piece的景观\"。",
+      "imageUrl": "http://static.dezeen.com/uploads/2026/07/shenzhen-natural-history-museum-architecture-china-cultural_dezeen_2364_sq-411x411.jpg",
+      "publishedAt": "2026-07-28T10:30:04.000Z"
+    },
+    {
+      "id": "designboom-aHR0cHM6Ly93d3cuZG",
+      "title": "shenzhen natural history museum by 3XN, B+H, and zhubo opens to the public",
+      "titleZh": "shenzhen natural history 博物馆 由 3XN, B+H, 与 zhubo opens 以 the public",
+      "source": "designboom",
+      "url": "https://www.designboom.com/architecture/shenzhen-natural-history-museum-3xn-bh-architects-zhubo-design-china/",
+      "sourceHomeUrl": "https://www.designboom.com",
+      "summary": "the 105,300-square-meter museum rises beside yanzi lake as a geological form visitors can climb, cross and explore",
+      "summaryZh": "来自 designboom 的建筑资讯，关注文化建筑：shenzhen natural history 博物馆 由 3XN, B+H, 与 zhubo opens 以 the public。",
+      "imageUrl": "https://www.designboom.com/wp-content/uploads/2026/07/shenzhen-natural-history-museum-china-granite-terrain-3xn-designboom-08-copy-500x400-22b08q85r050.jpg",
+      "publishedAt": "2026-07-28T07:49:40.000Z"
+    },
+    {
+      "id": "archeyes-aHR0cHM6Ly9hcmNoZX",
+      "title": "Architecture, Design and Theory",
+      "titleZh": "建筑、设计与理论",
+      "source": "Archeyes",
+      "url": "https://archeyes.com/",
+      "sourceHomeUrl": "https://archeyes.com",
+      "summary": "Architecture history, design cases, theory, and architect features from Archeyes.",
+      "summaryZh": "来自 Archeyes 的建筑资讯，关注建筑师与事务所：建筑、设计与理论。",
+      "imageUrl": "",
+      "publishedAt": "2000-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "Phoenix From The Ashes Urban History At Sunset",
+      "titleZh": "Phoenix From The Ashes 城市 History At Sunset",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/phoenix-from-the-ashes",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2025-09-03T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "Velonotte in Bergamo: Architecture By Bike",
+      "titleZh": "Velonotte 位于 Bergamo: Architecture 由 Bike",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/velonotte-architecture-by-bike-by-night-in-bergamo",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2024-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "architectuul-aHR0cHM6Ly9hcmNoaX",
+      "title": "The Building Of The Month V",
+      "titleZh": "The 建筑的The Month V",
+      "source": "Architectuul",
+      "url": "https://architectuul.com/digest/the-building-of-the-month-v",
+      "sourceHomeUrl": "https://architectuul.com",
+      "summary": "来自 Architectuul 的建筑资讯与知识条目。",
+      "summaryZh": "来自 Architectuul 的建筑资讯与知识条目。",
+      "imageUrl": "",
+      "publishedAt": "2024-02-08T00:00:00.000Z"
+    },
+    {
+      "id": "archdaily-aHR0cHM6Ly93d3cuYX",
+      "title": "Architecture Projects",
+      "titleZh": "建筑项目",
+      "source": "ArchDaily",
+      "url": "https://www.archdaily.com/search/projects",
+      "sourceHomeUrl": "https://www.archdaily.com",
+      "summary": "Selected architecture projects, interviews, competitions, and case studies from ArchDaily.",
+      "summaryZh": "来自 ArchDaily 的建筑资讯，关注建筑师与事务所、建筑观点：建筑项目。",
+      "imageUrl": "",
+      "publishedAt": "2000-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "--aHR0cHM6Ly93d3cuYX",
+      "title": "菲律宾圣殿式教堂，探索包容性的精神空间 / CAZA Architects",
+      "titleZh": "菲律宾圣殿式教堂，探索包容性的精神空间 / CAZA Architects",
+      "source": "有方",
+      "url": "https://www.archiposition.com/items/7f7b920ab8",
+      "sourceHomeUrl": "https://www.archiposition.com",
+      "summary": "摆脱传统教堂形态，以参数化设计创造静谧庇护所。",
+      "summaryZh": "摆脱传统教堂形态，以参数化设计创造静谧庇护所。",
+      "imageUrl": "",
+      "publishedAt": "2026-07-29T07:37:18.000Z"
+    }
+  ]
+}

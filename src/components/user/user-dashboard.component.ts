@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataService, Entry, FavoriteKind, Link, Reading, StandardClause, StandardQuickRef } from '../../services/data.service';
+import { LocaleService } from '../../services/locale.service';
 import { APP_UI_ICONS } from '../shared/ui-icons';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
@@ -48,8 +49,8 @@ interface NoteDisplayItem {
   imports: [RouterLink, NgTemplateOutlet, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page text-white">
-      <div class="ui-page-header ui-page-pad bg-app mb-0 transition-all">
-        <h2 class="ui-title">用户中心</h2>
+      <div class="ui-page-header ui-page-pad bg-app mb-0 transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out">
+        <h2 class="ui-title">{{ displayText('用户中心') }}</h2>
         <p class="ui-subtitle">User Dashboard</p>
       </div>
 
@@ -57,13 +58,13 @@ interface NoteDisplayItem {
         @for (tab of tabs; track tab.value) {
           <button
             (click)="selectTab(tab.value)"
-            class="mr-8 border-b-2 py-4 text-sm font-bold transition-all last:mr-0"
+            class="mr-8 border-b-2 py-4 text-sm font-bold transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-fast ease-ui-out last:mr-0"
             [class.border-blue-500]="activeTab() === tab.value"
             [class.text-white]="activeTab() === tab.value"
             [class.border-transparent]="activeTab() !== tab.value"
             [class.text-gray-500]="activeTab() !== tab.value"
             [class.hover:text-gray-300]="activeTab() !== tab.value"
-          >{{ tab.label }}</button>
+          >{{ displayText(tab.label) }}</button>
         }
       </div>
 
@@ -80,7 +81,7 @@ interface NoteDisplayItem {
                 [class.bg-white/5]="favoriteFilter() !== filter.value"
                 [class.text-gray-300]="favoriteFilter() !== filter.value"
               >
-                {{ filter.label }} {{ favoriteCount(filter.value) }}
+                {{ displayText(filter.label) }} {{ favoriteCount(filter.value) }}
               </button>
             }
           </div>
@@ -88,8 +89,8 @@ interface NoteDisplayItem {
           @if (favoriteItems().length === 0) {
             <div class="ui-empty-state h-60 opacity-80">
               <div class="ui-empty-icon"><svg lucideStar class="h-8 w-8" [strokeWidth]="1.8"></svg></div>
-              <p class="font-medium">暂无收藏内容</p>
-              <p class="mt-1 text-sm text-gray-500">百科、读物、资源和规范条文都可以收藏到这里。</p>
+              <p class="font-medium">{{ displayText('暂无收藏内容') }}</p>
+              <p class="mt-1 text-sm text-gray-500">{{ displayText('百科、读物、资源和规范条文都可以收藏到这里。') }}</p>
             </div>
           } @else {
             <div class="grid gap-4">
@@ -111,17 +112,17 @@ interface NoteDisplayItem {
                   [class.bg-white/5]="historyFilter() !== filter.value"
                   [class.text-gray-300]="historyFilter() !== filter.value"
                 >
-                  {{ filter.label }} {{ historyCount(filter.value) }}
+                  {{ displayText(filter.label) }} {{ historyCount(filter.value) }}
                 </button>
               }
             </div>
-            <button (click)="dataService.clearHistory()" class="rounded bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300">清空历史</button>
+            <button (click)="dataService.clearHistory()" class="rounded bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300">{{ displayText('清空历史') }}</button>
           </div>
 
           @if (historyItems().length === 0) {
             <div class="ui-empty-state h-60 w-full opacity-80">
               <div class="ui-empty-icon"><svg lucideHistory class="h-8 w-8" [strokeWidth]="1.8"></svg></div>
-              <p class="text-center font-medium">暂无历史记录</p>
+              <p class="text-center font-medium">{{ displayText('暂无历史记录') }}</p>
             </div>
           } @else {
             <div class="grid gap-4">
@@ -134,8 +135,8 @@ interface NoteDisplayItem {
           @if (noteItems().length === 0) {
             <div class="ui-empty-state h-60 w-full opacity-80">
               <div class="ui-empty-icon"><svg lucideStickyNote class="h-8 w-8" [strokeWidth]="1.8"></svg></div>
-              <p class="text-center font-medium">暂无笔记</p>
-              <p class="mt-1 text-sm text-gray-500">百科词条和规范条文的笔记会保存在这里。</p>
+              <p class="text-center font-medium">{{ displayText('暂无笔记') }}</p>
+              <p class="mt-1 text-sm text-gray-500">{{ displayText('百科词条和规范条文的笔记会保存在这里。') }}</p>
             </div>
           } @else {
             <div class="grid gap-4 md:grid-cols-2">
@@ -150,21 +151,21 @@ interface NoteDisplayItem {
                           [class.text-blue-300]="item.kind === 'entry'"
                           [class.bg-cyan-500/10]="item.kind === 'standard'"
                           [class.text-cyan-300]="item.kind === 'standard'"
-                        >{{ item.kind === 'entry' ? '百科' : '规范' }}</span>
-                        <span class="truncate text-xs text-gray-600">{{ item.subtitle }}</span>
+                        >{{ displayText(item.kind === 'entry' ? '百科' : '规范') }}</span>
+                        <span class="truncate text-xs text-gray-600">{{ displayText(item.subtitle) }}</span>
                       </div>
-                      <h3 class="truncate text-base font-bold text-white">{{ item.title }}</h3>
+                      <h3 class="truncate text-base font-bold text-white">{{ displayText(item.title) }}</h3>
                     </div>
-                    <button type="button" (click)="removeNote(item)" class="ui-icon-btn h-8 w-8" title="删除笔记" aria-label="删除笔记">
+                    <button type="button" (click)="removeNote(item)" class="ui-icon-btn h-8 w-8" [title]="displayText('删除笔记')" [attr.aria-label]="displayText('删除笔记')">
                       <svg lucideTrash2 class="h-4 w-4" [strokeWidth]="2"></svg>
                     </button>
                   </div>
                   <p class="min-h-16 whitespace-pre-wrap rounded-control border border-white/10 bg-black/20 p-3 text-sm leading-relaxed text-gray-300">{{ item.note }}</p>
                   <div class="mt-3 flex justify-end">
                     @if (item.kind === 'entry') {
-                      <a [routerLink]="['/entry', item.id]" class="ui-btn-secondary px-3 py-1.5 text-xs">查看词条</a>
+                      <a [routerLink]="['/entry', item.id]" class="ui-btn-secondary px-3 py-1.5 text-xs">{{ displayText('查看词条') }}</a>
                     } @else {
-                      <a [routerLink]="['/standards']" [queryParams]="{ q: item.title }" class="ui-btn-secondary px-3 py-1.5 text-xs">查看条文</a>
+                      <a [routerLink]="['/standards']" [queryParams]="{ q: item.title }" class="ui-btn-secondary px-3 py-1.5 text-xs">{{ displayText('查看条文') }}</a>
                     }
                   </div>
                 </div>
@@ -179,17 +180,17 @@ interface NoteDisplayItem {
           <div class="ui-card ui-card-hover flex items-center justify-between gap-4 p-4" appGsapCardHover>
             <div class="min-w-0">
               <div class="mb-1 flex items-center gap-2">
-                <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-300">百科</span>
+                <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-300">{{ displayText('百科') }}</span>
                 <span class="text-xs text-gray-600">{{ formatSavedAt(item.savedAt) }}</span>
               </div>
-              <h3 class="truncate text-base font-bold text-white">{{ item.entry.term }}</h3>
-              <p class="text-sm text-gray-500">{{ item.entry.category }}</p>
+              <h3 class="truncate text-base font-bold text-white">{{ displayEntryTerm(item.entry) }}</h3>
+              <p class="text-sm text-gray-500">{{ displayText(item.entry.category) }}</p>
               @if (dataService.hasEntryNote(item.entry.id)) {
-                <p class="mt-2 line-clamp-1 text-xs text-blue-200/80">笔记：{{ dataService.getEntryNote(item.entry.id) }}</p>
+                <p class="mt-2 line-clamp-1 text-xs text-blue-200/80">{{ displayText('笔记：') }}{{ dataService.getEntryNote(item.entry.id) }}</p>
               }
             </div>
             <div class="flex shrink-0 items-center gap-3">
-              <a [routerLink]="['/entry', item.entry.id]" class="ui-btn-secondary px-3 py-1.5 text-xs">查看</a>
+              <a [routerLink]="['/entry', item.entry.id]" class="ui-btn-secondary px-3 py-1.5 text-xs">{{ displayText('查看') }}</a>
               @if (mode === 'favorite') {
                 <button (click)="dataService.toggleFavoriteItem('entry', item.entry.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-yellow-500/20">
                   <svg lucideStar class="h-5 w-5 text-yellow-400" fill="currentColor" [strokeWidth]="2"></svg>
@@ -201,14 +202,14 @@ interface NoteDisplayItem {
           <div class="ui-card ui-card-hover flex items-center justify-between gap-4 p-4" appGsapCardHover>
             <div class="min-w-0">
               <div class="mb-1 flex items-center gap-2">
-                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">读物</span>
+                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">{{ displayText('读物') }}</span>
                 <span class="text-xs text-gray-600">{{ formatSavedAt(item.savedAt) }}</span>
               </div>
-              <h3 class="truncate text-base font-bold text-white">{{ item.reading.title }}</h3>
-              <p class="text-sm text-gray-500">{{ item.reading.author || item.reading.publisher }}</p>
+              <h3 class="truncate text-base font-bold text-white">{{ displayReadingTitle(item.reading) }}</h3>
+              <p class="text-sm text-gray-500">{{ displayReadingMeta(item.reading) }}</p>
             </div>
             <div class="flex shrink-0 items-center gap-3">
-              <a [routerLink]="['/readings']" [queryParams]="{ reading: item.reading.id }" class="ui-btn-secondary px-3 py-1.5 text-xs">详情</a>
+              <a [routerLink]="['/readings']" [queryParams]="{ reading: item.reading.id }" class="ui-btn-secondary px-3 py-1.5 text-xs">{{ displayText('详情') }}</a>
               @if (mode === 'favorite') {
                 <button (click)="dataService.toggleFavoriteItem('reading', item.reading.id || '')" class="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-yellow-500/20">
                   <svg lucideStar class="h-5 w-5 text-yellow-400" fill="currentColor" [strokeWidth]="2"></svg>
@@ -222,15 +223,17 @@ interface NoteDisplayItem {
               <img [src]="resourceImage(item.resource)" [alt]="item.resource.imageAlt || item.resource.title" loading="lazy" decoding="async" class="h-14 w-20 shrink-0 rounded-control border border-white/10 bg-white/5 object-cover">
               <div class="min-w-0">
                 <div class="mb-1 flex items-center gap-2">
-                  <span class="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-300">资源</span>
+                  <span class="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-300">{{ displayText('资源') }}</span>
                   <span class="text-xs text-gray-600">{{ formatSavedAt(item.savedAt) }}</span>
                 </div>
-                <h3 class="truncate text-base font-bold text-white">{{ item.resource.title }}</h3>
-                <p class="line-clamp-1 text-sm text-gray-500">{{ item.resource.description }}</p>
+                <h3 class="truncate text-base font-bold text-white">{{ displayText(item.resource.title) }}</h3>
+                <p class="line-clamp-1 text-sm text-gray-500">{{ displayText(item.resource.description) }}</p>
               </div>
             </div>
             <div class="flex shrink-0 items-center gap-3">
-              <button (click)="dataService.openExternalModal(item.resource.url)" class="ui-btn-secondary px-3 py-1.5 text-xs">打开</button>
+              <a [routerLink]="resourceRoute(item.resource)" [queryParams]="{ resource: item.resource.id }" class="ui-btn-secondary px-3 py-1.5 text-xs">
+                {{ displayText(resourceOpenLabel(item.resource)) }}
+              </a>
               @if (mode === 'favorite') {
                 <button (click)="dataService.toggleFavoriteItem('resource', item.resource.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-yellow-500/20">
                   <svg lucideStar class="h-5 w-5 text-yellow-400" fill="currentColor" [strokeWidth]="2"></svg>
@@ -242,18 +245,18 @@ interface NoteDisplayItem {
           <div class="ui-card ui-card-hover flex items-center justify-between gap-4 p-4" appGsapCardHover>
             <div class="min-w-0">
               <div class="mb-1 flex items-center gap-2">
-                <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-300">规范</span>
+                <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-300">{{ displayText('规范') }}</span>
                 <span class="font-mono text-xs text-gray-600">{{ item.standard.code }}</span>
                 <span class="text-xs text-gray-600">{{ formatSavedAt(item.savedAt) }}</span>
               </div>
-              <h3 class="truncate text-base font-bold text-white">{{ item.clause.title }}</h3>
-              <p class="text-sm text-gray-500">第 {{ item.clause.clauseNo }} 条 · {{ item.standard.title }}</p>
+              <h3 class="truncate text-base font-bold text-white">{{ displayText(item.clause.title) }}</h3>
+              <p class="text-sm text-gray-500">{{ displayStandardMeta(item) }}</p>
               @if (dataService.hasStandardClauseNote(item.clause.id)) {
-                <p class="mt-2 line-clamp-1 text-xs text-blue-200/80">笔记：{{ dataService.getStandardClauseNote(item.clause.id) }}</p>
+                <p class="mt-2 line-clamp-1 text-xs text-blue-200/80">{{ displayText('笔记：') }}{{ dataService.getStandardClauseNote(item.clause.id) }}</p>
               }
             </div>
             <div class="flex shrink-0 items-center gap-3">
-              <a [routerLink]="['/standards']" [queryParams]="{ q: item.clause.title }" class="ui-btn-secondary px-3 py-1.5 text-xs">查看</a>
+              <a [routerLink]="['/standards']" [queryParams]="{ q: item.clause.title }" class="ui-btn-secondary px-3 py-1.5 text-xs">{{ displayText('查看') }}</a>
               @if (mode === 'favorite') {
                 <button (click)="dataService.toggleFavoriteItem('standard', item.clause.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-yellow-500/20">
                   <svg lucideStar class="h-5 w-5 text-yellow-400" fill="currentColor" [strokeWidth]="2"></svg>
@@ -286,6 +289,7 @@ export class UserDashboardComponent {
   dataService = inject(DataService);
   route: ActivatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
+  private locale = inject(LocaleService);
 
   activeTab = signal<DashboardTab>('favorites');
   favoriteFilter = signal<ContentFilter>('all');
@@ -302,6 +306,36 @@ export class UserDashboardComponent {
     { value: 'resource', label: '资源' },
     { value: 'standard', label: '规范' }
   ];
+
+  displayText(value: string | null | undefined): string {
+    return this.locale.translateData(value);
+  }
+
+  displayEntryTerm(entry: Entry): string {
+    if (!this.locale.isEnglish()) return entry.term;
+    return entry.termEn || this.displayText(entry.term);
+  }
+
+  displayReadingTitle(reading: Reading): string {
+    return this.displayText(reading.title);
+  }
+
+  displayReadingMeta(reading: Reading): string {
+    const author = this.displayText(reading.author);
+    const publisher = this.displayText(reading.publisher);
+    return [author, publisher]
+      .map(value => value.trim())
+      .filter(value => value && value !== 'Architecture Reference' && !this.locale.hasCjk(value))
+      .join(' · ');
+  }
+
+  displayStandardMeta(item: StandardItem): string {
+    const standardTitle = this.displayText(item.standard.title);
+    if (this.locale.isEnglish()) {
+      return `Clause ${item.clause.clauseNo} · ${standardTitle}`;
+    }
+    return `第 ${item.clause.clauseNo} 条 · ${standardTitle}`;
+  }
 
   constructor() {
     void Promise.all([
@@ -370,7 +404,9 @@ export class UserDashboardComponent {
           kind: 'standard' as const,
           id,
           title: match.clause.title,
-          subtitle: `${match.standard.code} 第 ${match.clause.clauseNo} 条`,
+          subtitle: this.locale.isEnglish()
+            ? `${match.standard.code} Clause ${match.clause.clauseNo}`
+            : `${match.standard.code} 第 ${match.clause.clauseNo} 条`,
           note: note.trim()
         };
       })
@@ -432,13 +468,21 @@ export class UserDashboardComponent {
     return this.dataService.getResourcePreview(resource);
   }
 
+  resourceRoute(resource: Link): string {
+    return this.dataService.getResourceCollection(resource) === 'inspiration' ? '/inspiration' : '/resources';
+  }
+
+  resourceOpenLabel(resource: Link): string {
+    return resource.actions?.some(action => action.type === 'verified-download') ? '验证获取' : '查看';
+  }
+
   removeNote(item: NoteDisplayItem) {
     if (item.kind === 'entry') {
       this.dataService.setEntryNote(item.id, '');
     } else {
       this.dataService.setStandardClauseNote(item.id, '');
     }
-    this.dataService.displayToast('笔记已删除');
+    this.dataService.displayToast(this.displayText('笔记已删除'));
   }
 
   formatSavedAt(value: string): string {

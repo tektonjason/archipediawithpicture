@@ -1,8 +1,10 @@
 
-import { Component, HostListener, signal, inject } from '@angular/core';
+import { Component, HostListener, computed, signal, inject } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { NgStyle, CommonModule } from '@angular/common';
 import { APP_UI_ICONS } from '../shared/ui-icons';
+import { LocaleService } from '../../services/locale.service';
+import { ModalA11yDirective } from '../shared/modal-a11y.directive';
 import { GsapCardHoverDirective } from '../shared/gsap-card-hover.directive';
 
 interface AiTool {
@@ -15,7 +17,7 @@ interface AiTool {
 
 @Component({
   selector: 'app-ai-assistant',
-  imports: [NgStyle, CommonModule, GsapCardHoverDirective, ...APP_UI_ICONS],
+  imports: [NgStyle, CommonModule, ModalA11yDirective, GsapCardHoverDirective, ...APP_UI_ICONS],
   template: `
     <div class="ui-page-scroll ui-page-pad text-white relative">
       
@@ -28,9 +30,10 @@ interface AiTool {
       <!-- Tools Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
         @for (tool of aiTools; track tool.id) {
-          <div 
+          <button
+            type="button"
             (click)="openModal(tool)"
-            class="group relative ui-card ui-card-hover p-6 cursor-pointer overflow-hidden"
+            class="group relative ui-card ui-card-hover p-6 cursor-pointer overflow-hidden text-left"
             appGsapCardHover
           >
             <!-- Hover Gradient -->
@@ -65,19 +68,19 @@ interface AiTool {
             
             <p class="text-gray-400 text-sm leading-relaxed mb-6 min-h-[4rem] relative z-10">{{ tool.desc }}</p>
             
-            <button class="ui-btn-secondary w-full relative z-10">
+            <span class="ui-btn-secondary w-full relative z-10">
               <span>获取提示词</span>
               <svg lucideArrowRight class="w-4 h-4" [strokeWidth]="2"></svg>
-            </button>
-          </div>
+            </span>
+          </button>
         }
       </div>
 
       <!-- Prompt Modal -->
       @if (selectedTool()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div (click)="closeModal()" class="ui-modal-backdrop transition-opacity"></div>
-          <div class="ui-modal-panel w-full max-w-2xl max-h-[90vh] flex flex-col animate-modal-pop-in overflow-hidden">
+          <div (click)="closeModal()" animate.enter="ui-backdrop-enter" animate.leave="ui-backdrop-leave" class="ui-modal-backdrop"></div>
+          <div appModalA11y (modalClose)="closeModal()" animate.enter="ui-modal-enter" animate.leave="ui-modal-leave" class="ui-modal-panel w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
             
             <div class="ui-modal-header">
               <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -93,8 +96,8 @@ interface AiTool {
               <p class="font-medium mb-4 text-gray-400 text-sm">已为您准备好建筑学专用提示词 (Prompt):</p>
               
               <div class="bg-app border border-line rounded-control p-5 font-mono text-sm leading-loose whitespace-pre-wrap text-gray-300 relative group">
-                <span class="text-gray-500 select-none">{{ promptParts.prefix }}</span>
-                <span class="text-gray-500 select-none">{{ promptParts.suffix }}</span>
+                <span class="text-gray-500 select-none">{{ promptParts().prefix }}</span>
+                <span class="text-gray-500 select-none">{{ promptParts().suffix }}</span>
                 
                 <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                    <span class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Preview</span>
@@ -140,6 +143,7 @@ interface AiTool {
 })
 export class AiAssistantComponent {
   dataService = inject(DataService);
+  locale = inject(LocaleService);
   aiTools: AiTool[] = [
     { id: 'deepseek', name: 'DeepSeek', url: 'https://chat.deepseek.com', desc: '深度求索 (DeepSeek) 是国产开源大模型的领军者，擅长复杂逻辑推理、代码生成及深度学术问答。', theme: 'blue' },
     { id: 'chatgpt', name: 'ChatGPT', url: 'https://chatgpt.com', desc: 'OpenAI 开发的通用人工智能，拥有最庞大的知识库和流畅的对话体验，适合广泛的建筑理论探讨。', theme: 'green' },
@@ -151,12 +155,17 @@ export class AiAssistantComponent {
 
   selectedTool = signal<AiTool | null>(null);
 
-  promptParts = {
-    prefix: '你是一位专业的建筑学导师，服务于"Architecture Learning Planet"应用。 \n你的目标是帮助用户学习建筑知识，制定学习计划，并解释专业术语。 \n请用中文回答，语言专业、精确、简洁。',
-    suffix: '重要规则：\n如果你的回复中提到了任何特定的建筑术语，请尽量使用标准术语，并提供可访问的可靠资料的访问链接。 \n不要使用Markdown链接语法，直接输出文本即可。 \n保持语气鼓励和学术性。'
-  };
+  promptParts = computed(() => this.locale.locale() === 'en'
+    ? {
+      prefix: 'You are a professional architecture tutor serving the "Architecture Learning Planet" app. \nYour goal is to help users study architecture, build learning plans, and explain technical terms. \nPlease answer in English with a professional, precise, and concise style.',
+      suffix: 'Important rules:\nWhen your response mentions a specific architectural term, use standard terminology whenever possible and provide accessible links to reliable sources. \nDo not use Markdown link syntax; output plain text URLs instead. \nKeep the tone encouraging and academically grounded.'
+    }
+    : {
+      prefix: '你是一位专业的建筑学导师，服务于"Architecture Learning Planet"应用。 \n你的目标是帮助用户学习建筑知识，制定学习计划，并解释专业术语。 \n请用中文回答，语言专业、精确、简洁。',
+      suffix: '重要规则：\n如果你的回复中提到了任何特定的建筑术语，请尽量使用标准术语，并提供可访问的可靠资料的访问链接。 \n不要使用Markdown链接语法，直接输出文本即可。 \n保持语气鼓励和学术性。'
+    });
 
-  fullPrompt = this.promptParts.prefix + '\n' + this.promptParts.suffix;
+  fullPrompt = computed(() => this.promptParts().prefix + '\n' + this.promptParts().suffix);
 
   openModal(tool: AiTool) {
     this.selectedTool.set(tool);
@@ -180,7 +189,7 @@ export class AiAssistantComponent {
   copyAndGo() {
     const tool = this.selectedTool();
     if (tool) {
-      navigator.clipboard.writeText(this.fullPrompt).then(() => {
+      navigator.clipboard.writeText(this.fullPrompt()).then(() => {
         this.dataService.openExternalModal(tool.url);
         this.closeModal();
       }).catch(err => {
